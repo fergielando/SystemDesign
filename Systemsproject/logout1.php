@@ -1,11 +1,11 @@
 <?php
 
-@include 'config.php';
+@include 'config1.php';
 
 session_start();
 session_unset();
 session_destroy();
 
-header('location:Home_Page.php');
+header('location:Home_Page1.php');
 
 ?>

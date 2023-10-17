@@ -8,8 +8,7 @@ session_start();
 if (isset($_POST['submit'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $pass = md5($_POST['password']);
-    $cpass = md5($_POST['cpassword']);
-   $user_type = $_POST['UserType'];
+  
 
    
    $select = " SELECT * FROM user WHERE email = '$email' && password = '$pass' ";
@@ -19,11 +18,11 @@ if (isset($_POST['submit'])) {
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_array($result);
 
-        if ($row['UserType'] == 'Admin') {
+        if ($row['UserType'] == 'admin') {
             $_SESSION['admin_name'] = $row['FirstName']; 
             header('location:admin_page1.php');
 
-        } elseif ($row['UserType'] == 'User') {
+        } else if ($row['UserType'] == 'user') {
             $_SESSION['user_name'] = $row['FirstName']; 
             header('location:user_page1.php');
         }
@@ -41,8 +40,35 @@ if (isset($_POST['submit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login form</title>
     <link rel="stylesheet" href="css/fatman1.css">
+    <style>
+       .header {
+         background: #000; 
+         color: #fff; 
+         padding: 20px;
+         background-color: #000;
+         text-align: left;
+         margin-top: 20px;
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+      }
+
+      .header h1 {
+         font-size: 36px; 
+         margin: 0;
+      }
+
+      .header .logo {
+         width: 50px;
+         height: 50px;
+      }
+    </style>
 </head>
 <body>
+<div class="header">
+        <img src="ua.png" alt="U.A. Logo" class="logo">
+        <h1> U.A. University</h1>
+    </div>
 <div class="form-container">
     <form action="" method="post">
         <h3>Login</h3>

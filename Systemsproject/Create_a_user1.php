@@ -1,116 +1,153 @@
+<?php
+@include 'config1.php';
+
+if(isset($_POST['submit'])) {
+   $uid = mysqli_real_escape_string($conn, $_POST['uid']);
+   $firstName = mysqli_real_escape_string($conn, $_POST['firstName']);
+   $lastName = mysqli_real_escape_string($conn, $_POST['lastName']);
+   $gender = mysqli_real_escape_string($conn, $_POST['gender']);
+   $dob = mysqli_real_escape_string($conn, $_POST['dob']);
+   $street = mysqli_real_escape_string($conn, $_POST['street']);
+   $city = mysqli_real_escape_string($conn, $_POST['city']);
+   $state = mysqli_real_escape_string($conn, $_POST['state']);
+   $zipcode = mysqli_real_escape_string($conn, $_POST['zipcode']);
+   $email = mysqli_real_escape_string($conn, $_POST['email']);
+   $pass = md5($_POST['password']);
+   $cpass = md5($_POST['cpassword']);
+   $user_type = mysqli_real_escape_string($conn, $_POST['user_type']);
+
+   $select = "SELECT * FROM user WHERE email = '$email' && password = '$pass' ";
+   $result = mysqli_query($conn, $select);
+
+   if(mysqli_num_rows($result) > 0){
+      $error[] = 'User already exists!';
+   } else {
+      if($pass != $cpass){
+         $error[] = 'Password not matched!';
+      } else {
+         $insert = "INSERT INTO user(uid, firstname, lastname, gender, dob, street, city, state, zipcode, email, password, usertype) VALUES('$uid', '$firstName', '$lastName', '$gender', '$dob', '$street', '$city', '$state', '$zipcode', '$email', '$pass', '$user_type')";
+         $insert1 = "INSERT INTO logintable(uid, email, password, usertype) VALUES('$uid','$email','$pass','$user_type')";
+         mysqli_query($conn, $insert);
+         mysqli_query($conn, $insert1);
+         header('location:Create_a_user1.php');
+      }
+   }
+}
+if(isset($_POST['clear'])) {
+   
+    header('location:Create_a_user1.php');
+ }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
    <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE-edge">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Create User - U.A. University Admin Page</title>
+   <title>Create a User Form</title>
 
-   
    <link rel="stylesheet" href="css/fatman1.css">
 
    <style>
-      
       .header {
-         background: #000; 
-         color: #fff; 
-         padding: 20px; 
+         background: #000;
+         color: #fff;
+         padding: 20px;
          text-align: center;
-         margin-top: 20px; 
+         display: flex;
+         justify-content: space-between;
       }
 
-      
       .header h1 {
-         font-size: 36px; 
+         font-size: 36px;
       }
 
-      
-      .form-group {
-         display: block;
-         margin: 10px 0;
+      .header .logo {
+         width: 50px; 
+         height: 50px; 
       }
 
-      .form-group label {
-         display: block;
-         font-weight: bold;
-      }
-
-      .form-group input {
-         width: 100%;
-         padding: 10px;
-         border: 1px solid #ccc;
+      .header .back-button {
+         background: #000;
+         color: #fff;
+         padding: 10px 20px;
+         text-decoration: none;
          border-radius: 5px;
+         margin-right: 10px;
+      }
+
+      form {
+  box-sizing: border-box;
+  padding: 2rem;
+  border-radius: 1rem;
+  background-color: hsl(0, 0%, 100%);
+  border: 4px solid hsl(0, 0%, 90%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+.clear-btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: #fff;
+    text-transform: uppercase;
+    border-radius: 5px;
+    margin: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-family: Arial, sans-serif;
       }
    </style>
 </head>
 <body>
-   
+
    <div class="header">
-      <h1>Welcome to U.A. University</h1>
+      <img src="ua.png" alt="U.A. Logo" class="logo">
+      <h1>U.A. University</h1>
+      <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
    </div>
 
-   <div class="container">
-      <div class="content">
-         <h1>Create a User</h1>
-
+   <div class="form-container">
+      <form action="" method="post">
+         <h3>Create a User</h3>
          <?php
-         if (isset($message)) {
-             echo '<p class="success">' . $message . '</p>';
-         } elseif (isset($error)) {
-             echo '<p class="error">' . $error . '</p>';
-         }
+         if(isset($error)){
+            foreach($error as $error){
+               echo '<span class="error-msg">'.$error.'</span>';
+            };
+         };
          ?>
-
-         <form method="post">
-            <div class="form-group">
-               <label for="UID">UID:</label>
-               <input type="text" id="UID" name="UID" required>
-            </div>
-            <div class="form-group">
-               <label for="Name">Name:</label>
-               <input type="text" id="Name" name="Name" required>
-            </div>
-            <div class="form-group">
-               <label for="Email">Email:</label>
-               <input type="text" id="Email" name="Email" required>
-            </div>
-            <div class="form-group">
-               <label for="Password">Password:</label>
-               <input type="password" id="Password" name="Password" required>
-            </div>
-            <div class="form-group">
-               <label for="Address">Address:</label>
-               <input type="text" id="Address" name="Address" required>
-            </div>
-            <div class="form-group">
-               <label for="UserType">User Type:</label>
-               <input type="radio" id="Student" name="UserType" value="Student">
-               <label for="Student">Student</label>
-               <input type="radio" id="Faculty" name="UserType" value="Faculty">
-               <label for="Faculty">Faculty</label>
-            </div>
-            <div class="form-group" id="facultyFields" style="display: none;">
-               <label for="Department">Department:</label>
-               <input type="text" id="Department" name="Department">
-               <label for="FullTime">Full-Time Faculty:</label>
-               <input type="text" id="FullTime" name="FullTime">
-            </div>
-            <button type="submit" class="btn">Create User</button>
-         </form>
-         <a href="admin_page1.php" class="btn">Back to Admin Page</a>
-      </div>
+        <input type="text" name="uid" required placeholder="UID">
+      <input type="text" name="firstName" required placeholder="First Name">
+      <input type="text" name="lastName" required placeholder="Last Name">
+      <select name="gender" required>
+         <option value="M">Male</option>
+         <option value="F">Female</option>
+         <option value="O">Other</option>
+      </select>
+      <input type="date" name="dob" required placeholder="Date of Birth">
+      <input type="text" name="street" required placeholder="Street">
+      <input type="text" name="city" required placeholder="City">
+      <input type="text" name="state" required placeholder="State">
+      <input type="text" name="zipcode" required placeholder="ZipCode">
+      <input type="email" name="email" required placeholder="Email">
+      <input type="password" name="password" required placeholder="Password">
+      <input type="password" name="cpassword" required placeholder="Confirm Password">
+      <select name="user_type" required>
+         <option value="student">Student</option>
+         <option value="faculty">Faculty</option>
+      </select>
+      <input type="submit" name="submit" value="Create" class="form-btn">
+      <a href="Create_a_user1.php" value ="Clear" class="clear-btn">Clear</a> <!-- Add the Clear button -->
+      </form>
+      </form>
    </div>
-   <script>
-      
-      const userTypeRadio = document.querySelector('input[name="UserType"]');
-      const facultyFields = document.getElementById('facultyFields');
-      userTypeRadio.addEventListener('change', () => {
-         if (userTypeRadio.value === 'Faculty') {
-            facultyFields.style.display = 'block';
-         } else {
-            facultyFields.style.display = 'none';
-         }
-      });
-   </script>
+
 </body>
 </html>
