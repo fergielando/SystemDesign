@@ -53,14 +53,14 @@ if (!isset($_SESSION['admin_name'])) {
          background: #333;
       }
       .header .logo {
-         width: 50px; /* Adjust the width and height as needed */
-         height: 50px; /* Adjust the width and height as needed */
+         width: 50px; 
+         height: 50px; 
       }
       
       .welcome-message {
          text-align: center;
          padding: 20px;
-         font-size: 24px; /* Increase the font size */
+         font-size: 24px; /
       }
    </style>
 </head>
@@ -74,14 +74,14 @@ if (!isset($_SESSION['admin_name'])) {
          <a href="Create_a_user1.php" class="btn">Create a user</a>
          <a href="Update_a_user1.php" class="btn">Update a user</a>
          <a href="#" class="btn">Course Catalog</a>
-         <a href="#" class="btn">Departments</a>
+         <a href="Departments_page1.php" class="btn">Departments</a>
          <a href="#" class="btn">Master Schedule</a>
          <a href="#" class="btn">Academic Calendar</a>
       </div>
    </div>
 
    <div class="welcome-message">
-      <p>Welcome, <?php echo $_SESSION['admin_name']; ?></p>
+      <p>Welcome, <?php echo $_SESSION['admin_name']; ?>.This is the Admin Page!</p>
    </div>
 
    <div class="container">

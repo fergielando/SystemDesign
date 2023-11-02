@@ -62,6 +62,9 @@ if (isset($_POST['submit'])) {
          width: 50px;
          height: 50px;
       }
+      body {
+            background-color: #c2e8c1;
+        }
     </style>
 </head>
 <body>

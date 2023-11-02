@@ -50,17 +50,18 @@
          background: #333;
       }
 
-      /* Style for the welcome statement */
+      
      .welcome-statement {
          background-color: #72A0C1;
          color: #333;
          font-size: 18px;
          padding: 40px;
          text-align: center;
-         font-family: 'Poppins', cursive; /* Different font */
-         border: 2px solid #444; /* Border */
-         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Box shadow */
+         font-family: 'Poppins', cursive; 
+         border: 2px solid #444; 
+         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); 
       }
+
    </style>
 </head>
 <body>
@@ -72,14 +73,13 @@
       </div>
    </div>
 
-   <!-- Welcome statement placed outside of the header -->
+  
    <div class="welcome-statement">
       Welcome to U.A. University! We are delighted to extend a warm and enthusiastic welcome to all members of the U.A. University community. U.A. University is thrilled to have you as part of our academic family. Our dedicated faculty and staff are here to support and guide you every step of the way. We believe in your potential and are excited to see what you will achieve during your time at U.A. University.
    </div>
 
    <div class="container">
       <div class="content">
-         <!-- Other content goes here -->
       </div>
    </div>
 </body>

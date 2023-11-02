@@ -2,7 +2,7 @@
 @include 'config1.php';
 
 if (isset($_POST['submit'])) {
-    // Retrieve user data from the form
+   
     $uid = mysqli_real_escape_string($conn, $_POST['uid']);
     $firstName = mysqli_real_escape_string($conn, $_POST['firstName']);
     $lastName = mysqli_real_escape_string($conn, $_POST['lastName']);
@@ -14,19 +14,17 @@ if (isset($_POST['submit'])) {
     $zipcode = mysqli_real_escape_string($conn, $_POST['zipcode']);
     
 
-    // Update the 'user' table
+    
     $updateUserQuery = "UPDATE user SET firstname='$firstName', lastname='$lastName', gender='$gender', dob='$dob', street='$street', city='$city', state='$state', zipcode='$zipcode' WHERE uid='$uid'";
     mysqli_query($conn, $updateUserQuery);
 
-    // Update the 'logintable' table (if needed)
-    // If you want to allow users to change their email and password, update 'logintable' here.
+   
 
-    // Redirect to the user's profile page or another appropriate page
+   
     header('location:admin_page1.php');
 }
 
-if (isset($_GET['uid'])) {
-    // Fetch the user's current information based on the user ID
+if (isset($_GET['uid'])) { 
     $uid = mysqli_real_escape_string($conn, $_GET['uid']);
     $getUserQuery = "SELECT * FROM user WHERE uid='$uid'";
     $result = mysqli_query($conn, $getUserQuery);
@@ -78,3 +76,5 @@ if (isset($_GET['uid'])) {
 
 </body>
 </html>
+
+
