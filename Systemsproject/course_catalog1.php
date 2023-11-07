@@ -6,6 +6,14 @@ session_start();
 if (!isset($_SESSION['admin_name'])) {
    header('location:login_form1.php');
 }
+// Retrieve department data from the database
+$query = "SELECT * FROM Course";
+$result = mysqli_query($conn, $query);
+$course = [];
+
+while ($row = mysqli_fetch_assoc($result)) {
+    $course[] = $row;
+}
 ?>
 
 <!DOCTYPE html>
@@ -62,6 +70,10 @@ if (!isset($_SESSION['admin_name'])) {
          padding: 20px;
          font-size: 24px; /
       }
+
+      .department-container {
+         padding: 20px;
+      }
    </style>
 </head>
 <body>
@@ -70,23 +82,47 @@ if (!isset($_SESSION['admin_name'])) {
       <img src="ua.png" alt="U.A. Logo" class="logo">
       <h1>U.A. University Admin Page</h1>
       <div class="buttons">
-         <a href="logout1.php" class="btn">Logout</a>
-         <a href="Create_a_user1.php" class="btn">Create a user</a>
-         <a href="Update_a_user1.php" class="btn">Update a user</a>
-         <a href="course_catalog1.php" class="btn">Course Catalog</a>
-         <a href="Departments_page1.php" class="btn">Departments</a>
-         <a href="#" class="btn">Master Schedule</a>
-         <a href="#" class="btn">Academic Calendar</a>
+         <a href="create_course1.php" class="btn">Create Course</a>
+         <a href="#" class="btn">Drop Course</a>
+         <a href="#" class="btn">Update Course</a>
+         
+      <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
       </div>
    </div>
 
    <div class="welcome-message">
-      <p>Welcome, <?php echo $_SESSION['admin_name']; ?>.This is the Admin Page!</p>
+      <p>Welcome, <?php echo $_SESSION['admin_name']; ?>.This is the Course Catalog Page!</p>
    </div>
 
-   <div class="container">
+   <!-- <div class="container">
       <div class="content">
       </div>
-   </div>
+   </div> --> 
+   
+   <div class="department-container">
+      <h2>List Courses here once made </h2>
+      <table>
+         <tr>
+            <th>CourseID</th>
+            <th>CourseName</th>
+            <th>DeptID</th>
+            <th>Credits</th>
+            <th>Description</th>
+            <th>CourseType</th>
+            
+         </tr>
+         <?php foreach ($course as $course) : ?>
+            <tr>
+               <td><?php echo $course['CourseID']; ?></td>
+               <td><?php echo $course['CourseName']; ?></td>
+               <td><?php echo $course['DeptID']; ?></td>
+               <td><?php echo $course['Credits']; ?></td>
+               <td><?php echo $course['Description']; ?></td>
+               <td><?php echo $course['CourseType']; ?></td>
+                
+            </tr>
+         <?php endforeach; ?>
+      </table>
+</div>
 </body>
 </html>
