@@ -22,36 +22,29 @@ if (isset($_POST['create'])) {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Create Department</title>
+   <!-- Add your HTML head content here -->
 </head>
 <body>
-    <h2>Create a New Department</h2>
-    <form method="post" action="create_department.php">
-        <label for="newDeptID">Department ID:</label>
-        <input type="text" name="newDeptID" id="newDeptID" required><br><br>
+   <div class="header">
+      <h1>Create Department</h1>
+      <a href="Departments_page1.php" class="back-button">Back to Department Page</a>
+   </div>
 
-        <label for="newDeptName">Department Name:</label>
-        <input type="text" name="newDeptName" id="newDeptName" required><br><br>
-
-        <label for="newChairId">Chair ID:</label>
-        <input type="text" name="newChairId" id="newChairId" required><br><br>
-
-        <label for="newDeptManager">Department Manager:</label>
-        <input type="text" name="newDeptManager" id="newDeptManager" required><br><br>
-
-        <label for="newEmail">Email:</label>
-        <input type="email" name="newEmail" id="newEmail" required><br><br>
-
-        <label for="newPhoneNum">Phone Number:</label>
-        <input type="tel" name="newPhoneNum" id="newPhoneNum" required><br><br>
-
-        <label for="newRoomID">Room ID:</label>
-        <input type="text" name="newRoomID" id="newRoomID" required><br><br>
-
-        <input type="submit" name="create" value="Create Department">
-    </form>
+   <!-- Add a form for creating a new department -->
+   <div class="create-department-container">
+      <h2>Create a New Department</h2>
+      <form action="" method="post">
+         <input type="text" name="newDeptID" placeholder="Department ID">
+         <input type="text" name="newDeptName" placeholder="Department Name">
+         <input type="text" name="newChairId" placeholder="Chair ID">
+         <input type="text" name="newDeptManager" placeholder="Department Manager">
+         <input type="text" name="newEmail" placeholder="Email">
+         <input type="text" name="newPhoneNum" placeholder="Phone Number">
+         <input type="text" name="newRoomID" placeholder="Room ID">
+         <input type="submit" name="create" value="Create">
+      </form>
+   </div>
 </body>
 </html>
-

@@ -89,6 +89,20 @@ if (!isset($_SESSION['admin_name'])) {
    tr:nth-child(even) {
       background-color: #ccffcc; /* Light green background */
    }
+   .edit-btn {
+   background-color: #4CAF50; /* Green background */
+   color: white; /* White text */
+   padding: 8px 16px; /* Some padding */
+   margin: 4px 2px; /* Some margins */
+   border: none; /* No border */
+   border-radius: 4px; /* Rounded corners */
+   cursor: pointer; /* Pointer/hand icon */
+   text-decoration: none; /* No underline */
+}
+
+.edit-btn:hover {
+   background-color: #45a049; /* Darker green on hover */
+}
 
    
 </style>
@@ -99,15 +113,10 @@ if (!isset($_SESSION['admin_name'])) {
 
    <div class="header">
       <img src="ua.png" alt="U.A. Logo" class="logo">
-      <h1>U.A. University Admin Page</h1>
+      <h1>U.A. University Master Schedule</h1>
       <div class="buttons">
          <a href="logout1.php" class="btn">Logout</a>
-         <a href="Create_a_user1.php" class="btn">Create a user</a>
-         <a href="Update_a_user1.php" class="btn">Update a user</a>
-         <a href="course_catalog1.php" class="btn">Course Catalog</a>
-         <a href="Departments_page1.php" class="btn">Departments</a>
-         <a href="master_schedule1.php" class="btn">Master Schedule</a>
-         <a href="#" class="btn">Academic Calendar</a>
+         <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
       </div>
    </div>
    <div class="welcome-message">
@@ -122,13 +131,14 @@ if (!isset($_SESSION['admin_name'])) {
       <!-- Master Schedule Table -->
       <h2>Master Schedule</h2>
       <table border="1">
-         <tr>
+      </tr>
             <th>Schedule ID</th>
             <th>Course Name</th>
             <th>Day</th>
             <th>Time</th>
             <th>Building</th>
             <th>Room</th>
+            <th>Actions</th> <!-- This new header cell is for the edit/delete actions -->
          </tr>
 
          <?php
@@ -140,21 +150,23 @@ if (!isset($_SESSION['admin_name'])) {
          if (mysqli_num_rows($result) > 0) {
             // Output data of each row
             while($row = mysqli_fetch_assoc($result)) {
-               echo "<tr>";
-               echo "<td>" . htmlspecialchars($row["ScheduleID"]) . "</td>";
-               echo "<td>" . htmlspecialchars($row["CourseName"]) . "</td>";
-               echo "<td>" . htmlspecialchars($row["Day"]) . "</td>";
-               echo "<td>" . htmlspecialchars($row["Time"]) . "</td>";
-               echo "<td>" . htmlspecialchars($row["Bldg"]) . "</td>";
-               echo "<td>" . htmlspecialchars($row["Room"]) . "</td>";
-               echo "</tr>";
-            }
-         } else {
-            echo "<tr><td colspan='5'>No schedule available</td></tr>";
-         }
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($row["ScheduleID"]) . "</td>";
+                echo "<td>" . htmlspecialchars($row["CourseName"]) . "</td>";
+                echo "<td>" . htmlspecialchars($row["Day"]) . "</td>";
+                echo "<td>" . htmlspecialchars($row["Time"]) . "</td>";
+                echo "<td>" . htmlspecialchars($row["Bldg"]) . "</td>";
+                echo "<td>" . htmlspecialchars($row["Room"]) . "</td>";
+                // Add an Edit button that passes the ScheduleID as a GET parameter to the edit page
+                echo "<td><a href='edit_schedule1.php?ScheduleID=" . $row["ScheduleID"] . "' class='edit-btn'>Edit</a></td>";
+                echo "</tr>";
+             }
+
+            } else {
+                echo "<tr><td colspan='6'>No schedule available</td></tr>"; // Note that colspan is now '6' because of the new Actions column
+             }
+         
          ?>
       </table>
    </div>
 </div>
-
-

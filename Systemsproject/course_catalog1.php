@@ -74,6 +74,29 @@ while ($row = mysqli_fetch_assoc($result)) {
       .department-container {
          padding: 20px;
       }
+
+      table {
+         width: 100%;
+         border-collapse: collapse;
+      }
+
+      table, th, td {
+         border: 1px solid #000;
+      }
+
+      th, td {
+         padding: 8px;
+         text-align: left;
+      }
+      th {
+      background-color: #f2f2f2; /* Gives a slight background color to the header */
+   }
+
+   /* Style for every other row */
+   tr:nth-child(even) {
+      background-color: #ccffcc; /* Light green background */
+   }
+
    </style>
 </head>
 <body>
@@ -91,7 +114,7 @@ while ($row = mysqli_fetch_assoc($result)) {
    </div>
 
    <div class="welcome-message">
-      <p>Welcome, <?php echo $_SESSION['admin_name']; ?>.This is the Course Catalog Page!</p>
+      <p>Welcome, <?php echo $_SESSION['admin_name']; ?>. This is the Course Catalog Page!</p>
    </div>
 
    <!-- <div class="container">
@@ -100,7 +123,7 @@ while ($row = mysqli_fetch_assoc($result)) {
    </div> --> 
    
    <div class="department-container">
-      <h2>List Courses here once made </h2>
+      <h2>Courses</h2>
       <table>
          <tr>
             <th>CourseID</th>
