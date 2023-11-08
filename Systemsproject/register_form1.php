@@ -84,7 +84,7 @@ if(isset($_POST['submit'])){
       <input type="password" name="password" required placeholder="Password">
       <input type="password" name="cpassword" required placeholder="Confirm Password">
       <select name="user_type" required>
-         <option value="user">User</option>
+         <option value="student">Student</option>
          <option value="admin">Admin</option>
       </select>
       <input type="submit" name="submit" value="Register Now" class="form-btn">

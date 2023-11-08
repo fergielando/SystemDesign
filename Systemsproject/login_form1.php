@@ -22,7 +22,7 @@ if (isset($_POST['submit'])) {
             $_SESSION['admin_name'] = $row['FirstName']; 
             header('location:admin_page1.php');
 
-        } else if ($row['UserType'] == 'user') {
+        } else if ($row['UserType'] == 'student') {
             $_SESSION['user_name'] = $row['FirstName']; 
             header('location:user_page1.php');
         }
