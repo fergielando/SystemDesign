@@ -1,6 +1,25 @@
 <?php
 @include 'config1.php';
 
+// Function to retrieve users from the database
+function getUsers($conn, $uid = null) {
+    $query = "SELECT * FROM user";
+    if ($uid) {
+        $query .= " WHERE uid = '$uid'";
+    }
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+$users = getUsers($conn); // Get all users initially
+
+// Search for a user by UID
+if (isset($_POST['search'])) {
+    $uid = mysqli_real_escape_string($conn, $_POST['search_uid']);
+    $users = getUsers($conn, $uid); // Get users that match the UID
+}
+
+// Update user information
 if (isset($_POST['submit'])) {
    
     $uid = mysqli_real_escape_string($conn, $_POST['uid']);
@@ -31,48 +50,132 @@ if (isset($_GET['uid'])) {
     $user = mysqli_fetch_assoc($result);
 }
 ?>
+<style>
+      .header {
+         background: #000;
+         color: #fff;
+         padding: 20px;
+         text-align: center;
+         display: flex;
+         justify-content: space-between;
+      }
+
+      .header h1 {
+         font-size: 36px; 
+      }
+
+
+      .buttons {
+         display: flex;
+         align-items: center;
+      }
+      .header .back-button {
+         background: #000;
+         color: #fff;
+         padding: 10px 20px;
+         text-decoration: none;
+         border-radius: 5px;
+         margin-right: 10px;
+      }
+      .buttons a {
+         margin-left: 20px;
+         background: #000;
+         color: #fff;
+         padding: 10px 30px;
+         text-decoration: none;
+         border-radius: 5px;
+      }
+
+      .button-container .btn:hover {
+         background: #333;
+      }
+      .header .logo {
+         width: 50px; 
+         height: 50px; 
+      }
+      
+   table {
+      width: 100%; /* Full width */
+      max-width: 100%; /* Ensures table is not wider than its container */
+      border-collapse: collapse;
+      table-layout: auto; /* New line: Ensures the table respects the width */
+   }
+
+   th, td {
+      border: 1px solid #000;
+      padding: 15px;
+      text-align: left;
+      font-size: 14px;
+      word-wrap: break-word; /* New line: Allows words to break and wrap */
+   }
+
+   th {
+      background-color: #f2f2f2; /* Gives a slight background color to the header */
+   }
+
+   /* Style for every other row */
+   tr:nth-child(even) {
+      background-color: #ccffcc; /* Light green background */
+   }
+  
+</style>
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
+<meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Update a user Form</title>
-
-   <link rel="stylesheet" href="css/fatman1.css">
-
 </head>
 <body>
 
-<div class="form-container">
+<div class="header">
+      <h1>Department Management</h1>
+      <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
+   </div>
 
+<!-- Search Form -->
+<div class="search-container">
    <form action="" method="post">
-      <h3>Update a user</h3>
-      <?php
-      if(isset($error)){
-         foreach($error as $error){
-            echo '<span class="error-msg">'.$error.'</span>';
-         };
-      };
-      ?>
-      <input type="text" name="uid" required placeholder="UID">
-      <input type="text" name="firstName" required placeholder="First Name">
-      <input type="text" name="lastName" required placeholder="Last Name">
-      <select name="gender" required>
-         <option value="M">Male</option>
-         <option value="F">Female</option>
-         <option value="O">Other</option>
-      </select>
-      <input type="date" name="dob" required placeholder="Date of Birth">
-      <input type="text" name="street" required placeholder="Street">
-      <input type="text" name="city" required placeholder="City">
-      <input type="text" name="state" required placeholder="State">
-      <input type="text" name="zipcode" required placeholder="ZipCode">
-      <input type="submit" name="submit" value="update" class="form-btn">
+      <input type="text" name="search_uid" required placeholder="Enter UID to search">
+      <input type="submit" name="search" value="Search" class="form-btn">
    </form>
-
 </div>
+
+<!-- Users Table -->
+<div class="user-table">
+   <table>
+      <tr>
+         <th>UID</th>
+         <th>First Name</th>
+         <th>Last Name</th>
+         <th>Gender</th>
+         <th>Date of Birth</th>
+         <th>Street</th>
+         <th>City</th>
+         <th>State</th>
+         <th>ZipCode</th>
+         <th>Edit</th>
+      </tr>
+      <?php foreach ($users as $user): ?>
+      <tr>
+         <td><?php echo htmlspecialchars($user['UID']); ?></td>
+         <td><?php echo htmlspecialchars($user['FirstName']); ?></td>
+         <td><?php echo htmlspecialchars($user['LastName']); ?></td>
+         <td><?php echo htmlspecialchars($user['Gender']); ?></td>
+         <td><?php echo htmlspecialchars($user['DOB']); ?></td>
+         <td><?php echo htmlspecialchars($user['Street']); ?></td>
+         <td><?php echo htmlspecialchars($user['City']); ?></td>
+         <td><?php echo htmlspecialchars($user['State']); ?></td>
+         <td><?php echo htmlspecialchars($user['ZipCode']); ?></td>
+         <td><a href="edit_user.php?UID=<?php echo $user['UID']; ?>">Edit</a></td>
+      </tr>
+      <?php endforeach; ?>
+   </table>
+</div>
+
+<!-- Your existing scripts and footer here -->
 
 </body>
 </html>
