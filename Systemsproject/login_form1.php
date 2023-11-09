@@ -26,6 +26,14 @@ if (isset($_POST['submit'])) {
             $_SESSION['user_name'] = $row['FirstName']; 
             header('location:user_page1.php');
         }
+        } else if ($row['UserType'] == 'faculty') {
+            $_SESSION['user_name'] = $row['FirstName']; 
+            header('location:faculty_page1.php');
+        }
+        } else if ($row['UserType'] == 'statsoffice') {
+            $_SESSION['user_name'] = $row['FirstName']; 
+            header('location:statsoffice_page1.php');
+        }
     } else {
         $error[] = 'Incorrect email or password!';
     }
