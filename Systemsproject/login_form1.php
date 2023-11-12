@@ -11,25 +11,21 @@ if (isset($_POST['submit'])) {
   
 
    
-   $select = " SELECT * FROM user WHERE email = '$email' && password = '$pass' ";
-
+    $select = "SELECT * FROM logintable WHERE email = '$email' && password = '$pass'";
     $result = mysqli_query($conn, $select);
-
+    
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_array($result);
-
+    
         if ($row['UserType'] == 'admin') {
             $_SESSION['admin_name'] = $row['FirstName']; 
             header('location:admin_page1.php');
-
         } else if ($row['UserType'] == 'student') {
             $_SESSION['user_name'] = $row['FirstName']; 
             header('location:user_page1.php');
-        }
         } else if ($row['UserType'] == 'faculty') {
             $_SESSION['user_name'] = $row['FirstName']; 
             header('location:faculty_page1.php');
-        }
         } else if ($row['UserType'] == 'statsoffice') {
             $_SESSION['user_name'] = $row['FirstName']; 
             header('location:statsoffice_page1.php');

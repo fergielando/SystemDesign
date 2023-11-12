@@ -45,54 +45,88 @@
          width: 50px; 
          height: 50px; 
       }
-      
-      .welcome-message {
+
+      .welcome-statement {
          text-align: center;
          padding: 20px;
-         font-size: 24px; 
+         font-size: 24px;
          margin-bottom: 10px;
       }
-    <style>
-   /* ... [Your existing styles] ... */
-   
-   table {
-      width: 100%; /* Full width */
-      max-width: 100%; /* Ensures table is not wider than its container */
-      border-collapse: collapse;
-      table-layout: auto; /* New line: Ensures the table respects the width */
-   }
 
-   th, td {
-      border: 1px solid #000;
-      padding: 15px;
-      text-align: left;
-      font-size: 14px;
-      word-wrap: break-word; /* New line: Allows words to break and wrap */
-   }
+      .search-container {
+         margin-top: 20px;
+         text-align: center;
+      }
 
-   th {
-      background-color: #f2f2f2; /* Gives a slight background color to the header */
-   }
+      .search-container input[type=text] {
+         padding: 10px;
+         margin: 8px 0;
+         box-sizing: border-box;
+      }
 
-   /* Style for every other row */
-   tr:nth-child(even) {
-      background-color: #ccffcc; /* Light green background */
-   }
+      .search-container input[type=submit] {
+         background-color: #000;
+         color: white;
+         padding: 10px 20px;
+         border: none;
+         border-radius: 5px;
+         cursor: pointer;
+      }
 
-   
-</style>
+      table {
+         width: 100%;
+         max-width: 100%;
+         border-collapse: collapse;
+         table-layout: auto;
+      }
+
+      th, td {
+         border: 1px solid #000;
+         padding: 15px;
+         text-align: left;
+         font-size: 14px;
+         word-wrap: break-word;
+      }
+
+      th {
+         background-color: #f2f2f2;
+      }
+
+      tr:nth-child(even) {
+         background-color: #ccffcc;
+      }
+   </style>
 </head>
 <body>
    <div class="header">
       <img src="ua.png" alt="U.A. Logo" class="logo">
       <h1>Welcome to U.A. University</h1>
       <div class="button-container">
-      <a href="logout1.php" class="btn">Logout</a>
+         <a href="logout1.php" class="btn">Logout</a>
+         <a href="student_academic_profile1.php" class="btn">Academic Profile</a>
+         <a href="student_course_catalog1.php" class="btn">Course Catalog</a>
+         <a href="student_majors1.php" class="btn">Majors</a>
+         <a href="student_minors1.php" class="btn">Minors</a>
+         <a href="student_departments1.php" class="btn">Departments</a>
       </div>
    </div>
 
+   <?php
+      // Assuming you have stored the student's name in the session
+      session_start();
+      $studentName = isset($_SESSION['student_name']) ? $_SESSION['student_name'] : "Brian";
+   ?>
+
    <div class="welcome-statement">
-      Welcome to the User Dashboard! Here you can view the master schedule for U.A. University.
+      Welcome, <?php echo $studentName; ?>, to the Student Dashboard! Here you can view the master schedule for U.A. University.
+   </div>
+
+   <!-- Search functionality -->
+   <div class="search-container">
+      <form action="" method="get">
+         <input type="text" placeholder="Search for a course..." name="search">
+         <input type="submit" value="Search">
+      </form>
    </div>
 
    <!-- Master Schedule Table Section -->

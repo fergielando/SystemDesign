@@ -51,48 +51,45 @@ if (isset($_GET['uid'])) {
 }
 ?>
 <style>
-      .header {
-         background: #000;
-         color: #fff;
-         padding: 20px;
-         text-align: center;
-         display: flex;
-         justify-content: space-between;
-      }
+    <style>
+   .header {
+      background: #000;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      justify-content: space-between;
+   }
 
-      .header h1 {
-         font-size: 36px; 
-      }
+   .header h1 {
+      font-size: 36px;
+   }
 
-
-      .buttons {
-         display: flex;
-         align-items: center;
-      }
-      .header .back-button {
-         background: #000;
-         color: #fff;
-         padding: 10px 20px;
-         text-decoration: none;
-         border-radius: 5px;
-         margin-right: 10px;
-      }
-      .buttons a {
-         margin-left: 20px;
-         background: #000;
-         color: #fff;
-         padding: 10px 30px;
-         text-decoration: none;
-         border-radius: 5px;
-      }
-
-      .button-container .btn:hover {
-         background: #333;
-      }
-      .header .logo {
+   .header .logo {
          width: 50px; 
          height: 50px; 
       }
+   .buttons {
+      display: flex;
+      align-items: center;
+   }
+
+   .back-button,
+   .create-user-button {
+      background: #333;
+      color: #fff;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-right: 10px;
+   }
+
+   .back-button:hover,
+   .create-user-button:hover {
+      background: #000;
+   }
+
+      
       
    table {
       width: 100%; /* Full width */
@@ -132,7 +129,9 @@ if (isset($_GET['uid'])) {
 
 <div class="header">
       <h1>Department Management</h1>
-      <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
+      <a href="admin_page1.php" class="btn">Back to Admin Page</a>
+      <a href="create_a_user1.php" class="btn">Create a User</a>
+
    </div>
 
 <!-- Search Form -->
@@ -145,34 +144,38 @@ if (isset($_GET['uid'])) {
 
 <!-- Users Table -->
 <div class="user-table">
-   <table>
-      <tr>
-         <th>UID</th>
-         <th>First Name</th>
-         <th>Last Name</th>
-         <th>Gender</th>
-         <th>Date of Birth</th>
-         <th>Street</th>
-         <th>City</th>
-         <th>State</th>
-         <th>ZipCode</th>
-         <th>Edit</th>
-      </tr>
-      <?php foreach ($users as $user): ?>
-      <tr>
-         <td><?php echo htmlspecialchars($user['UID']); ?></td>
-         <td><?php echo htmlspecialchars($user['FirstName']); ?></td>
-         <td><?php echo htmlspecialchars($user['LastName']); ?></td>
-         <td><?php echo htmlspecialchars($user['Gender']); ?></td>
-         <td><?php echo htmlspecialchars($user['DOB']); ?></td>
-         <td><?php echo htmlspecialchars($user['Street']); ?></td>
-         <td><?php echo htmlspecialchars($user['City']); ?></td>
-         <td><?php echo htmlspecialchars($user['State']); ?></td>
-         <td><?php echo htmlspecialchars($user['ZipCode']); ?></td>
-         <td><a href="edit_user.php?UID=<?php echo $user['UID']; ?>">Edit</a></td>
-      </tr>
-      <?php endforeach; ?>
-   </table>
+<table>
+   <tr>
+      <th>UID</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Gender</th>
+      <th>Date of Birth</th>
+      <th>Street</th>
+      <th>City</th>
+      <th>State</th>
+      <th>ZipCode</th>
+      <th>Edit</th>
+      <th>View Academic Profile</th>
+     
+   </tr>
+   <?php foreach ($users as $user): ?>
+   <tr>
+      <td><?php echo htmlspecialchars($user['UID']); ?></td>
+      <td><?php echo htmlspecialchars($user['FirstName']); ?></td>
+      <td><?php echo htmlspecialchars($user['LastName']); ?></td>
+      <td><?php echo htmlspecialchars($user['Gender']); ?></td>
+      <td><?php echo htmlspecialchars($user['DOB']); ?></td>
+      <td><?php echo htmlspecialchars($user['Street']); ?></td>
+      <td><?php echo htmlspecialchars($user['City']); ?></td>
+      <td><?php echo htmlspecialchars($user['State']); ?></td>
+      <td><?php echo htmlspecialchars($user['ZipCode']); ?></td>
+      <td><a href="edit_user.php?UID=<?php echo $user['UID']; ?>">Edit</a></td>
+      <td><a href="view_academic_profile1.php?UID=<?php echo $user['UID']; ?>">View Academic Profile</a></td>
+   </tr>
+   <?php endforeach; ?>
+</table>
+
 </div>
 
 <!-- Your existing scripts and footer here -->

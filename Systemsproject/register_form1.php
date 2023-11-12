@@ -31,7 +31,7 @@ if(isset($_POST['submit'])){
       if($pass != $cpass){
          $error[] = 'Password not matched!';
       }else{
-         $insert = "INSERT INTO user(uid, firstname, lastname, gender, dob, street, city, state, zipcode, email, password, usertype) VALUES('$uid', '$firstName', '$lastName', '$gender', '$dob', '$street', '$city', '$state', '$zipcode', '$email', '$pass', '$user_type')";
+         $insert = "INSERT INTO user(uid, firstname, lastname, gender, dob, street, city, state, zipcode) VALUES('$uid', '$firstName', '$lastName', '$gender', '$dob', '$street', '$city', '$state', '$zipcode')";
          $insert1 = "INSERT INTO logintable(uid, email, password, usertype) VALUES('$uid','$email','$pass','$user_type')";
          mysqli_query($conn, $insert);
          mysqli_query($conn, $insert1);

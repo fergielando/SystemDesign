@@ -102,12 +102,13 @@ if (!isset($_SESSION['admin_name'])) {
       <h1>U.A. University Admin Page</h1>
       <div class="buttons">
          <a href="logout1.php" class="btn">Logout</a>
-         <a href="Create_a_user1.php" class="btn">Create a user</a>
          <a href="Update_a_user1.php" class="btn">Update a user</a>
          <a href="course_catalog1.php" class="btn">Course Catalog</a>
          <a href="Departments_page1.php" class="btn">Departments</a>
          <a href="master_schedule1.php" class="btn">Master Schedule</a>
          <a href="#" class="btn">Academic Calendar</a>
+         <a href="majors1.php" class="btn">Majors</a> <!-- Added Majors button -->
+      <a href="minors1.php" class="btn">Minors</a> <!-- Added Minors button -->
       </div>
    </div>
    <div class="welcome-message">

@@ -16,7 +16,7 @@ if(isset($_POST['submit'])) {
    $cpass = md5($_POST['cpassword']);
    $user_type = mysqli_real_escape_string($conn, $_POST['user_type']);
 
-   $select = "SELECT * FROM user WHERE email = '$email' && password = '$pass' ";
+   $select = "SELECT * FROM logintable WHERE email = '$email' && password = '$pass' ";
    $result = mysqli_query($conn, $select);
 
    if(mysqli_num_rows($result) > 0){
@@ -25,7 +25,7 @@ if(isset($_POST['submit'])) {
       if($pass != $cpass){
          $error[] = 'Password not matched!';
       } else {
-         $insert = "INSERT INTO user(uid, firstname, lastname, gender, dob, street, city, state, zipcode, email, password, usertype) VALUES('$uid', '$firstName', '$lastName', '$gender', '$dob', '$street', '$city', '$state', '$zipcode', '$email', '$pass', '$user_type')";
+         $insert = "INSERT INTO user(uid, firstname, lastname, gender, dob, street, city, state, zipcode) VALUES('$uid', '$firstName', '$lastName', '$gender', '$dob', '$street', '$city', '$state', '$zipcode')";
          $insert1 = "INSERT INTO logintable(uid, email, password, usertype) VALUES('$uid','$email','$pass','$user_type')";
          mysqli_query($conn, $insert);
          mysqli_query($conn, $insert1);
