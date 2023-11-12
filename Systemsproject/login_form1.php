@@ -11,7 +11,7 @@ if (isset($_POST['submit'])) {
   
 
    
-    $select = "SELECT * FROM logintable WHERE email = '$email' && password = '$pass'";
+    $select = "SELECT logintable.*, user.FirstName FROM logintable JOIN user ON logintable.UID = user.UID WHERE Email = '$email' && Password = '$pass'";
     $result = mysqli_query($conn, $select);
     
     if (mysqli_num_rows($result) > 0) {
@@ -24,10 +24,10 @@ if (isset($_POST['submit'])) {
             $_SESSION['user_name'] = $row['FirstName']; 
             header('location:user_page1.php');
         } else if ($row['UserType'] == 'faculty') {
-            $_SESSION['user_name'] = $row['FirstName']; 
+            $_SESSION['faculty_name'] = $row['FirstName']; 
             header('location:faculty_page1.php');
         } else if ($row['UserType'] == 'statsoffice') {
-            $_SESSION['user_name'] = $row['FirstName']; 
+            $_SESSION['statsoffice_name'] = $row['FirstName']; 
             header('location:statsoffice_page1.php');
         }
     } else {
