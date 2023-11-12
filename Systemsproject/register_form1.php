@@ -18,7 +18,7 @@ if(isset($_POST['submit'])){
    $cpass = md5($_POST['cpassword']);
    $user_type = mysqli_real_escape_string($conn, $_POST['user_type']);
 
-   $select = " SELECT * FROM user WHERE email = '$email' && password = '$pass' ";
+   $select = " SELECT * FROM logintable WHERE email = '$email' && password = '$pass' ";
 
    $result = mysqli_query($conn, $select);
 
