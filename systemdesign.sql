@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 12, 2023 at 04:31 AM
+-- Generation Time: Nov 12, 2023 at 04:40 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -688,21 +688,21 @@ CREATE TABLE `dept` (
 --
 
 INSERT INTO `dept` (`DeptID`, `DeptName`, `ChairID`, `DeptManager`, `Email`, `PhoneNum`, `RoomID`) VALUES
-('ART', 'Art', 400221, 'Linda Young', 'linda.young@UAuni.edu', '(555) 234-5678', '2H'),
-('BIO', 'Biology', 400061, 'Emily Jones', 'emily.jones@UAuni.edu', '(555) 456-7890', NULL),
-('BUS', 'Business', 400281, 'Olivia Lewis', 'olivia.lewis@UAuni.edu', '(555) 567-8901', NULL),
-('CHE', 'Chemistry', 400161, 'William White', 'william.white@UAuni.edu', '(555) 901-2345', NULL),
-('CIS', 'CIS (Computer Information Systems)', 400021, 'Sarah Johnson', 'sarah.johnson@UAuni.edu', '(555) 234-5678', NULL),
-('ECO', 'Economics', 400121, 'David Lee', 'david.lee@UAuni.edu', '(555) 789-0123', NULL),
-('ENG', 'English', 400041, 'Michael Williams', 'michael.williams@UAuni.edu', '(555) 345-6789', NULL),
-('HIS', 'History', 400081, 'Robert Brown', 'robert.brown@UAuni.edu', '(555) 567-8901', NULL),
-('MAT', 'Mathematics', 400141, 'Jennifer Hall', 'jennifer.hall@UAuni.edu', '(555) 890-1234', NULL),
-('MIS', 'MIS (Management Information Systems)', 400001, 'Bryan Don', 'john.smith@UAuni.edu', '(555) 123-4567', NULL),
-('PHI', 'Philosophy', 400261, 'Patricia Scott', 'patricia.scott@UAuni.edu', '(555) 456-7890', NULL),
-('PHY', 'Physics', 400201, 'James Harris', 'james.harris@UAuni.edu', '(555) 123-4567', NULL),
-('POL', 'Politics', 400241, 'Christopher Allen', 'christopher.allen@UAuni.edu', '(555) 345-6789', NULL),
-('PSY', 'Psychology', 400101, 'Maria Davis', 'maria.davis@UAuni.edu', '(555) 678-9012', NULL),
-('SOC', 'Sociology', 400181, 'Susan Clark', 'susan.clark@UAuni.edu', '(555) 012-3456', NULL);
+('ART', 'Art', 400221, 'Linda Young', 'linda.young@UAuni.edu', '(555) 234-5678', '12C'),
+('BIO', 'Biology', 400061, 'Emily Jones', 'emily.jones@UAuni.edu', '(555) 456-7890', '4C'),
+('BUS', 'Business', 400281, 'Olivia Lewis', 'olivia.lewis@UAuni.edu', '(555) 567-8901', '15C'),
+('CHE', 'Chemistry', 400161, 'William White', 'william.white@UAuni.edu', '(555) 901-2345', '9C'),
+('CIS', 'CIS (Computer Information Systems)', 400021, 'Sarah Johnson', 'sarah.johnson@UAuni.edu', '(555) 234-5678', '2C'),
+('ECO', 'Economics', 400121, 'David Lee', 'david.lee@UAuni.edu', '(555) 789-0123', '7C'),
+('ENG', 'English', 400041, 'Michael Williams', 'michael.williams@UAuni.edu', '(555) 345-6789', '3C'),
+('HIS', 'History', 400081, 'Robert Brown', 'robert.brown@UAuni.edu', '(555) 567-8901', '5C'),
+('MAT', 'Mathematics', 400141, 'Jennifer Hall', 'jennifer.hall@UAuni.edu', '(555) 890-1234', '8C'),
+('MIS', 'MIS (Management Information Systems)', 400001, 'Bryan Don', 'john.smith@UAuni.edu', '(555) 123-4567', '1C'),
+('PHI', 'Philosophy', 400261, 'Patricia Scott', 'patricia.scott@UAuni.edu', '(555) 456-7890', '14C'),
+('PHY', 'Physics', 400201, 'James Harris', 'james.harris@UAuni.edu', '(555) 123-4567', '11C'),
+('POL', 'Politics', 400241, 'Christopher Allen', 'christopher.allen@UAuni.edu', '(555) 345-6789', '13C'),
+('PSY', 'Psychology', 400101, 'Maria Davis', 'maria.davis@UAuni.edu', '(555) 678-9012', '6C'),
+('SOC', 'Sociology', 400181, 'Susan Clark', 'susan.clark@UAuni.edu', '(555) 012-3456', '10C');
 
 -- --------------------------------------------------------
 
