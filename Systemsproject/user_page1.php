@@ -1,3 +1,27 @@
+
+<?php
+// Include your database configuration file and session start if needed
+@include 'config1.php';
+session_start();
+
+// Fetch available courses with additional details, ordered by CRN (Include this part only)
+$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
+          FROM coursesection 
+          JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
+          JOIN day ON timeslot.DayID = day.DayID
+          JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
+          JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+          JOIN room ON coursesection.RoomID = room.RoomID
+          JOIN building ON room.BuildingID = building.BuildingID
+          ORDER BY coursesection.CRN ASC";
+$result = mysqli_query($conn, $query);
+
+$courses = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $courses[] = $row;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,38 +70,12 @@
          height: 50px; 
       }
 
-      .welcome-statement {
-         text-align: center;
-         padding: 20px;
-         font-size: 24px;
-         margin-bottom: 10px;
-      }
-
-      .search-container {
-         margin-top: 20px;
-         text-align: center;
-      }
-
-      .search-container input[type=text] {
-         padding: 10px;
-         margin: 8px 0;
-         box-sizing: border-box;
-      }
-
-      .search-container input[type=submit] {
-         background-color: #000;
-         color: white;
-         padding: 10px 20px;
-         border: none;
-         border-radius: 5px;
-         cursor: pointer;
-      }
-
       table {
          width: 100%;
          max-width: 100%;
          border-collapse: collapse;
          table-layout: auto;
+         margin: 0 auto;
       }
 
       th, td {
@@ -86,6 +84,7 @@
          text-align: left;
          font-size: 14px;
          word-wrap: break-word;
+         border-radius: 10px; 
       }
 
       th {
@@ -112,70 +111,39 @@
    </div>
 
    <?php
-      // Assuming you have stored the student's name in the session
-      session_start();
-      $studentName = isset($_SESSION['student_name']) ? $_SESSION['student_name'] : "Brian";
+   
    ?>
 
-   <div class="welcome-statement">
-      Welcome, <?php echo $studentName; ?>, to the Student Dashboard! Here you can view the master schedule for U.A. University.
+<div class="welcome-message">
+      <p>Welcome, <?php echo $_SESSION['user_name']; ?>. Welcome this is is UA University!</p>
    </div>
 
-   <!-- Search functionality -->
-   <div class="search-container">
-      <form action="" method="get">
-         <input type="text" placeholder="Search for a course..." name="search">
-         <input type="submit" value="Search">
-      </form>
-   </div>
 
-   <!-- Master Schedule Table Section -->
-   <div class="container">
-      <h2>Master Schedule</h2>
-      <div class="content">
-         <!-- The Master Schedule Table -->
-         <table class="master-schedule-table">
-            <thead>
-               <tr>
-                  <th>Schedule ID</th>
-                  <th>Course Name</th>
-                  <th>Day</th>
-                  <th>Time</th>
-                  <th>Building</th>
-                  <th>Room</th>
-               </tr>
-            </thead>
-            <tbody>
-               <!-- PHP code to fetch data from the database and display rows -->
-               <?php
-               // Include your database configuration file
-               @include 'config1.php';
-
-               // SQL query to select data from the master schedule table
-               $query = "SELECT ScheduleID, CourseName, Day, Time, Bldg, Room FROM masterschedule";
-               $result = mysqli_query($conn, $query);
-
-               // Check if the query returns any rows
-               if (mysqli_num_rows($result) > 0) {
-                  // Output data of each row
-                  while($row = mysqli_fetch_assoc($result)) {
-                     echo "<tr>";
-                     echo "<td>" . htmlspecialchars($row["ScheduleID"]) . "</td>";
-                     echo "<td>" . htmlspecialchars($row["CourseName"]) . "</td>";
-                     echo "<td>" . htmlspecialchars($row["Day"]) . "</td>";
-                     echo "<td>" . htmlspecialchars($row["Time"]) . "</td>";
-                     echo "<td>" . htmlspecialchars($row["Bldg"]) . "</td>";
-                     echo "<td>" . htmlspecialchars($row["Room"]) . "</td>";
-                     echo "</tr>";
-                  }
-               } else {
-                  echo "<tr><td colspan='6'>No schedule available</td></tr>";
-               }
-               ?>
-            </tbody>
-         </table>
-      </div>
-   </div>
-
+</head>
+<body>
+   <table>
+      <thead>
+         <tr>
+            <th>CRN</th>
+            <th>Course Name</th>
+            <th>Day</th>
+            <th>Building</th>
+            <th>Room</th>
+            <th>Time</th>
+         </tr>
+      </thead>
+      <tbody>
+         <?php foreach ($courses as $course): ?>
+            <tr>
+               <td><?php echo $course['CRN']; ?></td>
+               <td><?php echo $course['CourseName']; ?></td>
+               <td><?php echo $course['Weekday']; ?></td>
+               <td><?php echo $course['BuildingName']; ?></td>
+               <td><?php echo $course['RoomNum']; ?></td>
+               <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+            </tr>
+         <?php endforeach; ?>
+      </tbody>
+   </table>
 </body>
 </html>

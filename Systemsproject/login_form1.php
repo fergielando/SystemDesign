@@ -1,34 +1,87 @@
 <?php
-
+// Include your database connection and other necessary files
 @include 'config1.php';
-
 
 session_start();
 
+// Function to generate a random temporary password
+function generateRandomPassword($length = 8) {
+    $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $password = '';
+    for ($i = 0; $i < $length; $i++) {
+        $password .= $characters[rand(0, strlen($characters) - 1)];
+    }
+    return $password;
+}
+
 if (isset($_POST['submit'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $pass = md5($_POST['password']);
-  
+    $password = md5($_POST['password']);
 
-   
-    $select = "SELECT logintable.*, user.FirstName FROM logintable JOIN user ON logintable.UID = user.UID WHERE Email = '$email' && Password = '$pass'";
+    $select = "SELECT logintable.*, user.FirstName FROM logintable JOIN user ON logintable.UID = user.UID WHERE Email = '$email'";
     $result = mysqli_query($conn, $select);
-    
+
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_array($result);
-    
-        if ($row['UserType'] == 'admin') {
-            $_SESSION['admin_name'] = $row['FirstName']; 
-            header('location:admin_page1.php');
-        } else if ($row['UserType'] == 'student') {
-            $_SESSION['user_name'] = $row['FirstName']; 
-            header('location:user_page1.php');
-        } else if ($row['UserType'] == 'faculty') {
-            $_SESSION['faculty_name'] = $row['FirstName']; 
-            header('location:faculty_page1.php');
-        } else if ($row['UserType'] == 'statsoffice') {
-            $_SESSION['statsoffice_name'] = $row['FirstName']; 
-            header('location:statsoffice_page1.php');
+
+        if ($row['NumOfLogin'] >= 3) {
+            // Account is locked
+            $error[] = 'Account locked. Please contact the administrator.';
+
+            // After locking the account, send an email with a temporary password
+            if ($row['NumOfLogin'] >= 2) {
+                $temporaryPassword = generateRandomPassword(); // Generate a random temporary password
+                $hashedTempPassword = md5($temporaryPassword); // Hash the temporary password
+
+                // Update the user's password in the database with the temporary password
+                $updateTempPassword = "UPDATE logintable SET Password = '$hashedTempPassword' WHERE UID = '{$row['UID']}'";
+                mysqli_query($conn, $updateTempPassword);
+
+                // Send the temporary password to the user's email
+                $to = $row['Email']; // User's email address
+                $subject = 'Temporary Password';
+                $message = "Your account has been locked due to multiple failed login attempts. Here is your temporary password: $temporaryPassword";
+
+                // You may need to configure your SMTP settings for the mail() function to work correctly
+                mail($to, $subject, $message);
+            }
+        } else {
+            if ($row['Password'] == $password) {
+                // Successful login, reset failed attempts
+                $updateFailedAttempts = "UPDATE logintable SET NumOfLogin = 0 WHERE UID = '{$row['UID']}'";
+                mysqli_query($conn, $updateFailedAttempts);
+
+                // Handle different user types
+                if ($row['UserType'] == 'admin') {
+                    $_SESSION['admin_name'] = $row['FirstName'];
+                    $_SESSION['UID'] = $row['UID'];
+                    header('location: admin_page1.php');
+                } elseif ($row['UserType'] == 'student') {
+                    $_SESSION['user_name'] = $row['FirstName'];
+                    $_SESSION['UID'] = $row['UID'];
+                    header('location: user_page1.php');
+                } elseif ($row['UserType'] == 'faculty') {
+                    $_SESSION['faculty_name'] = $row['FirstName'];
+                    $_SESSION['UID'] = $row['UID'];
+                    header('location: faculty_page1.php');
+                } elseif ($row['UserType'] == 'statsoffice') {
+                    $_SESSION['statsoffice_name'] = $row['FirstName'];
+                    $_SESSION['UID'] = $row['UID'];
+                    header('location: statsoffice_page1.php');
+                }
+            } else {
+                // Failed login attempt, increment login attempts
+                $updateFailedAttempts = "UPDATE logintable SET NumOfLogin = NumOfLogin + 1 WHERE UID = '{$row['UID']}'";
+                mysqli_query($conn, $updateFailedAttempts);
+
+                $error[] = 'Incorrect email or password!';
+
+                if ($row['NumOfLogin'] >= 2) {
+                    // Lock the account after 3 failed attempts
+                    $updateLockAccount = "UPDATE logintable SET NumOfLogin = 3 WHERE UID = '{$row['UID']}'";
+                    mysqli_query($conn, $updateLockAccount);
+                }
+            }
         }
     } else {
         $error[] = 'Incorrect email or password!';

@@ -1,5 +1,3 @@
-
-
 <?php
 // Include your database configuration file and session start if needed
 @include 'config1.php';
@@ -27,66 +25,70 @@ while ($row = mysqli_fetch_assoc($result)) {
 <html lang="en">
 <head>
    <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta http-equiv="X-UA-Compatible" content="IE-edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   
-   <!-- Add the styles for the table here or in a separate CSS file -->
+   <link rel="stylesheet" href="css/fatman1.css">
+
+   <div class="header">
+      <img src="ua.png" alt="U.A. Logo" class="logo">
+      <h1>Welcome to U.A. University</h1>
+      <div class="button-container">
+         <a href="logout1.php" class="btn">Logout</a>
+         <a href="student_majors1.php" class="btn">Majors</a>
+         <a href="student_minors1.php" class="btn">Minors</a>
+         <a href="student_departments1.php" class="btn">Departments</a>
+      </div>
+   </div>
+   <link rel="stylesheet" href="css/fatman1.css">
    <style>
-    .header {
-         background: #000; 
-         color: #fff; 
+      .header {
+         background: #000;
+         color: #fff;
          padding: 20px;
-         background-color: #000;
-         text-align: left;
-         margin-top: 20px;
+         text-align: center;
          display: flex;
          justify-content: space-between;
-         align-items: center;
       }
 
       .header h1 {
          font-size: 36px; 
-         margin: 0;
       }
 
-      .header .logo {
-         width: 50px;
-         height: 50px;
+      .container {
+         margin-top: 20px;
       }
 
-      .button-container {
+      .buttons {
          display: flex;
          align-items: center;
       }
 
-      .button-container .btn {
-         display: inline-block;
+      .buttons a {
+         margin-left: 20px;
+         background: #000;
+         color: #fff;
          padding: 10px 30px;
-         font-size: 20px;
-         background: #000; 
-         color: #fff; 
-         margin: 0 20px; 
-         text-transform: capitalize;
-         text-decoration: none; 
+         text-decoration: none;
          border-radius: 5px;
-         background-color: #000;
       }
 
       .button-container .btn:hover {
          background: #333;
       }
-
-      
-     .welcome-statement {
-         color: #333;
-         font-size: 18px;
-         padding: 40px;
-         text-align: center;
-         font-family: 'Poppins', cursive; 
-         border: 2px solid #444; 
-         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); 
+      .header .logo {
+         width: 50px; 
+         height: 50px; 
       }
-      table {
+      
+      .welcome-message {
+         text-align: center;
+         padding: 20px;
+         font-size: 24px; 
+         margin-bottom: 10px;
+      }
+  
+   
+   table {
       width: 100%; /* Full width */
       max-width: 100%; /* Ensures table is not wider than its container */
       border-collapse: collapse;
@@ -110,35 +112,17 @@ while ($row = mysqli_fetch_assoc($result)) {
       background-color: #ccffcc; /* Light green background */
    }
 
-         
-      
-   </style>
+   
+</style>
 </head>
-<body>
-</head>
-<body>
-   <div class="header">
-      <img src="ua.png" alt="U.A. Logo" class="logo">
-      <h1>Welcome to U.A. University</h1>
-      <div class="button-container">
-         <a href="login_form1.php" class="btn">Login</a>
-      </div>
-   </div>
-
-  
-   <div class="welcome-statement">
-      Welcome to U.A. University! We are delighted to extend a warm and enthusiastic welcome to all members of the U.A. University community. U.A. University is thrilled to have you as part of our academic family. Our dedicated faculty and staff are here to support and guide you every step of the way. We believe in your potential and are excited to see what you will achieve during your time at U.A. University.
-   </div>
-
-   <div class="container">
-      <div class="content">
-      </div>
-   </div>
-</body>
-</html>
 <body>
    <table>
-      <thead>
+        
+   
+   <div class="content">
+      <!-- Master Schedule Table -->
+      <h2>Master Schedule</h2>
+      <table border="1">
          <tr>
             <th>CRN</th>
             <th>Course Name</th>
@@ -146,9 +130,8 @@ while ($row = mysqli_fetch_assoc($result)) {
             <th>Building</th>
             <th>Room</th>
             <th>Time</th>
+            <th>Available Seats</th>
          </tr>
-      </thead>
-      <tbody>
          <?php foreach ($courses as $course): ?>
             <tr>
                <td><?php echo $course['CRN']; ?></td>
@@ -157,9 +140,9 @@ while ($row = mysqli_fetch_assoc($result)) {
                <td><?php echo $course['BuildingName']; ?></td>
                <td><?php echo $course['RoomNum']; ?></td>
                <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+               <td><?php echo $course['AvailableSeats']; ?></td>
             </tr>
          <?php endforeach; ?>
-      </tbody>
    </table>
 </body>
 </html>

@@ -115,6 +115,60 @@ if (isset($_GET['uid'])) {
       background-color: #ccffcc; /* Light green background */
    }
   
+   .header {
+         background: #000;
+         color: #fff;
+         padding: 20px;
+         text-align: center;
+         display: flex;
+         justify-content: space-between;
+      }
+
+      .header h1 {
+         font-size: 36px;
+      }
+
+      .header .back-button {
+         background: #000;
+         color: #fff;
+         padding: 10px 20px;
+         text-decoration: none;
+         border-radius: 5px;
+         margin-right: 10px;
+      }
+
+      .major-container {
+         padding: 20px;
+      }
+
+      table {
+         width: 100%;
+         border-collapse: collapse;
+      }
+
+      table, th, td {
+         border: 1px solid #000;
+      }
+
+      th, td {
+         padding: 8px;
+         text-align: left;
+      }
+
+      .edit-button {
+         background: #000;
+         color: #fff;
+         padding: 10px 20px;
+         text-decoration: none;
+         border-radius: 5px;
+         margin: 5px;
+         display: inline-block;
+      }
+
+      /* Style for every other row */
+   tr:nth-child(even) {
+      background-color: #ccffcc; /* Light green background */
+   }
 </style>
 
 
@@ -131,6 +185,7 @@ if (isset($_GET['uid'])) {
       <h1>Department Management</h1>
       <a href="admin_page1.php" class="btn">Back to Admin Page</a>
       <a href="create_a_user1.php" class="btn">Create a User</a>
+      <a href="locked_out1.php" class="btn">Locked out Users</a>
 
    </div>
 
