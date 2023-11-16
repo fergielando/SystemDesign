@@ -137,6 +137,17 @@ if (isset($_GET['uid'])) {
          margin-right: 10px;
       }
 
+      .header .btn {
+      background: #333;
+      color: #fff;
+      padding: 15px 30px; /* Adjust padding to make the buttons larger */
+      text-decoration: none;
+      border-radius: 8px;
+      margin-right: 10px;
+      font-size: 16px; /* Adjust font size for better visibility */
+   }
+
+
       .major-container {
          padding: 20px;
       }
@@ -182,10 +193,12 @@ if (isset($_GET['uid'])) {
 <body>
 
 <div class="header">
+   
       <h1>Department Management</h1>
       <a href="admin_page1.php" class="btn">Back to Admin Page</a>
       <a href="create_a_user1.php" class="btn">Create a User</a>
       <a href="locked_out1.php" class="btn">Locked out Users</a>
+
 
    </div>
 

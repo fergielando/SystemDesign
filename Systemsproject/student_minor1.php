@@ -1,4 +1,7 @@
 <?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 @include 'config1.php';
 
 // Retrieve minor data from the database
@@ -6,8 +9,15 @@ $query = "SELECT * FROM minor";
 $result = mysqli_query($conn, $query);
 $minors = [];
 
+// Initialize a counter for assigning new sequential IDs
+$counter = 1;
+
 while ($row = mysqli_fetch_assoc($result)) {
+   $row['MinorID'] = $counter;
     $minors[] = $row;
+
+     // Increment the counter for the next major
+     $counter++;
 }
 
 ?>

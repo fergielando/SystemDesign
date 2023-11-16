@@ -1,36 +1,60 @@
-
 <?php
 // Include your database configuration file and session start if needed
 @include 'config1.php';
 session_start();
 
-// Fetch available courses with additional details, ordered by CRN (Include this part only)
-$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
-          FROM coursesection 
+// Fetch enrolled courses for the current student
+$uid = $_SESSION['UID'];
+$enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
+          FROM enrollment
+          JOIN coursesection ON enrollment.CRN = coursesection.CRN
           JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
           JOIN day ON timeslot.DayID = day.DayID
           JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
           JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
           JOIN room ON coursesection.RoomID = room.RoomID
           JOIN building ON room.BuildingID = building.BuildingID
-          ORDER BY coursesection.CRN ASC";
-$result = mysqli_query($conn, $query);
+          WHERE enrollment.StudentID = '$uid'";
+$enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
 
-$courses = [];
-while ($row = mysqli_fetch_assoc($result)) {
-    $courses[] = $row;
+// Check if the student has any enrolled courses
+if (mysqli_num_rows($enrolledCoursesResult) > 0) {
+    $enrolledCourses = [];
+    while ($row = mysqli_fetch_assoc($enrolledCoursesResult)) {
+        $enrolledCourses[] = $row;
+    }
+} else {
+    $enrolledCourses = false; // No enrolled courses
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
+    <!-- Add your head content here -->
+    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>User Page - Master Schedule</title>
    <link rel="stylesheet" href="css/fatman1.css">
    <style>
+       body {
+            margin: 0;
+            padding: 0;
+            background-image: url('School.jpg'); /* Replace 'background_image.jpg' with your image file */
+            background-size: cover;
+            background-position: center;
+            font-family: Arial, sans-serif; /* Add a generic font family */
+            color: #fff; /* Set text color to white */
+            height: 100vh; /* Set the body height to full viewport height */
+        }
+
+        .overlay {
+            background: rgba(0, 0, 0, 0.5); /* Add a semi-transparent black overlay */
+            height: 100%; /* Set the overlay height to full viewport height */
+            overflow: auto; /* Allow scrolling if the content overflows */
+        }
+
       .header {
          background: #000;
          color: #fff;
@@ -97,6 +121,7 @@ while ($row = mysqli_fetch_assoc($result)) {
    </style>
 </head>
 <body>
+   <div class = "overlay">
    <div class="header">
       <img src="ua.png" alt="U.A. Logo" class="logo">
       <h1>Welcome to U.A. University</h1>
@@ -105,45 +130,44 @@ while ($row = mysqli_fetch_assoc($result)) {
          <a href="student_academic_profile1.php" class="btn">Academic Profile</a>
          <a href="student_course_catalog1.php" class="btn">Course Catalog</a>
          <a href="student_majors1.php" class="btn">Majors</a>
-         <a href="student_minors1.php" class="btn">Minors</a>
+         <a href="student_minor1.php" class="btn">Minors</a>
          <a href="student_departments1.php" class="btn">Departments</a>
       </div>
    </div>
-
-   <?php
    
-   ?>
 
-<div class="welcome-message">
-      <p>Welcome, <?php echo $_SESSION['user_name']; ?>. Welcome this is is UA University!</p>
+   <div class="welcome-message">
+      <p>Welcome, <?php echo $_SESSION['user_name']; ?>. Welcome, this is UA University!</p>
    </div>
 
-
-</head>
-<body>
-   <table>
-      <thead>
-         <tr>
-            <th>CRN</th>
-            <th>Course Name</th>
-            <th>Day</th>
-            <th>Building</th>
-            <th>Room</th>
-            <th>Time</th>
-         </tr>
-      </thead>
-      <tbody>
-         <?php foreach ($courses as $course): ?>
+   <?php if ($enrolledCourses !== false): ?>
+      <table>
+         <thead>
             <tr>
-               <td><?php echo $course['CRN']; ?></td>
-               <td><?php echo $course['CourseName']; ?></td>
-               <td><?php echo $course['Weekday']; ?></td>
-               <td><?php echo $course['BuildingName']; ?></td>
-               <td><?php echo $course['RoomNum']; ?></td>
-               <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+               <th>CRN</th>
+               <th>Course Name</th>
+               <th>Day</th>
+               <th>Building</th>
+               <th>Room</th>
+               <th>Time</th>
             </tr>
-         <?php endforeach; ?>
-      </tbody>
-   </table>
+         </thead>
+         <tbody>
+            <?php foreach ($enrolledCourses as $course): ?>
+               <tr>
+                  <td><?php echo $course['CRN']; ?></td>
+                  <td><?php echo $course['CourseName']; ?></td>
+                  <td><?php echo $course['Weekday']; ?></td>
+                  <td><?php echo $course['BuildingName']; ?></td>
+                  <td><?php echo $course['RoomNum']; ?></td>
+                  <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+               </tr>
+            <?php endforeach; ?>
+         </tbody>
+      </table>
+   <?php else: ?>
+      <p>No courses registered for this semester.</p>
+   <?php endif; ?>
 </body>
 </html>
+

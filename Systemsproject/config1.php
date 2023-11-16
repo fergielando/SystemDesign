@@ -1,5 +1,5 @@
 <?php
 
-$conn = mysqli_connect('localhost','root','','systemdesign');
+$conn = mysqli_connect('localhost','root','','systemdesign7');
 
 ?>
