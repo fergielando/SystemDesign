@@ -238,6 +238,14 @@ if (isset($_GET['drop_course'])) {
          border: 1px solid #000;
       }
 
+      #searchInput {
+        font-size: 18px; /* Increase font size */
+        padding: 10px; /* Add padding */
+        border: 2px solid #333; /* Change border style and color */
+        border-radius: 5px; /* Add border radius for rounded corners */
+        margin-bottom: 10px; /* Add margin at the bottom for spacing */
+    }
+
    </style>
    <script>
        function searchTable() {
@@ -296,9 +304,9 @@ if (isset($_GET['drop_course'])) {
     <div class="course-assignment-container">
         <h1>Assign/Drop Courses</h1>
         <!-- ... Existing search input and course assignment form ... -->
-        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for courses...">
+        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for courses..." style="font-size: 18px; padding: 10px; width: 300px; border: 2px solid #333; border-radius: 5px; margin-bottom: 10px;">
 
-
+        
         <div class="top-right-container">
       <h2>Schedule</h2>
       <table class="enrolled-courses-table">
