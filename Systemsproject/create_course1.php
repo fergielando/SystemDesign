@@ -48,9 +48,16 @@ while ($row = mysqli_fetch_assoc($result)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Course</title>
+
+    <link rel="stylesheet" href="edit_dept.css">
 </head>
 <body>
+
+<div class="header">
     <h2>Create a New Course</h2>
+    <a href="Departments_page1.php" class="back-button">Back to Department List</a>
+</div>
+
     <form action="create_course1.php" method="POST">
         <label for="newCourseID">Course ID:</label>
         <input type="text" name="newCourseID" id="newCourseID" required><br>
