@@ -62,6 +62,15 @@ while ($row = mysqli_fetch_assoc($result)) {
          padding: 8px;
          text-align: left;
       }
+      
+      th {
+      background-color: #f2f2f2; /* Gives a slight background color to the header */
+   }
+
+   /* Style for every other row */
+   tr:nth-child(even) {
+      background-color: #ccffcc; /* Light green background */
+   }
 
       .create-button {
         background: #000;
