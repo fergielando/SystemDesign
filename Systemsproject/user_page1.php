@@ -118,7 +118,9 @@ if (mysqli_num_rows($enrolledCoursesResult) > 0) {
       tr:nth-child(even) {
          background-color: #ccffcc;
       }
+
    </style>
+<link rel="stylesheet" href="userPage.css">
 </head>
 <body>
    <div class = "overlay">
@@ -127,11 +129,6 @@ if (mysqli_num_rows($enrolledCoursesResult) > 0) {
       <h1>Welcome to U.A. University</h1>
       <div class="button-container">
          <a href="logout1.php" class="btn">Logout</a>
-         <a href="student_academic_profile1.php" class="btn">Academic Profile</a>
-         <a href="student_course_catalog1.php" class="btn">Course Catalog</a>
-         <a href="student_majors1.php" class="btn">Majors</a>
-         <a href="student_minor1.php" class="btn">Minors</a>
-         <a href="student_departments1.php" class="btn">Departments</a>
       </div>
    </div>
    
@@ -168,6 +165,15 @@ if (mysqli_num_rows($enrolledCoursesResult) > 0) {
    <?php else: ?>
       <p>No courses registered for this semester.</p>
    <?php endif; ?>
+
+   <div class="button-container">
+         <a href="student_academic_profile1.php" class="btn">Academic Profile</a>
+         <a href="student_course_catalog1.php" class="btn">Course Catalog</a>
+         <a href="student_majors1.php" class="btn">Majors</a>
+         <a href="student_minor1.php" class="btn">Minors</a>
+         <a href="student_departments1.php" class="btn">Departments</a>
+      </div>
 </body>
 </html>
+
 
