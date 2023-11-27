@@ -51,11 +51,18 @@ if (isset($_POST['update'])) {
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Edit Department</title>
 
-   <link rel="stylesheet" href="css/fatman1.css">
+   <!-- <link rel="stylesheet" href="css/fatman1.css"> 
+<div class="form-group">
+                <label for="LastName">Last Name</label>
+                
+            </div>
+        -->
 
    <style>
       /* Add your custom styles here */
+      
    </style>
+   <link rel="stylesheet" href="edit_dept.css">
 </head>
 <body>
 
@@ -66,13 +73,33 @@ if (isset($_POST['update'])) {
 
    <div class="edit-department-container">
       <h2>Edit Department Information</h2>
-      <form action="" method="post">
+     <!--  <form action="" method="post"> --> 
+
+     <div class="form-group">
+                <label for="newDeptName">Dept Name</label>
          <input type="text" name="newDeptName" placeholder="Department Name" value="<?php echo $department['DeptName']; ?>">
+</div>
+<div class="form-group">
+                <label for="newChairId">Chair ID</label>
          <input type="text" name="newChairId" placeholder="Chair ID" value="<?php echo $department['ChairID']; ?>">
+</div>
+<div class="form-group">
+                <label for="newDeptManager">Dept Manager Name</label>
          <input type="text" name="newDeptManager" placeholder="Department Manager" value="<?php echo $department['DeptManager']; ?>">
+</div>
+<div class="form-group">
+                <label for="newEmail">Email</label>
          <input type="text" name="newEmail" placeholder="Email" value="<?php echo $department['Email']; ?>">
+</div>
+<div class="form-group">
+                <label for="newPhoneNum">Phone Number</label>
          <input type="text" name="newPhoneNum" placeholder="Phone Number" value="<?php echo $department['PhoneNum']; ?>">
+</div>
+<div class="form-group">
+                <label for="newRoomID">Room ID</label>
          <input type="text" name="newRoomID" placeholder="Room ID" value="<?php echo $department['RoomID']; ?>"> 
+</div> 
+
          <input type="submit" name="update" value="Update">
       </form>
    </div>

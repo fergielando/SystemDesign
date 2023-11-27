@@ -1,18 +1,33 @@
+
 <?php
-@include 'config1.php';
+@include 'config1.php'; // Include your database configuration file
 
 session_start();
 
-if (!isset($_SESSION['admin_name'])) {
-   header('location:login_form1.php');
+// Check for user's session UID
+if (!isset($_SESSION['UID'])) {
+    echo "Please log in to assign courses.";
+    exit;
 }
-// Retrieve department data from the database
-$query = "SELECT * FROM Course";
-$result = mysqli_query($conn, $query);
-$course = [];
 
+$uid = $_SESSION['UID'];
+
+// Fetch available courses with additional details, ordered by CRN
+$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, course.Description, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, coursesection.AvailableSeats
+          FROM coursesection 
+          JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
+          JOIN day ON timeslot.DayID = day.DayID
+          JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
+          JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+          JOIN room ON coursesection.RoomID = room.RoomID
+          JOIN building ON room.BuildingID = building.BuildingID
+          JOIN course ON coursesection.CourseID = course.CourseID
+          ORDER BY coursesection.CRN ASC";
+$result = mysqli_query($conn, $query);
+
+$courses = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $course[] = $row;
+    $courses[] = $row;
 }
 ?>
 
@@ -20,11 +35,25 @@ while ($row = mysqli_fetch_assoc($result)) {
 <html lang="en">
 <head>
    <meta charset="UTF-8">
-   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-   <meta name="viewport" content="width device-width, initial-scale=1.0">
-   <title>Admin Panel</title>
-
+   <meta http-equiv="X-UA-Compatible" content="IE-edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Course List</title>
    <link rel="stylesheet" href="css/fatman1.css">
+
+   
+   <div class="header">
+      <img src="ua.png" alt="U.A. Logo" class="logo">
+      <h1>U.A. University Admin Page</h1>
+      <div class="buttons">
+         <a href="create_course1.php" class="btn">Create Course</a>
+         <a href="#" class="btn">Drop Course</a>
+         <a href="#" class="btn">Update Course</a>
+         
+      <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
+      </div>
+   </div>
+
+
    <style>
       .header {
          background: #000;
@@ -99,53 +128,39 @@ while ($row = mysqli_fetch_assoc($result)) {
 
    </style>
 </head>
+
 <body>
+   <h1>Course List</h1>
 
-   <div class="header">
-      <img src="ua.png" alt="U.A. Logo" class="logo">
-      <h1>U.A. University Admin Page</h1>
-      <div class="buttons">
-         <a href="create_course1.php" class="btn">Create Course</a>
-         <a href="#" class="btn">Drop Course</a>
-         <a href="#" class="btn">Update Course</a>
-         
-      <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
-      </div>
-   </div>
-
-   <div class="welcome-message">
-      <p>Welcome, <?php echo $_SESSION['admin_name']; ?>. This is the Course Catalog Page!</p>
-   </div>
-
-   <!-- <div class="container">
-      <div class="content">
-      </div>
-   </div> --> 
-   
-   <div class="department-container">
-      <h2>Courses</h2>
-      <table>
-         <tr>
-            <th>CourseID</th>
-            <th>CourseName</th>
-            <th>DeptID</th>
-            <th>Credits</th>
-            <th>Description</th>
-            <th>CourseType</th>
-            
-         </tr>
-         <?php foreach ($course as $course) : ?>
-            <tr>
-               <td><?php echo $course['CourseID']; ?></td>
-               <td><?php echo $course['CourseName']; ?></td>
-               <td><?php echo $course['DeptID']; ?></td>
-               <td><?php echo $course['Credits']; ?></td>
-               <td><?php echo $course['Description']; ?></td>
-               <td><?php echo $course['CourseType']; ?></td>
-                
-            </tr>
-         <?php endforeach; ?>
-      </table>
-</div>
+   <table>
+       <thead>
+           <tr>
+               <th>CRN</th>
+               <th>Course Name</th>
+               <th>Section</th>
+               <th>Day</th>
+               <th>Building</th>
+               <th>Room</th>
+               <th>Time</th>
+               <th>Available Seats</th>
+               <th>Description</th>
+           </tr>
+       </thead>
+       <tbody>
+           <?php foreach ($courses as $course): ?>
+               <tr>
+                   <td><?php echo $course['CRN']; ?></td>
+                   <td><?php echo $course['CourseName']; ?></td>
+                   <td><?php echo $course['SectionNum']; ?></td>
+                   <td><?php echo $course['Weekday']; ?></td>
+                   <td><?php echo $course['BuildingName']; ?></td>
+                   <td><?php echo $course['RoomNum']; ?></td>
+                   <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+                   <td><?php echo $course['AvailableSeats']; ?></td>
+                   <td><?php echo $course['Description']; ?></td>
+               </tr>
+           <?php endforeach; ?>
+       </tbody>
+   </table>
 </body>
 </html>

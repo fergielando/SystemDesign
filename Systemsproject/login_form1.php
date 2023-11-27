@@ -63,7 +63,7 @@ if (isset($_POST['submit'])) {
                 } elseif ($row['UserType'] == 'faculty') {
                     $_SESSION['faculty_name'] = $row['FirstName'];
                     $_SESSION['UID'] = $row['UID'];
-                    header('location: faculty_page1.php');
+                    header('location: fac_newhome1.php');
                 } elseif ($row['UserType'] == 'statsoffice') {
                     $_SESSION['statsoffice_name'] = $row['FirstName'];
                     $_SESSION['UID'] = $row['UID'];

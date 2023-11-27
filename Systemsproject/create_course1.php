@@ -1,76 +1,64 @@
 <?php
-@include 'config1.php';
+@include 'config1.php'; // Include your database configuration file
 
 session_start();
 
-if (!isset($_SESSION['admin_name'])) {
-    header('location: login_form1.php');
+if (!isset($_SESSION['UID'])) {
+    echo "Please log in to create a course section.";
     exit;
 }
 
-// Enable error reporting and display errors during development
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Create a new course
-if (isset($_POST['create'])) {
-    $newCourseID = mysqli_real_escape_string($conn, $_POST['newCourseID']);
-    $newCourseName = mysqli_real_escape_string($conn, $_POST['newCourseName']);
-    $newDeptId = mysqli_real_escape_string($conn, $_POST['newDeptId']);
-    $newCredits = mysqli_real_escape_string($conn, $_POST['newCredits']);
-    $newDescription = mysqli_real_escape_string($conn, $_POST['newDescription']);
-    $newCourseType = mysqli_real_escape_string($conn, $_POST['newCourseType']);
-
-    // Your code to insert a new course into the database
-    $insertQuery = "INSERT INTO `Course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Description`, `CourseType`) VALUES ('$newCourseID', '$newCourseName', '$newDeptId', '$newCredits', '$newDescription', '$newCourseType')";
-
-    if (mysqli_query($conn, $insertQuery)) {
-        header('location: course_catalog1.php');
-        exit;
-    } else {
-        echo "Course creation failed: " . mysqli_error($conn);
-    }
+// Check if the courseID is passed in the URL
+if (!isset($_GET['courseID'])) {
+    echo "Course ID is missing.";
+    exit;
 }
 
-// Retrieve course data from the database
-$query = "SELECT * FROM `Course`"; // Adjust the SQL query to match your database schema
-$result = mysqli_query($conn, $query);
-$courses = [];
+$courseID = $_GET['courseID'];
 
-while ($row = mysqli_fetch_assoc($result)) {
-    $courses[] = $row;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Process the form data for creating a course section
+    $crn = $_POST['crn'];
+    $sectionNum = $_POST['sectionNum'];
+    $facultyID = $_POST['facultyID'];
+    $timeSlotID = $_POST['timeSlotID'];
+    $roomID = $_POST['roomID'];
+    $semesterID = $_POST['semesterID'];
+    $availableSeats = $_POST['availableSeats'];
+
+    // Insert the course section into the 'coursesection' table
+    $insertSectionQuery = "INSERT INTO coursesection (CRN, SectionNum, FacultyID, TimeSlotID, RoomID, SemesterID, AvailableSeats, CourseID) 
+                          VALUES ('$crn', '$sectionNum', '$facultyID', '$timeSlotID', '$roomID', '$semesterID', '$availableSeats', '$courseID')";
+    mysqli_query($conn, $insertSectionQuery);
+
+    // Redirect to a success page or display a success message
+    header("Location: success_page.php");
+    exit;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Course</title>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE-edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Create Course Section</title>
+   <link rel="stylesheet" href="css/fatman1.css">
 </head>
 <body>
-    <h2>Create a New Course</h2>
-    <form action="create_course1.php" method="POST">
-        <label for="newCourseID">Course ID:</label>
-        <input type="text" name="newCourseID" id="newCourseID" required><br>
-        
-        <label for="newCourseName">Course Name:</label>
-        <input type="text" name="newCourseName" id="newCourseName" required><br>
-        
-        <label for="newDeptId">Department ID:</label>
-        <input type="text" name="newDeptId" id="newDeptId" required><br>
-        
-        <label for="newCredits">Credits:</label>
-        <input type="text" name="newCredits" id="newCredits" required><br>
-        
-        <label for="newDescription">Description:</label>
-        <textarea name="newDescription" id="newDescription" required></textarea><br>
-        
-        <label for="newCourseType">Course Type:</label>
-        <input type="text" name="newCourseType" id="newCourseType" required><br>
-        
-        <button type="submit" name="create">Create Course</button>
-    </form>
+   <h1>Create Course Section</h1>
+   <form method="POST" action="">
+       <!-- Input fields for CRN, SectionNum, FacultyID, TimeSlotID, RoomID, SemesterID, and AvailableSeats -->
+       <input type="number" name="crn" placeholder="CRN" required>
+       <input type="text" name="sectionNum" placeholder="Section Number" required>
+       <input type="number" name="facultyID" placeholder="Faculty ID" required>
+       <input type="number" name="timeSlotID" placeholder="Time Slot ID" required>
+       <input type="number" name="roomID" placeholder="Room ID" required>
+       <input type="number" name="semesterID" placeholder="Semester ID" required>
+       <input type="number" name="availableSeats" placeholder="Available Seats" required>
+       <!-- ... (other input fields) ... -->
+       <button type="submit">Create Course Section</button>
+   </form>
 </body>
 </html>

@@ -41,84 +41,117 @@ if (isset($_POST['update'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-   <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE-edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Edit Major</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Major</title>
 
-   <link rel="stylesheet" href="css/fatman1.css">
+    <link rel="stylesheet" href="css/fatman1.css">
 
-   <style>
-      
-  .header {
-         background: #000;
-         color: #fff;
-         padding: 20px;
-         text-align: center;
-         display: flex;
-         justify-content: space-between;
-      }
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+        }
 
-      .header h1 {
-         font-size: 36px;
-      }
+        .header {
+            background: #3498db;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-      .header .back-button {
-         background: #000;
-         color: #fff;
-         padding: 10px 20px;
-         text-decoration: none;
-         border-radius: 5px;
-         margin-right: 10px;
-      }
+        .header h1 {
+            font-size: 36px;
+            margin: 0;
+        }
 
-      .major-container {
-         padding: 20px;
-      }
+        .header .back-button {
+            background: #2980b9;
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
 
-      table {
-         width: 100%;
-         border-collapse: collapse;
-      }
+        .header .back-button:hover {
+            background-color: #1c6281;
+        }
 
-      table, th, td {
-         border: 1px solid #000;
-      }
+        .edit-major-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-      th, td {
-         padding: 8px;
-         text-align: left;
-      }
+        h2 {
+            text-align: center;
+            color: #3498db;
+        }
 
-      .edit-button {
-         background: #000;
-         color: #fff;
-         padding: 10px 20px;
-         text-decoration: none;
-         border-radius: 5px;
-         margin: 5px;
-         display: inline-block;
-      }
-      </style>
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            background-color: #3498db;
+            color: #fff;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+
 <body>
 
-   <div class="header">
-      <h1>Edit Major</h1>
-      <a href="majors1.php" class="back-button">Back to Majors List</a>
-   </div>
+    <div class="header">
+        <h1>Edit Major</h1>
+        <a href="majors1.php" class="back-button">Back to Majors List</a>
+    </div>
 
-   <div class="edit-major-container">
-      <h2>Edit Major Information</h2>
-      <form action="" method="post">
-    <input type="text" name="newDeptID" placeholder="Department ID" value="<?php echo $major['DeptID']; ?>">
-    <input type="text" name="newMajorName" placeholder="MajorName" value="<?php echo $major['MajorName']; ?>">
-    <input type="submit" name="update" value="Update">
-       </form>
+    <div class="edit-major-container">
+        <h2>Edit Major Information</h2>
+        <form action="" method="post">
+            <input type="text" name="newDeptID" placeholder="Department ID" value="<?php echo $major['DeptID']; ?>">
+            <input type="text" name="newMajorName" placeholder="Major Name" value="<?php echo $major['MajorName']; ?>">
+            <input type="submit" name="update" value="Update Major">
+        </form>
+    </div>
 
-   </div>
-
-   <!-- Add any other elements or styling as needed -->
+    <!-- Add any other elements or styling as needed -->
 
 </body>
+
 </html>
