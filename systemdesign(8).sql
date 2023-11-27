@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2023 at 05:31 PM
+-- Generation Time: Nov 27, 2023 at 07:53 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -3484,10 +3484,47 @@ INSERT INTO `major` (`MajorID`, `DeptID`, `MajorName`) VALUES
 
 CREATE TABLE `majorprerequisite` (
   `MajorID` int(11) NOT NULL,
-  `PRmajorID` int(11) NOT NULL,
+  `PRmajorID` varchar(11) NOT NULL,
   `MinGrade` varchar(3) DEFAULT NULL,
   `DOLU` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `majorprerequisite`
+--
+
+INSERT INTO `majorprerequisite` (`MajorID`, `PRmajorID`, `MinGrade`, `DOLU`) VALUES
+(0, '0', 'Min', '0000-00-00'),
+(1, '0', 'C', '0000-00-00'),
+(2, '0', 'C', '0000-00-00'),
+(3, '0', 'C', '0000-00-00'),
+(4, '0', 'C', '0000-00-00'),
+(5, '0', 'C', '0000-00-00'),
+(6, '0', 'C', '0000-00-00'),
+(7, '0', 'C', '0000-00-00'),
+(8, '0', 'C', '0000-00-00'),
+(9, '0', 'C', '0000-00-00'),
+(10, '0', 'C', '0000-00-00'),
+(11, '0', 'C', '0000-00-00'),
+(12, '0', 'C', '0000-00-00'),
+(13, '0', 'C', '0000-00-00'),
+(14, '0', 'C', '0000-00-00'),
+(15, '0', 'C', '0000-00-00'),
+(16, '0', 'C', '0000-00-00'),
+(17, '0', 'C', '0000-00-00'),
+(18, '0', 'C', '0000-00-00'),
+(19, '0', 'C', '0000-00-00'),
+(20, '0', 'C', '0000-00-00'),
+(21, '0', 'C', '0000-00-00'),
+(22, '0', 'C', '0000-00-00'),
+(23, '0', 'C', '0000-00-00'),
+(24, '0', 'C', '0000-00-00'),
+(25, '0', 'C', '0000-00-00'),
+(26, '0', 'C', '0000-00-00'),
+(27, '0', 'C', '0000-00-00'),
+(28, '0', 'C', '0000-00-00'),
+(29, '0', 'C', '0000-00-00'),
+(30, '0', 'C', '0000-00-00');
 
 -- --------------------------------------------------------
 
@@ -3863,7 +3900,7 @@ INSERT INTO `minor` (`MinorID`, `DeptID`, `MinorName`) VALUES
 
 CREATE TABLE `minorprerequisite` (
   `MinorID` int(11) NOT NULL,
-  `PRmajorID` int(11) NOT NULL,
+  `PRminorID` varchar(11) NOT NULL,
   `MinGrade` varchar(3) DEFAULT NULL,
   `DOLU` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -6786,8 +6823,8 @@ ALTER TABLE `minor`
 -- Indexes for table `minorprerequisite`
 --
 ALTER TABLE `minorprerequisite`
-  ADD PRIMARY KEY (`MinorID`,`PRmajorID`),
-  ADD KEY `MinorID` (`MinorID`,`PRmajorID`);
+  ADD PRIMARY KEY (`MinorID`,`PRminorID`),
+  ADD KEY `MinorID` (`MinorID`,`PRminorID`);
 
 --
 -- Indexes for table `office`
@@ -6993,6 +7030,12 @@ ALTER TABLE `dept`
 ALTER TABLE `enrollment`
   ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`),
   ADD CONSTRAINT `enrollment_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`);
+
+--
+-- Constraints for table `faculty`
+--
+ALTER TABLE `faculty`
+  ADD CONSTRAINT `faculty_ibfk_1` FOREIGN KEY (`FacultyID`) REFERENCES `user` (`UID`);
 
 --
 -- Constraints for table `facultydept`
