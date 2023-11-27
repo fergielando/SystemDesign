@@ -269,6 +269,20 @@ if (isset($_POST['update_user'])) {
          <input type="submit" name="assign_major" value="Assign Major" class="create-button">
       </form>
 
+      <!-- Register Major Section -->
+<div class="register-major-container">
+    <h2>Register Major</h2>
+    <form action="" method="post">
+        <select name="register_major">
+            <option value="" disabled selected>Select a major to register</option>
+            <?php foreach ($majors as $major) : ?>
+                <option value="<?php echo $major['MajorID']; ?>"><?php echo $major['MajorName']; ?></option>
+            <?php endforeach; ?>
+        </select>
+        <input type="submit" name="register_major_submit" value="Register Major" class="create-button">
+    </form>
+</div>
+
       <h2>Assign Minor</h2>
       <form action="" method="post">
          <select name="minor">
@@ -320,6 +334,27 @@ if (isset($_POST['update_user'])) {
                   echo "<td>{$enrolledCourse['StartTime']} to {$enrolledCourse['EndTime']}</td>";
                   echo "</tr>";
                }
+
+               // Function to register a major for a student
+if (isset($_POST['register_major_submit'])) {
+    $selectedMajorID = mysqli_real_escape_string($conn, $_POST['register_major']);
+
+    // Check if the registration already exists
+    $checkRegistrationQuery = "SELECT * FROM studentmajor WHERE StudentID = '$uid' AND MajorID = '$selectedMajorID'";
+    $checkRegistrationResult = mysqli_query($conn, $checkRegistrationQuery);
+
+    if (mysqli_num_rows($checkRegistrationResult) > 0) {
+        // If the registration exists, show a message or handle it as needed
+        echo "You are already registered for this major.";
+    } else {
+        // If the registration doesn't exist, insert it into the database
+        $registerMajorQuery = "INSERT INTO studentmajor (StudentID, MajorID) VALUES ('$uid', '$selectedMajorID')";
+        mysqli_query($conn, $registerMajorQuery);
+
+        // Optionally, you can add a success message or redirect the user
+        echo "Major registered successfully!";
+    }
+}
                ?>
             </tbody>
          </table>

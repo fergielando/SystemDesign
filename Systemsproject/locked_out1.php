@@ -42,6 +42,7 @@ $locked_accounts_result = mysqli_query($conn, $locked_accounts_query);
 </head>
 <body>
     <h1>Admin Panel: Manage User Accounts</h1>
+    <a href="admin_page1.php" class="btn">Back to Admin Page</a>
 
     <h2>Locked or Flagged Accounts</h2>
     <table>

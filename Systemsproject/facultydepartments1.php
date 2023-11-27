@@ -65,7 +65,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
     <div class="header">
         <h1>Department Management</h1>
-        <a href="user_page1.php" class="back-button">Back to Student Portal</a>
+        <a href="faculty_page1.php" class="back-button">Back to Portal</a>
     </div>
 
     <div class="department-container">

@@ -106,7 +106,7 @@ if (!isset($_SESSION['admin_name'])) {
          <a href="course_catalog1.php" class="btn">Course Catalog</a>
          <a href="Departments_page1.php" class="btn">Departments</a>
          <a href="master_schedule1.php" class="btn">Master Schedule</a>
-         <a href="#" class="btn">Academic Calendar</a>
+         <a href="calendar_admin1.php" class="btn">Academic Calendar</a>
          <a href="majors1.php" class="btn">Majors</a> <!-- Added Majors button -->
       <a href="minors1.php" class="btn">Minors</a> <!-- Added Minors button -->
       </div>
