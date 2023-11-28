@@ -5,16 +5,36 @@
 session_start();
 
 // Fetch available courses with additional details, ordered by CRN (Include this part only)
-$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, course.deptID, coursesection.RoomID, building.BuildingName, periodd.StartTime, periodd.EndTime 
-          FROM coursesection 
-          JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
-          JOIN day ON timeslot.DayID = day.DayID
-          JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
-          JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
-          JOIN room ON coursesection.RoomID = room.RoomID
-          JOIN building ON room.BuildingID = building.BuildingID
-          JOIN course ON masterschedule.CourseID = course.CourseID
-          ORDER BY coursesection.CRN ASC";
+$query = "SELECT
+    coursesection.CRN,
+    coursesection.CourseID,
+    coursesection.AvailableSeats,
+    timeslot.TimeSlotID,
+    day.Weekday,
+    masterschedule.CourseName,
+    course.deptID,
+    coursesection.RoomID,
+    building.BuildingName,
+    periodd.StartTime,
+    periodd.EndTime,
+    user.FirstName AS FacultyFirstName,
+    user.LastName AS FacultyLastName
+FROM coursesection
+JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
+JOIN day ON timeslot.DayID = day.DayID
+JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
+JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+JOIN room ON coursesection.RoomID = room.RoomID
+JOIN building ON room.BuildingID = building.BuildingID
+JOIN course ON masterschedule.CourseID = course.CourseID
+JOIN facultyhistory ON coursesection.CRN = facultyhistory.CRN
+JOIN faculty ON facultyhistory.FacultyID = faculty.FacultyID
+JOIN user ON faculty.FacultyID = user.UID  -- Join using the foreign key constraint
+ORDER BY coursesection.CRN ASC";
+
+
+
+
 $result = mysqli_query($conn, $query);
 
 $courses = [];
@@ -278,35 +298,52 @@ while ($row = mysqli_fetch_assoc($result)) {
    </select>
 </div>
 
+<div class="filter-container">
+   <label for="facultyFilter">Faculty Member:</label>
+   <select id="facultyFilter" onchange="filterTable('facultyFilter', 'Faculty Name')">
+      <option value="">All</option>
+      <?php foreach ($facultyMembers as $facultyMember): ?>
+         <option value="<?php echo $facultyMember['FacultyFirstName'] . ' ' . $facultyMember['FacultyLastName']; ?>">
+            <?php echo $facultyMember['FacultyFirstName'] . ' ' . $facultyMember['FacultyLastName']; ?>
+         </option>
+      <?php endforeach; ?>
+   </select>
+</div>
+
+
 
 
    <!-- Add similar filter containers for other columns if needed -->
 
    <table>
-      <thead>
-         <tr>
-            <th>CRN</th>
-            <th>Course Name</th>
-            <th>Department ID</th>
-            <th>Day</th>
-            <th>Building</th>
-            <th>Room ID</th>
-            <th>Time</th>
-         </tr>
-      </thead>
-      <tbody>
-         <?php foreach ($courses as $course): ?>
-            <tr>
-               <td><?php echo $course['CRN']; ?></td>
-               <td><?php echo $course['CourseName']; ?></td>
-               <td><?php echo $course['deptID']; ?></td>
-               <td><?php echo $course['Weekday']; ?></td>
-               <td><?php echo $course['BuildingName']; ?></td>
-               <td><?php echo $course['RoomID']; ?></td>
-               <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
-            </tr>
-         <?php endforeach; ?>
-      </tbody>
+   <thead>
+    <tr>
+        <th>CRN</th>
+        <th>Course Name</th>
+        <th>Department ID</th>
+        <th>Day</th>
+        <th>Building</th>
+        <th>Room ID</th>
+        <th>Time</th>
+        <th>Professor Name</th>  <!-- Add faculty name header -->
+    </tr>
+</thead>
+
+<tbody>
+    <?php foreach ($courses as $course): ?>
+        <tr>
+            <td><?php echo $course['CRN']; ?></td>
+            <td><?php echo $course['CourseName']; ?></td>
+            <td><?php echo $course['deptID']; ?></td>
+            <td><?php echo $course['Weekday']; ?></td>
+            <td><?php echo $course['BuildingName']; ?></td>
+            <td><?php echo $course['RoomID']; ?></td>
+            <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+            <td><?php echo $course['FacultyFirstName'] . " " . $course['FacultyLastName']; ?></td>  <!-- Display faculty name -->
+        </tr>
+    <?php endforeach; ?>
+</tbody>
+
    </table>
 
    <script>
@@ -352,6 +389,29 @@ while ($row = mysqli_fetch_assoc($result)) {
             }
          }
       }
+
+
+
+      function filterTable(filterId, columnName) {
+   var input, filter, table, tr, td, i, txtValue;
+   input = document.getElementById(filterId);
+   filter = input.value.toUpperCase();
+   table = document.querySelector("table");
+   tr = table.getElementsByTagName("tr");
+
+   for (i = 0; i < tr.length; i++) {
+      td = tr[i].getElementsByTagName("td")[getColumnIndex(columnName)];
+      if (td) {
+         txtValue = td.textContent || td.innerText;
+         if (filter === "" || txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+         } else {
+            tr[i].style.display = "none";
+         }
+      }
+   }
+}
+
 
       function getColumnIndex(columnName) {
          var table = document.querySelector("table");

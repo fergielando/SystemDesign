@@ -64,22 +64,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
         }
     }
 
-// Check for conflicts with previously dropped courses
-$previouslyDroppedCoursesQuery = "SELECT TimeSlotID FROM studenthistory WHERE StudentID = '$uid' AND Grade = 'Dropped'";
-$previouslyDroppedCoursesResult = mysqli_query($conn, $previouslyDroppedCoursesQuery);
-$previouslyDroppedTimeSlots = [];
-while ($droppedCourseRow = mysqli_fetch_assoc($previouslyDroppedCoursesResult)) {
-    $previouslyDroppedTimeSlots[] = $droppedCourseRow['TimeSlotID'];
-}
-
-foreach ($selectedTimeSlots as $selectedTimeSlot) {
-    if (in_array($selectedTimeSlot, $previouslyDroppedTimeSlots)) {
-        echo "Enrollment failed: Conflict with a previously dropped course.";
-        exit;
-    }
-}
-
-
     if (!$timeSlotConflict) {
         mysqli_begin_transaction($conn);
     
@@ -137,10 +121,8 @@ if (isset($_GET['drop_course'])) {
         mysqli_query($conn, $deleteEnrollmentQuery);
 
         // Increase the available seats in coursesection
-        // Assuming $dropCRN contains the CRN of the course to be dropped
-$updateSeatsQuery = "UPDATE coursesection SET AvailableSeats = AvailableSeats + 1 WHERE CRN = '$dropCRN'";
-mysqli_query($conn, $updateSeatsQuery);
-
+        $updateSeatsQuery = "UPDATE coursesection SET AvailableSeats = AvailableSeats + 1 WHERE CRN = '$dropCRN'";
+        mysqli_query($conn, $updateSeatsQuery);
 
         echo "Course with CRN $dropCRN has been dropped successfully.";
     } else {
@@ -256,14 +238,6 @@ mysqli_query($conn, $updateSeatsQuery);
          border: 1px solid #000;
       }
 
-      #searchInput {
-        font-size: 18px; /* Increase font size */
-        padding: 10px; /* Add padding */
-        border: 2px solid #333; /* Change border style and color */
-        border-radius: 5px; /* Add border radius for rounded corners */
-        margin-bottom: 10px; /* Add margin at the bottom for spacing */
-    }
-
    </style>
    <script>
        function searchTable() {
@@ -322,9 +296,9 @@ mysqli_query($conn, $updateSeatsQuery);
     <div class="course-assignment-container">
         <h1>Assign/Drop Courses</h1>
         <!-- ... Existing search input and course assignment form ... -->
-        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for courses..." style="font-size: 18px; padding: 10px; width: 300px; border: 2px solid #333; border-radius: 5px; margin-bottom: 10px;">
+        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for courses...">
 
-        
+
         <div class="top-right-container">
       <h2>Schedule</h2>
       <table class="enrolled-courses-table">

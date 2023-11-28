@@ -26,6 +26,29 @@ if (mysqli_num_rows($enrolledCoursesResult) > 0) {
 } else {
     $enrolledCourses = false; // No enrolled courses
 }
+
+// Fetching additional StudentYear information
+$studentInfoQuery = "SELECT StudentYear FROM student WHERE StudentID = '$uid'";
+$studentInfoResult = mysqli_query($conn, $studentInfoQuery);
+$studentInfo = mysqli_fetch_assoc($studentInfoResult);
+$studentYear = $studentInfo['StudentYear'];
+
+// Fetch the time slots and days of the week from your database
+$timeSlotsQuery = "SELECT DISTINCT StartTime, EndTime FROM periodd ORDER BY StartTime";
+$timeSlotsResult = mysqli_query($conn, $timeSlotsQuery);
+
+$daysOfWeekQuery = "SELECT DISTINCT Weekday FROM day ORDER BY FIELD(Weekday, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')";
+$daysOfWeekResult = mysqli_query($conn, $daysOfWeekQuery);
+
+$timeSlots = [];
+while ($row = mysqli_fetch_assoc($timeSlotsResult)) {
+    $timeSlots[] = $row;
+}
+
+$daysOfWeek = [];
+while ($row = mysqli_fetch_assoc($daysOfWeekResult)) {
+    $daysOfWeek[] = $row['Weekday'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +64,7 @@ if (mysqli_num_rows($enrolledCoursesResult) > 0) {
        body {
             margin: 0;
             padding: 0;
-            background-image: url('School.jpg'); /* Replace 'background_image.jpg' with your image file */
+            /*background-image: url('background.jpg'); /* Replace 'background_image.jpg' with your image file */
             background-size: cover;
             background-position: center;
             font-family: Arial, sans-serif; /* Add a generic font family */
@@ -63,6 +86,17 @@ if (mysqli_num_rows($enrolledCoursesResult) > 0) {
          display: flex;
          justify-content: space-between;
       }
+
+      .welcome-message {
+    background: linear-gradient(to right, #e6f7ff, #ffffff);
+    color: black; /* Black text */
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px; /* Optional: rounds the corners */
+    margin: 20px auto; /* Centers the message and adds spacing */
+    font-size: 24px; /* Increases the font size */
+}
+
 
       .header h1 {
          font-size: 36px; 
@@ -94,36 +128,86 @@ if (mysqli_num_rows($enrolledCoursesResult) > 0) {
          height: 50px; 
       }
 
+      .table-container {
+    width: 90%; /* Adjust as needed */
+    margin: auto; /* Centers the container */
+    border-radius: 15px; /* Rounds the corners */
+    overflow: hidden; /* Ensures the border radius clips the content */
+}
       table {
-         width: 100%;
-         max-width: 100%;
-         border-collapse: collapse;
-         table-layout: auto;
-         margin: 0 auto;
-      }
+    width: 90%; /* Adjust the width to fit your screen better */
+    margin: 20px auto; /* Center the table with margin and add some space around it */
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 15px; /* Round corners for the outer border */
+    overflow: hidden; /* Ensures the rounded corners are visible */
+}
 
-      th, td {
-         border: 1px solid #000;
-         padding: 15px;
-         text-align: left;
-         font-size: 14px;
-         word-wrap: break-word;
-         border-radius: 10px; 
-         color:#000;
-      }
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    color: black;
+    text-align: center;
+}
 
-      .welcome-message p {
-            font-size: 24px; /* Adjust the size as needed */
-            font-weight: bold;
-            color: #fff; /* or any color you prefer */
-        }
+th {
+    background-color: #e6f7ff; /* Use the blue color here for consistency */
+    font-weight: bold;
+}
 
-        tr:nth-child(even) {
-            background-color: #ccffcc; /* Solid green color */
-        }
-        tr:nth-child(odd) {
-            background-color: #ffffff; /* Solid white color */
-        }
+/* Alternating row colors with gradient */
+tr:nth-child(even) {
+    background: linear-gradient(to right, #e6f7ff, #ffffff);
+}
+
+tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+/* Rounded corners for the first and last table header */
+th:first-child {
+    border-top-left-radius: 15px;
+}
+
+th:last-child {
+    border-top-right-radius: 15px;
+}
+
+/* Button styles */
+.buttons {
+    display: flex;
+    justify-content: center; /* Centers the buttons */
+    padding: 10px 0; /* Adds padding above and below the buttons */
+    margin-top: 20px; /* Adds space between the table and buttons */
+}
+
+.buttons a {
+    background: linear-gradient(to right, #e6f7ff, #ffffff); /* Gradient to match the table rows */
+    color: #000;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px; /* Rounded corners for buttons */
+    margin-right: 10px; /* Adds space between buttons */
+    font-weight: bold; /* Optional: makes the text a bit bolder */
+    border: none; /* Removes border */
+}
+
+.buttons a:hover {
+    background-color: #cceeff; /* A lighter blue for hover state */
+    color: white;
+}
+
+@media screen and (max-width: 600px) {
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .buttons {
+        justify-content: center; /* Center buttons on small screens */
+    }
+}
+
 
    </style>
 <link rel="stylesheet" href="userPage.css">
@@ -140,45 +224,54 @@ if (mysqli_num_rows($enrolledCoursesResult) > 0) {
    
 
    <div class="welcome-message">
-      <p>Welcome, <?php echo $_SESSION['user_name']; ?>. Welcome, this is UA University! Here is your current Schedule!</p>
-   </div>
+    <p>Welcome, <?php echo $_SESSION['user_name']; ?>. Welcome to UA University! You are currently in your <?php echo $studentYear; ?> year. Here is your current schedule:</p>
+</div>
+
 
    <?php if ($enrolledCourses !== false): ?>
-      <table>
-         <thead>
+    <table>
+        <thead>
             <tr>
-               <th>CRN</th>
-               <th>Course Name</th>
-               <th>Day</th>
-               <th>Building</th>
-               <th>Room</th>
-               <th>Time</th>
+                <th>Time / Day</th>
+                <?php foreach ($daysOfWeek as $day): ?>
+                    <th><?php echo $day; ?></th>
+                <?php endforeach; ?>
             </tr>
-         </thead>
-         <tbody>
-            <?php foreach ($enrolledCourses as $course): ?>
-               <tr>
-                  <td><?php echo $course['CRN']; ?></td>
-                  <td><?php echo $course['CourseName']; ?></td>
-                  <td><?php echo $course['Weekday']; ?></td>
-                  <td><?php echo $course['BuildingName']; ?></td>
-                  <td><?php echo $course['RoomNum']; ?></td>
-                  <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
-               </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($timeSlots as $timeSlot): ?>
+                <tr>
+                    <td><?php echo $timeSlot['StartTime'] . " - " . $timeSlot['EndTime']; ?></td>
+                    <?php foreach ($daysOfWeek as $day): ?>
+                        <td>
+                            <?php
+                            foreach ($enrolledCourses as $course) {
+                                if ($course['Weekday'] == $day && $course['StartTime'] <= $timeSlot['StartTime'] && $course['EndTime'] >= $timeSlot['EndTime']) {
+                                    echo $course['CourseName'] . "<br>";
+                                    echo "Room: " . $course['RoomNum'] . "<br>";
+                                    echo "Building: " . $course['BuildingName'] . "<br>";
+                                }
+                            }
+                            ?>
+                        </td>
+                    <?php endforeach; ?>
+                </tr>
             <?php endforeach; ?>
-         </tbody>
-      </table>
-   <?php else: ?>
-      <p>No courses registered for this semester.</p>
-   <?php endif; ?>
+        </tbody>
+    </table>
+<?php else: ?>
+    <p>No courses registered for this semester.</p>
+<?php endif; ?>
 
-   <div class="button-container">
-         <a href="student_academic_profile1.php" class="btn">Academic Profile</a>
-         <a href="student_course_catalog1.php" class="btn">Course Catalog</a>
-         <a href="student_majors1.php" class="btn">Majors</a>
-         <a href="student_minor1.php" class="btn">Minors</a>
-         <a href="student_departments1.php" class="btn">Departments</a>
-      </div>
+    <div class="buttons">
+    <a href="student_academic_profile1.php" class="btn">Academic Profile</a>
+    <a href="student_course_catalog1.php" class="btn">Course Catalog</a>
+    <a href="student_majors1.php" class="btn">Majors</a>
+    <a href="student_minor1.php" class="btn">Minors</a>
+    <a href="student_departments1.php" class="btn">Departments</a>
+    <a href="studentmasterschedule.php" class="btn">Master Schedule</a>
+</div>
+
 </body>
 </html>
 

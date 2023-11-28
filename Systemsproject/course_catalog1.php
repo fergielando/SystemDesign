@@ -48,7 +48,6 @@ while ($row = mysqli_fetch_assoc($result)) {
          <a href="create_course1.php" class="btn">Create Course</a>
          <a href="#" class="btn">Drop Course</a>
          <a href="#" class="btn">Update Course</a>
-         
       <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
       </div>
    </div>

@@ -39,59 +39,125 @@ while ($rowMinor = mysqli_fetch_assoc($resultMinors)) {
     $minors[] = $rowMinor;
 }
 
-$queryUserMajor = "SELECT MajorName FROM studentmajor INNER JOIN major ON studentmajor.MajorID = major.MajorID WHERE StudentID = '$uid'";
-$resultUserMajor = mysqli_query($conn, $queryUserMajor);
-$userMajor = mysqli_fetch_assoc($resultUserMajor);
+$queryUserMajors = "SELECT MajorName FROM studentmajor INNER JOIN major ON studentmajor.MajorID = major.MajorID WHERE StudentID = '$uid'";
+$resultUserMajors = mysqli_query($conn, $queryUserMajors);
+$userMajors = [];
 
-$queryUserMinor = "SELECT MinorName FROM studentminor INNER JOIN minor ON studentminor.MinorID = minor.MinorID WHERE StudentID = '$uid'";
-$resultUserMinor = mysqli_query($conn, $queryUserMinor);
-$userMinor = mysqli_fetch_assoc($resultUserMinor);
+while ($rowUserMajor = mysqli_fetch_assoc($resultUserMajors)) {
+    $userMajors[] = $rowUserMajor['MajorName'];
+}
 
+$queryUserMinors = "SELECT MinorName FROM studentminor INNER JOIN minor ON studentminor.MinorID = minor.MinorID WHERE StudentID = '$uid'";
+$resultUserMinors = mysqli_query($conn, $queryUserMinors);
+$userMinors = [];
 
+while ($rowUserMinor = mysqli_fetch_assoc($resultUserMinors)) {
+    $userMinors[] = $rowUserMinor['MinorName'];
+}
 
 // Function to assign a major to a student
 if (isset($_POST['assign_major'])) {
     $selectedMajorID = mysqli_real_escape_string($conn, $_POST['major']);
-    
-    // Check if the assignment already exists
-    $checkAssignmentQuery = "SELECT * FROM studentmajor WHERE StudentID = '$uid'";
-    $checkAssignmentResult = mysqli_query($conn, $checkAssignmentQuery);
 
-    if (mysqli_num_rows($checkAssignmentResult) > 0) {
-        // If the assignment exists, update it in the database
-        $assignMajorQuery = "UPDATE studentmajor SET MajorID = '$selectedMajorID' WHERE StudentID = '$uid'";
-        mysqli_query($conn, $assignMajorQuery);
+    // Check how many majors the student has declared
+    $countUserMajorsQuery = "SELECT COUNT(*) as totalMajors FROM studentmajor WHERE StudentID = '$uid'";
+    $countUserMajorsResult = mysqli_query($conn, $countUserMajorsQuery);
+    $countUserMajors = mysqli_fetch_assoc($countUserMajorsResult);
+
+    if ($countUserMajors['totalMajors'] < 2) {
+        // If the student has declared less than two majors, proceed to assign the major
+        // Check if the assignment already exists
+        $checkAssignmentQuery = "SELECT * FROM studentmajor WHERE StudentID = '$uid' AND MajorID = '$selectedMajorID'";
+        $checkAssignmentResult = mysqli_query($conn, $checkAssignmentQuery);
+
+        if (mysqli_num_rows($checkAssignmentResult) > 0) {
+            // If the assignment exists, update it in the database
+            $assignMajorQuery = "UPDATE studentmajor SET MajorID = '$selectedMajorID' WHERE StudentID = '$uid'";
+            mysqli_query($conn, $assignMajorQuery);
+        } else {
+            // If the assignment doesn't exist, insert it into the database
+            $assignMajorQuery = "INSERT INTO studentmajor (StudentID, MajorID) VALUES ('$uid', '$selectedMajorID')";
+            mysqli_query($conn, $assignMajorQuery);
+        }
+        // Refresh the page to reflect the changes
+        header("Location: student_academic_profile1.php");
+        exit;
     } else {
-        // If the assignment doesn't exist, insert it into the database
-        $assignMajorQuery = "INSERT INTO studentmajor (StudentID, MajorID) VALUES ('$uid', '$selectedMajorID')";
-        mysqli_query($conn, $assignMajorQuery);
+        // The student has already declared two majors, show an error message or handle it as needed
+        echo "You can only declare up to two majors.";
     }
-    // Refresh the page to reflect the changes
-    header("Location: student_academic_profile1.php");
-    exit;
 }
 
 // Function to assign a minor to a student
 if (isset($_POST['assign_minor'])) {
     $selectedMinorID = mysqli_real_escape_string($conn, $_POST['minor']);
-    
+
     // Check if the assignment already exists
-    $checkAssignmentQuery = "SELECT * FROM studentminor WHERE StudentID = '$uid'";
+    $checkAssignmentQuery = "SELECT * FROM studentminor WHERE StudentID = '$uid' AND MinorID = '$selectedMinorID'";
     $checkAssignmentResult = mysqli_query($conn, $checkAssignmentQuery);
 
     if (mysqli_num_rows($checkAssignmentResult) > 0) {
-        // If the assignment exists, update it in the database
-        $assignMinorQuery = "UPDATE studentminor SET MinorID = '$selectedMinorID' WHERE StudentID = '$uid'";
-        mysqli_query($conn, $assignMinorQuery);
+        echo "You are already assigned to this minor.";
     } else {
         // If the assignment doesn't exist, insert it into the database
         $assignMinorQuery = "INSERT INTO studentminor (StudentID, MinorID) VALUES ('$uid', '$selectedMinorID')";
         mysqli_query($conn, $assignMinorQuery);
+        
+        // Optionally, refresh the page to reflect the changes
+        header("Location: student_academic_profile1.php");
+        exit;
     }
-    // Refresh the page to reflect the changes
-    header("Location: student_academic_profile1.php");
-    exit;
 }
+
+
+// Function to drop a major for a student
+if (isset($_POST['drop_major_submit'])) {
+    $selectedMajorToDrop = mysqli_real_escape_string($conn, $_POST['drop_major']);
+
+    // Check if the selected major to drop exists in the user's declared majors
+    if (in_array($selectedMajorToDrop, $userMajors)) {
+        // Remove the selected major from the user's declared majors
+        $key = array_search($selectedMajorToDrop, $userMajors);
+        if ($key !== false) {
+            unset($userMajors[$key]);
+        }
+
+        // Update the user's declared majors in the database
+        $queryDeleteMajor = "DELETE FROM studentmajor WHERE StudentID = '$uid' AND MajorID = (SELECT MajorID FROM major WHERE MajorName = '$selectedMajorToDrop')";
+        mysqli_query($conn, $queryDeleteMajor);
+
+        // Optionally, you can add a success message or redirect the user
+        echo "Major dropped successfully!";
+    } else {
+        // If the selected major doesn't exist in the user's declared majors, show an error message or handle it as needed
+        echo "Selected major is not in your declared majors.";
+    }
+}
+
+// Function to drop a minor for a student
+if (isset($_POST['drop_minor_submit'])) {
+    $selectedMinorToDrop = mysqli_real_escape_string($conn, $_POST['drop_minor']);
+
+    // Check if the selected minor to drop exists in the user's declared minors
+    if (in_array($selectedMinorToDrop, $userMinors)) {
+        // Remove the selected minor from the user's declared minors
+        $key = array_search($selectedMinorToDrop, $userMinors);
+        if ($key !== false) {
+            unset($userMinors[$key]);
+        }
+
+        // Update the user's declared minors in the database
+        $queryDeleteMinor = "DELETE FROM studentminor WHERE StudentID = '$uid' AND MinorID = (SELECT MinorID FROM minor WHERE MinorName = '$selectedMinorToDrop')";
+        mysqli_query($conn, $queryDeleteMinor);
+
+        // Optionally, you can add a success message or redirect the user
+        echo "Minor dropped successfully!";
+    } else {
+        // If the selected minor doesn't exist in the user's declared minors, show an error message or handle it as needed
+        echo "Selected minor is not in your declared minors.";
+    }
+}
+
 
 
 // Function to update user information
@@ -111,11 +177,8 @@ if (isset($_POST['update_user'])) {
     // Refresh the page to reflect the changes
     header("Location: student_academic_profile1.php");
     exit;
-
-    
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -128,21 +191,20 @@ if (isset($_POST['update_user'])) {
    <link rel="stylesheet" href="css/fatman1.css">
 
    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
+       body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-        .header {
-            background: #000;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-            display: flex;
-            justify-content: space-between;
-        }
+    .header {
+        background: #000;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        display: flex;
+        justify-content: space-between;
+    }
 
         .header h1 {
             font-size: 36px;
@@ -163,19 +225,21 @@ if (isset($_POST['update_user'])) {
         }
 
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        background-color: #fff; /* White table background color */
+    }
 
-        table, th, td {
-            border: 1px solid #000;
-        }
+    table, th, td {
+        border: 1px solid #000;
+    }
 
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
+    th, td {
+        padding: 12px;
+        text-align: left;
+        color: #000; /* Black text color */
+    }
 
         .create-button {
             background: #000;
@@ -236,6 +300,20 @@ if (isset($_POST['update_user'])) {
       .enrolled-courses-table, th, td {
          border: 1px solid #000;
       }
+
+      .back-button {
+        background: #000;
+        color: #fff;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-right: 10px;
+        transition: background-color 0.3s; /* Smooth transition for background color change */
+    }
+
+    .back-button:hover {
+        background-color: #4caf50; /* Green color when hovered */
+    }
     </style>
 </head>
 <body>
@@ -244,6 +322,7 @@ if (isset($_POST['update_user'])) {
       <h1>Academic Profile</h1>
       <a href="user_page1.php" class="back-button">Back to Student Portal</a>
       <a href="Create Schedule1.php" class="back-button">Create Schedule</a>
+      <a href="DegreeAudit1.php" class="back-button">Degree Audit</a>
    </div>
 
    <div class="academic-profile-container">
@@ -252,11 +331,37 @@ if (isset($_POST['update_user'])) {
       <p><strong>User ID:</strong> <?php echo $user['UID']; ?></p>
       <p><strong>Name:</strong> <?php echo $user['FirstName'] . ' ' . $user['LastName']; ?></p>
 
-      <h2>Current Major</h2>
-      <p><?php echo (!empty($userMajor['MajorName'])) ? $userMajor['MajorName'] : 'Not assigned'; ?></p>
+      <h2>Current Major(s)</h2>
+      <table>
+         <thead>
+            <tr>
+               <th>Major Name</th>
+            </tr>
+         </thead>
+         <tbody>
+            <?php foreach ($userMajors as $userMajor) : ?>
+               <tr>
+                  <td><?php echo $userMajor; ?></td>
+               </tr>
+            <?php endforeach; ?>
+         </tbody>
+      </table>
 
-      <h2>Current Minor</h2>
-      <p><?php echo (!empty($userMinor['MinorName'])) ? $userMinor['MinorName'] : 'Not assigned'; ?></p>
+      <h2>Current Minor(s)</h2>
+      <table>
+         <thead>
+            <tr>
+               <th>Minor Name</th>
+            </tr>
+         </thead>
+         <tbody>
+            <?php foreach ($userMinors as $userMinor) : ?>
+               <tr>
+                  <td><?php echo $userMinor; ?></td>
+               </tr>
+            <?php endforeach; ?>
+         </tbody>
+      </table>
 
       <h2>Assign Major</h2>
       <form action="" method="post">
@@ -268,21 +373,6 @@ if (isset($_POST['update_user'])) {
          </select>
          <input type="submit" name="assign_major" value="Assign Major" class="create-button">
       </form>
-
-      <!-- Register Major Section -->
-<div class="register-major-container">
-    <h2>Register Major</h2>
-    <form action="" method="post">
-        <select name="register_major">
-            <option value="" disabled selected>Select a major to register</option>
-            <?php foreach ($majors as $major) : ?>
-                <option value="<?php echo $major['MajorID']; ?>"><?php echo $major['MajorName']; ?></option>
-            <?php endforeach; ?>
-        </select>
-        <input type="submit" name="register_major_submit" value="Register Major" class="create-button">
-    </form>
-</div>
-
       <h2>Assign Minor</h2>
       <form action="" method="post">
          <select name="minor">
@@ -293,6 +383,32 @@ if (isset($_POST['update_user'])) {
          </select>
          <input type="submit" name="assign_minor" value="Assign Minor" class="create-button">
       </form>
+
+
+      <h2>Drop Major</h2>
+   <form action="" method="post">
+      <select name="drop_major">
+         <option value="" disabled selected>Select a major to drop</option>
+         <?php foreach ($userMajors as $userMajor) : ?>
+            <option value="<?php echo $userMajor; ?>"><?php echo $userMajor; ?></option>
+         <?php endforeach; ?>
+      </select>
+      <input type="submit" name="drop_major_submit" value="Drop Major" class="create-button">
+   </form>
+
+   <h2>Drop Minor</h2>
+<form action="" method="post">
+   <select name="drop_minor">
+      <option value="" disabled selected>Select a minor to drop</option>
+      <?php foreach ($userMinors as $userMinor) : ?>
+         <option value="<?php echo $userMinor; ?>"><?php echo $userMinor; ?></option>
+      <?php endforeach; ?>
+   </select>
+   <input type="submit" name="drop_minor_submit" value="Drop Minor" class="create-button">
+</form>
+
+
+
 
       <div class="top-right-container">
       <h2>Course History</h2>
@@ -383,10 +499,3 @@ if (isset($_POST['register_major_submit'])) {
 
 </body>
 </html>
-
-
-
-
-
-
-
