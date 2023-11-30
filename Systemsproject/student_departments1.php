@@ -75,7 +75,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <th>DeptID</th>
                 <th>DeptName</th>
                 <th>ChairId</th>
-                <th>DeptManager</th>
+                <th>DeptManager</th>/
                 <th>Email</th>
                 <th>PhoneNum</th>
                 <th>RoomID</th>

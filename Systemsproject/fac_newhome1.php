@@ -216,7 +216,7 @@ while ($row = mysqli_fetch_assoc($scheduleResult)) {
 </header>
 
    <?php
-   // ... (Your PHP code for retrieving faculty info and courses)
+   
 
    // Retrieve unique SemesterIDs for filtering
    $uniqueSemesters = array_unique(array_column($courses, 'SemesterID'));

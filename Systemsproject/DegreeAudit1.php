@@ -58,24 +58,21 @@ while ($course = mysqli_fetch_assoc($courseHistoryResult)) {
 }
 
 function fetchPrerequisitesWithGradeCheck($conn, $prerequisiteQuery, $courseHistory) {
-    $result = mysqli_query($conn, $prerequisiteQuery);
-    $prerequisites = [];
+   $result = mysqli_query($conn, $prerequisiteQuery);
+   $prerequisites = [];
 
-    while ($row = mysqli_fetch_assoc($result)) {
-        $row['AchievedGrade'] = false; // Default value
-        foreach ($courseHistory as $course) {
-            if (isset($row['PRmajorID']) && $course['CourseID'] == $row['PRmajorID']) {
-                // Check if the grade is 'A', 'B', or 'C'
-                if (in_array($course['Grade'], ['A', 'B', 'C'])) {
-                    $row['AchievedGrade'] = true;
-                    break;
-                }
-            }
-        }
-        $prerequisites[] = $row;
-    }
+   while ($row = mysqli_fetch_assoc($result)) {
+       $row['AchievedGrade'] = false; // Default value
+       foreach ($courseHistory as $course) {
+           if (isset($row['PRmajorID']) && $course['CourseID'] == $row['PRmajorID'] && $course['Grade'] >= 'C') {
+               $row['AchievedGrade'] = true;
+               break;
+           }
+       }
+       $prerequisites[] = $row;
+   }
 
-    return $prerequisites;
+   return $prerequisites;
 }
 
 

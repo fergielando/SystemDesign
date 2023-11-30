@@ -11,16 +11,35 @@ if (!isset($_SESSION['UID'])) {
 
 $uid = $_SESSION['UID'];
 
-// Fetch available courses with additional details, ordered by CRN
-$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, coursesection.SectionNum
-          FROM coursesection 
-          JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
-          JOIN day ON timeslot.DayID = day.DayID
-          JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
-          JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
-          JOIN room ON coursesection.RoomID = room.RoomID
-          JOIN building ON room.BuildingID = building.BuildingID
-          ORDER BY coursesection.CRN ASC";
+// Fetch available courses with additional details, including prerequisites, ordered by CRN
+$query = "SELECT
+    coursesection.CRN,
+    coursesection.CourseID,
+    coursesection.AvailableSeats,
+    timeslot.TimeSlotID,
+    day.Weekday,
+    masterschedule.CourseName,
+    room.RoomNum,
+    building.BuildingName,
+    periodd.StartTime,
+    periodd.EndTime,
+    coursesection.SectionNum,
+    coursesection.SemesterID,
+    courseprerequisite.PRcourseID,
+    courseprerequisite.MinGrade,
+    course.Credits  -- Include the Credits column from the course table
+FROM coursesection
+JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
+JOIN day ON timeslot.DayID = day.DayID
+JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
+JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+JOIN room ON coursesection.RoomID = room.RoomID
+JOIN building ON room.BuildingID = building.BuildingID
+LEFT JOIN courseprerequisite ON coursesection.CourseID = courseprerequisite.CourseID
+JOIN course ON coursesection.CourseID = course.CourseID  -- Join the course table to get Credits
+ORDER BY coursesection.CRN ASC";
+
+
 $result = mysqli_query($conn, $query);
 
 $courses = [];
@@ -41,12 +60,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
     $selectedTimeSlots = [];
     $timeSlotConflict = false;
 
-    // Collect TimeSlotIDs of selected courses
     foreach ($_POST['courses'] as $selectedCRN) {
         $selectedCRN = mysqli_real_escape_string($conn, $selectedCRN);
+    
+        // Retrieve course details for the selected course
         $courseDetailsQuery = "SELECT TimeSlotID FROM coursesection WHERE CRN = '$selectedCRN'";
         $courseDetailsResult = mysqli_query($conn, $courseDetailsQuery);
+        
         if ($courseDetailsRow = mysqli_fetch_assoc($courseDetailsResult)) {
+            // Check if the course has already been dropped in the same semester
+            $checkDropQuery = "SELECT * FROM studenthistory WHERE StudentID = '$uid' AND CRN = '$selectedCRN' AND SemesterID = (SELECT SemesterID FROM coursesection WHERE CRN = '$selectedCRN') AND Grade = 'Dropped'";
+            $checkDropResult = mysqli_query($conn, $checkDropQuery);
+    
+            if (mysqli_num_rows($checkDropResult) > 0) {
+                echo "Course with CRN $selectedCRN has already been dropped in this semester.";
+                exit;
+            }
+    
+            // Retrieve prerequisite information for the selected course
+            $prerequisiteQuery = "SELECT PRcourseID, MinGrade FROM courseprerequisite WHERE CourseID = (SELECT CourseID FROM coursesection WHERE CRN = '$selectedCRN')";
+            $prerequisiteResult = mysqli_query($conn, $prerequisiteQuery);
+    
+            if ($prerequisiteRow = mysqli_fetch_assoc($prerequisiteResult)) {
+                $prerequisiteCourseID = $prerequisiteRow['PRcourseID'];
+                $minGrade = $prerequisiteRow['MinGrade'];
+    
+                // Check if the student has met the prerequisite requirement
+                $hasPrerequisite = false;
+    
+                // Query to check if the student has the required grade in the prerequisite course
+                $prerequisiteCheckQuery = "SELECT * FROM studenthistory WHERE StudentID = '$uid' AND CourseID = '$prerequisiteCourseID' AND Grade IN ('A', 'B', 'C')";
+                $prerequisiteCheckResult = mysqli_query($conn, $prerequisiteCheckQuery);
+    
+                if (mysqli_num_rows($prerequisiteCheckResult) > 0) {
+                    $hasPrerequisite = true;
+                }
+    
+                if (!$hasPrerequisite) {
+                    echo "<div id='prerequisiteError'>Enrollment failed: You must obtain a $minGrade or better in the prerequisite course (CourseID: $prerequisiteCourseID) to register for this class.</div>";
+                    echo "<script>setTimeout(function() { window.location.href = 'Create Schedule1.php'; }, 3000);</script>";
+                    exit;
+                }
+            }
+    
             if (in_array($courseDetailsRow['TimeSlotID'], $selectedTimeSlots)) {
                 $timeSlotConflict = true;
                 echo "Enrollment failed: Time slot conflict detected.";
@@ -55,22 +111,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
             $selectedTimeSlots[] = $courseDetailsRow['TimeSlotID'];
         }
     }
-
+    
+    
     // Check for conflicts with current enrollments
     foreach ($selectedTimeSlots as $selectedTimeSlot) {
         if (in_array($selectedTimeSlot, $currentEnrollmentTimeSlots)) {
-            echo "Enrollment failed: Conflict with currently enrolled course.";
+            echo "Enrollment failed: Conflict with previous or currently enrolled course.";
+            echo "<script>setTimeout(function() { window.location.href = 'Create Schedule1.php'; }, 3000);</script>";
             exit;
         }
     }
 
     if (!$timeSlotConflict) {
         mysqli_begin_transaction($conn);
-    
+
         try {
             foreach ($_POST['courses'] as $selectedCRN) {
                 $selectedCRN = mysqli_real_escape_string($conn, $selectedCRN);
-                $courseDetailsQuery = "SELECT CourseID, AvailableSeats FROM coursesection WHERE CRN = '$selectedCRN'";
+                $courseDetailsQuery = "SELECT CourseID, AvailableSeats, SemesterID FROM coursesection WHERE CRN = '$selectedCRN'";
                 $courseDetailsResult = mysqli_query($conn, $courseDetailsQuery);
                 if ($courseDetailsRow = mysqli_fetch_assoc($courseDetailsResult)) {
                     if ($courseDetailsRow['AvailableSeats'] > 0) {
@@ -78,16 +136,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
                         $insertHistoryQuery = "INSERT INTO studenthistory (StudentID, CRN, CourseID, SemesterID, Grade) VALUES (?, ?, ?, ?, ?)";
                         $grade = 'In Progress'; // Set the initial grade
                         $stmt = mysqli_prepare($conn, $insertHistoryQuery);
-                        mysqli_stmt_bind_param($stmt, "sssss", $uid, $selectedCRN, $courseDetailsRow['CourseID'], $semesterID, $grade);
+                        mysqli_stmt_bind_param($stmt, "sssss", $uid, $selectedCRN, $courseDetailsRow['CourseID'], $courseDetailsRow['SemesterID'], $grade);
                         mysqli_stmt_execute($stmt);
-    
+
                         // Enrollment logic for enrollment table
                         $currentDateTime = date("Y-m-d H:i:s"); // Get the current date and time
                         $insertEnrollmentQuery = "INSERT INTO enrollment (StudentID, CRN, Grade, DOE) VALUES (?, ?, ?, ?)";
                         $stmt = mysqli_prepare($conn, $insertEnrollmentQuery);
                         mysqli_stmt_bind_param($stmt, "ssss", $uid, $selectedCRN, $grade, $currentDateTime);
                         mysqli_stmt_execute($stmt);
-    
+
                         // Update the available seats
                         $updateSeatsQuery = "UPDATE coursesection SET AvailableSeats = AvailableSeats - 1 WHERE CRN = ?";
                         $stmt = mysqli_prepare($conn, $updateSeatsQuery);
@@ -108,23 +166,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
         }
     }
 }
+
 if (isset($_GET['drop_course'])) {
     $dropCRN = mysqli_real_escape_string($conn, $_GET['drop_course']);
 
     // Check if the user is enrolled in the course
-    $checkEnrollmentQuery = "SELECT StudentID FROM enrollment WHERE StudentID = '$uid' AND CRN = '$dropCRN'";
+    // Check if the user is enrolled in the course and get the SemesterID from the enrollment table
+$checkEnrollmentQuery = "SELECT enrollment.StudentID, studenthistory.SemesterID
+FROM enrollment
+JOIN studenthistory ON enrollment.StudentID = studenthistory.StudentID AND enrollment.CRN = studenthistory.CRN
+WHERE enrollment.StudentID = '$uid' AND enrollment.CRN = '$dropCRN'";
+
     $checkEnrollmentResult = mysqli_query($conn, $checkEnrollmentQuery);
 
     if (mysqli_num_rows($checkEnrollmentResult) > 0) {
-        // Remove the course from studenthistory
-        $deleteEnrollmentQuery = "DELETE FROM enrollment WHERE StudentID = '$uid' AND CRN = '$dropCRN'";
-        mysqli_query($conn, $deleteEnrollmentQuery);
+        $enrollmentRow = mysqli_fetch_assoc($checkEnrollmentResult);
+        $semesterID = $enrollmentRow['SemesterID'];
 
-        // Increase the available seats in coursesection
-        $updateSeatsQuery = "UPDATE coursesection SET AvailableSeats = AvailableSeats + 1 WHERE CRN = '$dropCRN'";
-        mysqli_query($conn, $updateSeatsQuery);
+        // Check if the course has already been dropped in the same semester
+        $checkDropQuery = "SELECT * FROM studenthistory WHERE StudentID = '$uid' AND CRN = '$dropCRN' AND SemesterID = '$semesterID' AND Grade = 'Dropped'";
+        $checkDropResult = mysqli_query($conn, $checkDropQuery);
 
-        echo "Course with CRN $dropCRN has been dropped successfully.";
+        if (mysqli_num_rows($checkDropResult) > 0) {
+            echo "Course with CRN $dropCRN has already been dropped in this semester.";
+        } else {
+            // Update the grade to "Dropped" in studenthistory
+            $updateHistoryQuery = "UPDATE studenthistory SET Grade = 'Dropped' WHERE StudentID = '$uid' AND CRN = '$dropCRN' AND SemesterID = '$semesterID'";
+            mysqli_query($conn, $updateHistoryQuery);
+
+            // Increase the available seats in coursesection
+            $updateSeatsQuery = "UPDATE coursesection SET AvailableSeats = AvailableSeats + 1 WHERE CRN = '$dropCRN'";
+            mysqli_query($conn, $updateSeatsQuery);
+
+            // Remove the course from enrollment
+            $deleteEnrollmentQuery = "DELETE FROM enrollment WHERE StudentID = '$uid' AND CRN = '$dropCRN'";
+            mysqli_query($conn, $deleteEnrollmentQuery);
+
+            echo "Course with CRN $dropCRN has been dropped successfully.";
+        }
     } else {
         echo "Course with CRN $dropCRN is not currently enrolled.";
     }
@@ -347,35 +426,41 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
         
         <form action="" method="post">
             <table id="courseTable">
-                <thead>
-                    <tr>
-                        <th>CRN</th>
-                        <th>Course Name</th>
-                        <th>Section</th> 
-                        <th>Day</th>
-                        <th>Building</th>
-                        <th>Room</th>
-                        <th>Time</th>
-                        <th>Available Seats</th>
-                        <th>Select</th>
-                    </tr>
-                </thead>
+            <thead>
+    <tr>
+        <th>CRN</th>
+        <th>Course Name</th>
+        <th>Section</th>
+        <th>Day</th>
+        <th>Building</th>
+        <th>Room</th>
+        <th>SemesterID</th>
+        <th>Time</th>
+        <th>Credits</th> <!-- Add a "Credits" column -->
+        <th>Available Seats</th>
+        <th>Select</th>
+    </tr>
+</thead>
+
                 <tbody>
-                    <?php foreach ($courses as $course): ?>
-                        <tr>
-                            <td><?php echo $course['CRN']; ?></td>
-                            <td><?php echo $course['CourseName']; ?></td>
-                            <td><?php echo $course['SectionNum']; ?></td> <!-- Display the SectionNum column -->
-                            <td><?php echo $course['Weekday']; ?></td>
-                            <td><?php echo $course['BuildingName']; ?></td>
-                            <td><?php echo $course['RoomNum']; ?></td>
-                            <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
-                            <td><?php echo $course['AvailableSeats']; ?></td>
-                            <td>
-                                <input type="checkbox" name="courses[]" value="<?php echo $course['CRN']; ?>" data-course-name="<?php echo $course['CourseName']; ?>" onchange="updateSelectedCourses()">
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                <?php foreach ($courses as $course): ?>
+    <tr>
+        <td><?php echo $course['CRN']; ?></td>
+        <td><?php echo $course['CourseName']; ?></td>
+        <td><?php echo $course['SectionNum']; ?></td>
+        <td><?php echo $course['Weekday']; ?></td>
+        <td><?php echo $course['BuildingName']; ?></td>
+        <td><?php echo $course['RoomNum']; ?></td>
+        <td><?php echo $course['SemesterID']; ?></td>
+        <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+        <td><?php echo $course['Credits']; ?></td> <!-- Display the Credits column -->
+        <td><?php echo $course['AvailableSeats']; ?></td>
+        <td>
+            <input type="checkbox" name="courses[]" value="<?php echo $course['CRN']; ?>" data-course-name="<?php echo $course['CourseName']; ?>" onchange="updateSelectedCourses()">
+        </td>
+    </tr>
+<?php endforeach; ?>
+
                 </tbody>
             </table>
             <input type="submit" value="Assign Course">

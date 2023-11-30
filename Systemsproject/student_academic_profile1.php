@@ -55,6 +55,7 @@ while ($rowUserMinor = mysqli_fetch_assoc($resultUserMinors)) {
     $userMinors[] = $rowUserMinor['MinorName'];
 }
 
+
 // Function to assign a major to a student
 if (isset($_POST['assign_major'])) {
     $selectedMajorID = mysqli_real_escape_string($conn, $_POST['major']);
@@ -88,26 +89,37 @@ if (isset($_POST['assign_major'])) {
     }
 }
 
-// Function to assign a minor to a student
 if (isset($_POST['assign_minor'])) {
-    $selectedMinorID = mysqli_real_escape_string($conn, $_POST['minor']);
+    // Check how many majors the student has declared
+    $countUserMajorsQuery = "SELECT COUNT(*) as totalMajors FROM studentmajor WHERE StudentID = '$uid'";
+    $countUserMajorsResult = mysqli_query($conn, $countUserMajorsQuery);
+    $countUserMajors = mysqli_fetch_assoc($countUserMajorsResult);
 
-    // Check if the assignment already exists
-    $checkAssignmentQuery = "SELECT * FROM studentminor WHERE StudentID = '$uid' AND MinorID = '$selectedMinorID'";
-    $checkAssignmentResult = mysqli_query($conn, $checkAssignmentQuery);
-
-    if (mysqli_num_rows($checkAssignmentResult) > 0) {
-        echo "You are already assigned to this minor.";
+    if ($countUserMajors['totalMajors'] >= 2) {
+        // The student has already declared two majors, show an error message or handle it as needed
+        echo "You can only declare up to two majors. Minor assignment failed.";
     } else {
-        // If the assignment doesn't exist, insert it into the database
-        $assignMinorQuery = "INSERT INTO studentminor (StudentID, MinorID) VALUES ('$uid', '$selectedMinorID')";
-        mysqli_query($conn, $assignMinorQuery);
+        // Continue with the minor assignment process
+        $selectedMinorID = mysqli_real_escape_string($conn, $_POST['minor']);
         
-        // Optionally, refresh the page to reflect the changes
-        header("Location: student_academic_profile1.php");
-        exit;
+        // Check if the assignment already exists
+        $checkAssignmentQuery = "SELECT * FROM studentminor WHERE StudentID = '$uid' AND MinorID = '$selectedMinorID'";
+        $checkAssignmentResult = mysqli_query($conn, $checkAssignmentQuery);
+        
+        if (mysqli_num_rows($checkAssignmentResult) > 0) {
+            echo "You are already assigned to this minor.";
+        } else {
+            // If the assignment doesn't exist, insert it into the database
+            $assignMinorQuery = "INSERT INTO studentminor (StudentID, MinorID) VALUES ('$uid', '$selectedMinorID')";
+            mysqli_query($conn, $assignMinorQuery);
+            
+            // Optionally, refresh the page to reflect the changes
+            header("Location: student_academic_profile1.php");
+            exit;
+        }
     }
 }
+
 
 
 // Function to drop a major for a student
