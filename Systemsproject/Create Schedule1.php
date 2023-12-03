@@ -18,7 +18,7 @@ $query = "SELECT
     coursesection.AvailableSeats,
     timeslot.TimeSlotID,
     day.Weekday,
-    masterschedule.CourseName,
+    course.CourseName,
     room.RoomNum,
     building.BuildingName,
     periodd.StartTime,
@@ -31,7 +31,6 @@ $query = "SELECT
 FROM coursesection
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
 JOIN day ON timeslot.DayID = day.DayID
-JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
 JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
 JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
@@ -395,12 +394,12 @@ WHERE enrollment.StudentID = '$uid' AND enrollment.CRN = '$dropCRN'";
             <tbody>
                <?php
                // Fetch and display currently enrolled courses
-              $enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
+              $enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, course.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
                            FROM enrollment
                            JOIN coursesection ON enrollment.CRN = coursesection.CRN
                            JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
                            JOIN day ON timeslot.DayID = day.DayID
-                           JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
+                           JOIN course ON coursesection.CourseID = course.CourseID
                            JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
                            JOIN room ON coursesection.RoomID = room.RoomID
                            JOIN building ON room.BuildingID = building.BuildingID

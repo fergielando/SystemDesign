@@ -13,11 +13,10 @@ if (!isset($_SESSION['UID'])) {
 $uid = $_SESSION['UID'];
 
 // Fetch available courses with additional details, ordered by CRN
-$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, course.Description, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, coursesection.AvailableSeats
+$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, course.CourseName, course.Description, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, coursesection.AvailableSeats
           FROM coursesection 
           JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
           JOIN day ON timeslot.DayID = day.DayID
-          JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
           JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
           JOIN room ON coursesection.RoomID = room.RoomID
           JOIN building ON room.BuildingID = building.BuildingID

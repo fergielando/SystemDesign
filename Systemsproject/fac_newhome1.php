@@ -30,12 +30,12 @@ if ($facultyRow = mysqli_fetch_assoc($facultyResult)) {
 }
 
 // Fetch the courses assigned to the faculty
-$scheduleQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, facultyhistory.SemesterID
+$scheduleQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, course.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, facultyhistory.SemesterID
                   FROM facultyhistory
                   JOIN coursesection ON facultyhistory.CourseID = coursesection.CourseID
                   JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
                   JOIN day ON timeslot.DayID = day.DayID
-                  JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
+                  JOIN course ON coursesection.CourseID = course.CourseID 
                   JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
                   JOIN room ON coursesection.RoomID = room.RoomID
                   JOIN building ON room.BuildingID = building.BuildingID

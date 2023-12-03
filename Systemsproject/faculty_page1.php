@@ -5,15 +5,14 @@
 session_start();
 
 // Fetch available courses with additional details, ordered by CRN (Include this part only)
-$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, course.deptID, coursesection.RoomID, building.BuildingName, periodd.StartTime, periodd.EndTime 
+$query = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, course.CourseName, course.deptID, coursesection.RoomID, building.BuildingName, periodd.StartTime, periodd.EndTime 
           FROM coursesection 
           JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
           JOIN day ON timeslot.DayID = day.DayID
-          JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
+          JOIN course ON coursesection.CourseID = course.CourseID 
           JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
           JOIN room ON coursesection.RoomID = room.RoomID
           JOIN building ON room.BuildingID = building.BuildingID
-          JOIN course ON masterschedule.CourseID = course.CourseID
           ORDER BY coursesection.CRN ASC";
 $result = mysqli_query($conn, $query);
 
