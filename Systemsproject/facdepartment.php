@@ -65,7 +65,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
     <div class="header">
         <h1>Department Management</h1>
-        <a href="user_page1.php" class="back-button">Back to Student Portal</a>
+        <a href="fac_newhome1.php" class="back-button">Back </a>
     </div>
 
     <div class="department-container">
@@ -75,7 +75,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <th>DeptID</th>
                 <th>DeptName</th>
                 <th>ChairId</th>
-                <th>DeptManager</th>/
+                <th>DeptManager</th>
                 <th>Email</th>
                 <th>PhoneNum</th>
                 <th>RoomID</th>

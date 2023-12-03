@@ -45,7 +45,7 @@ while ($course = mysqli_fetch_assoc($matCoursesResult)) {
     <header>
         <div class="header">
             <h1>Welcome to the Math Depmatment</h1>
-            <a href="student_depmatments1.php" class="back-button">Back to Depmatments</a>
+            <button class="back-button" onclick="goBack()">Back</button>
         </div>
     </header>
 
@@ -89,7 +89,11 @@ while ($course = mysqli_fetch_assoc($matCoursesResult)) {
     </main>
 
     <footer>
-        <!-- Footer content can be added here -->
+    <script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
     </footer>
 </body>
 </html>

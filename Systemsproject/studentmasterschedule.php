@@ -3,10 +3,6 @@
 
 session_start();
 
-if (!isset($_SESSION['admin_name'])) {
-   header('location:login_form1.php');
-}
-
 // Fetch available courses with additional details, ordered by CRN (Include this part only)
 $query = "SELECT
     coursesection.CRN,
@@ -97,7 +93,7 @@ while ($row = mysqli_fetch_assoc($result)) {
    <meta charset="UTF-8">
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <meta name="viewport" content="width device-width, initial-scale=1.0">
-   <title>Admin Panel</title>
+   <title>Master Schedule</title>
 
    
  <!-- Add the styles for the table, search feature, and filters here or in a separate CSS file -->
@@ -238,15 +234,10 @@ while ($row = mysqli_fetch_assoc($result)) {
       <img src="ua.png" alt="U.A. Logo" class="logo">
       <h1>Master Schedule</h1>
       <div class="button-container">
-         <a href="admin_page1.php" class="btn">Back</a>
+         <a href="user_page1.php" class="btn">Back</a>
       </div>
       </head>
    </div>
-   <div class="welcome-message">
-      <p>Welcome, <?php echo $_SESSION['admin_name']; ?>, This is the U.A. University Admin Page!</p>
-   <div class="container">
-      <div class="content">
-
 <body>
  
 
