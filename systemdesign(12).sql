@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2023 at 01:26 AM
+-- Generation Time: Dec 04, 2023 at 01:48 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -41,6 +41,7 @@ CREATE TABLE `admin` (
 
 INSERT INTO `admin` (`AdminID`, `AdminType`) VALUES
 (3, 'PL0'),
+(47, 'PL1'),
 (67, 'PL1');
 
 -- --------------------------------------------------------
@@ -77,6 +78,7 @@ CREATE TABLE `adminpl1` (
 --
 
 INSERT INTO `adminpl1` (`AdminID`, `priorityType`) VALUES
+(47, '1'),
 (67, '1');
 
 -- --------------------------------------------------------
@@ -7812,6 +7814,35 @@ INSERT INTO `office` (`RoomID`, `OfficeID`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `periodd`
+--
+
+CREATE TABLE `periodd` (
+  `PeriodID` int(11) NOT NULL,
+  `StartTime` time NOT NULL,
+  `EndTime` time NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `periodd`
+--
+
+INSERT INTO `periodd` (`PeriodID`, `StartTime`, `EndTime`) VALUES
+(1, '07:00:00', '08:00:00'),
+(2, '08:10:00', '09:10:00'),
+(3, '09:20:00', '10:30:00'),
+(4, '10:40:00', '11:50:00'),
+(5, '12:00:00', '13:00:00'),
+(6, '13:10:00', '14:10:00'),
+(7, '14:20:00', '15:30:00'),
+(8, '15:40:00', '16:50:00'),
+(9, '17:00:00', '18:10:00'),
+(10, '18:20:00', '19:30:00'),
+(11, '19:40:00', '20:50:00');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `room`
 --
 
@@ -13320,6 +13351,13 @@ ALTER TABLE `office`
   ADD PRIMARY KEY (`RoomID`) USING BTREE,
   ADD KEY `RoomID` (`RoomID`),
   ADD KEY `OfficeID` (`OfficeID`);
+
+--
+-- Indexes for table `periodd`
+--
+ALTER TABLE `periodd`
+  ADD PRIMARY KEY (`PeriodID`),
+  ADD KEY `PeriodID` (`PeriodID`);
 
 --
 -- Indexes for table `room`
