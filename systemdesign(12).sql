@@ -13506,7 +13506,7 @@ ALTER TABLE `classroom`
 -- Constraints for table `course`
 --
 ALTER TABLE `course`
-  ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `courseprerequisite`
@@ -13519,11 +13519,11 @@ ALTER TABLE `courseprerequisite`
 -- Constraints for table `coursesection`
 --
 ALTER TABLE `coursesection`
-  ADD CONSTRAINT `coursesection_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `coursesection_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `coursesection_ibfk_4` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `coursesection_ibfk_5` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `coursesection_ibfk_6` FOREIGN KEY (`TimeSlotID`) REFERENCES `timeslot` (`TimeSlotID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `coursesection_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_4` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_5` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_6` FOREIGN KEY (`TimeSlotID`) REFERENCES `timeslot` (`TimeSlotID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `datagen`
@@ -13535,8 +13535,8 @@ ALTER TABLE `datagen`
 -- Constraints for table `dept`
 --
 ALTER TABLE `dept`
-  ADD CONSTRAINT `dept_ibfk_1` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `dept_ibfk_2` FOREIGN KEY (`ChairID`) REFERENCES `user` (`UID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `dept_ibfk_1` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `dept_ibfk_2` FOREIGN KEY (`ChairID`) REFERENCES `user` (`UID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `enrollment`
@@ -13555,7 +13555,7 @@ ALTER TABLE `faculty`
 -- Constraints for table `facultydept`
 --
 ALTER TABLE `facultydept`
-  ADD CONSTRAINT `facultydept_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE SET NULL,
+  ADD CONSTRAINT `facultydept_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `facultydept_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
@@ -13563,7 +13563,7 @@ ALTER TABLE `facultydept`
 --
 ALTER TABLE `facultyft`
   ADD CONSTRAINT `facultyft_ibfk_1` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `facultyft_ibfk_2` FOREIGN KEY (`OfficeID`) REFERENCES `office` (`OfficeID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `facultyft_ibfk_2` FOREIGN KEY (`OfficeID`) REFERENCES `office` (`OfficeID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `facultyhistory`
@@ -13579,14 +13579,14 @@ ALTER TABLE `facultyhistory`
 --
 ALTER TABLE `facultypt`
   ADD CONSTRAINT `facultypt_ibfk_1` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `facultypt_ibfk_2` FOREIGN KEY (`OfficeID`) REFERENCES `office` (`OfficeID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `facultypt_ibfk_2` FOREIGN KEY (`OfficeID`) REFERENCES `office` (`OfficeID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `gradstudent`
 --
 ALTER TABLE `gradstudent`
   ADD CONSTRAINT `gradstudent_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `gradstudent_ibfk_2` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `gradstudent_ibfk_2` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `gradstudentft`
@@ -13622,7 +13622,7 @@ ALTER TABLE `logintable`
 -- Constraints for table `major`
 --
 ALTER TABLE `major`
-  ADD CONSTRAINT `major_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `major_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `majorprerequisite`
@@ -13642,7 +13642,7 @@ ALTER TABLE `masterschedule`
 -- Constraints for table `minor`
 --
 ALTER TABLE `minor`
-  ADD CONSTRAINT `minor_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `minor_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `minorprerequisite`
@@ -13674,7 +13674,7 @@ ALTER TABLE `statsoffice`
 --
 ALTER TABLE `student`
   ADD CONSTRAINT `student_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `user` (`UID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `student_ibfk_2` FOREIGN KEY (`MajorID`) REFERENCES `major` (`MajorID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `student_ibfk_2` FOREIGN KEY (`MajorID`) REFERENCES `major` (`MajorID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `studenthistory`
@@ -13703,14 +13703,14 @@ ALTER TABLE `studentminor`
 -- Constraints for table `timeslot`
 --
 ALTER TABLE `timeslot`
-  ADD CONSTRAINT `timeslot_ibfk_1` FOREIGN KEY (`DayID`) REFERENCES `day` (`DayID`) ON DELETE SET NULL ON UPDATE SET NULL,
-  ADD CONSTRAINT `timeslot_ibfk_2` FOREIGN KEY (`PeriodID`) REFERENCES `periodd` (`PeriodID`) ON DELETE SET NULL ON UPDATE SET NULL;
+  ADD CONSTRAINT `timeslot_ibfk_1` FOREIGN KEY (`DayID`) REFERENCES `day` (`DayID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `timeslot_ibfk_2` FOREIGN KEY (`PeriodID`) REFERENCES `periodd` (`PeriodID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `undergradstudent`
 --
 ALTER TABLE `undergradstudent`
-  ADD CONSTRAINT `undergradstudent_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE SET NULL,
+  ADD CONSTRAINT `undergradstudent_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `undergradstudent_ibfk_2` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
