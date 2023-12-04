@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2023 at 03:05 AM
+-- Generation Time: Dec 04, 2023 at 08:27 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -1263,7 +1263,6 @@ INSERT INTO `course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Descriptio
 ('BU6450', 'Human Resource Management', 'BUS', 6, 'Examines HR strategies, talent acquisition, performance management, employee development, and organizational behavior in managing human capital.', 'Graduate'),
 ('BU6500', 'Global Business and International Management', 'BUS', 6, 'Focuses on managing businesses in a global context, addressing cross-cultural management, international trade, and global strategy.', 'Graduate'),
 ('BU6550', 'Business Ethics and Corporate Social Responsibility', 'BUS', 6, 'Explores ethical dilemmas in business, corporate governance, sustainability, and the role of businesses in society.', 'Graduate'),
-('CourseID', 'CourseName', 'DeptID', 0, 'Description', 'CourseType'),
 ('CP2120', 'Principles of Chemistry I', 'CHE', 2, 'Introduction to the origins and principles of modern chemistry. Discussion of atomic and molecular structure, stoichiometry, periodicity, bonding and states of matter. Principles are illustrated through demonstrations and study of descriptive chemistry.', 'Undergraduate'),
 ('CP2121', 'Principles of Chemistry I Lab', 'CHE', 1, 'Laboratory course designed to illustrate concepts of Principles of Chemistry I. Emphasis on basic chemical concepts, quantitative laboratory skills, descriptive chemistry, and development of scientific report writing skills. Three laboratory hours per week.', 'Undergraduate'),
 ('CP2130', 'Principles of Chemistry II', 'CHE', 2, 'Continuation of Principles of Chemistry I. Discussion of acid/base and oxidation/reduction reactions, equilibrium, kinetics and electrochemistry. Principles are illustrated through demonstrations and study of descriptive chemistry.', 'Undergraduate'),
@@ -7808,8 +7807,7 @@ INSERT INTO `office` (`RoomID`, `OfficeID`) VALUES
 ('8C', '8DEPT'),
 ('23C', '8FAC'),
 ('9C', '9DEPT'),
-('24C', '9FAC'),
-('RoomID', 'OfficeID');
+('24C', '9FAC');
 
 -- --------------------------------------------------------
 
@@ -13207,6 +13205,7 @@ ALTER TABLE `day`
 --
 ALTER TABLE `dept`
   ADD PRIMARY KEY (`DeptID`),
+  ADD UNIQUE KEY `DeptID_2` (`DeptID`),
   ADD KEY `DeptID` (`DeptID`),
   ADD KEY `dept_ibfk_1` (`RoomID`),
   ADD KEY `dept_ibfk_2` (`ChairID`);
@@ -13492,9 +13491,9 @@ ALTER TABLE `advisor`
 -- Constraints for table `attendance`
 --
 ALTER TABLE `attendance`
-  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `attendance_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `attendance_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `classroom`
@@ -13519,7 +13518,7 @@ ALTER TABLE `courseprerequisite`
 -- Constraints for table `coursesection`
 --
 ALTER TABLE `coursesection`
-  ADD CONSTRAINT `coursesection_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `coursesection_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `coursesection_ibfk_4` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `coursesection_ibfk_5` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -13529,7 +13528,7 @@ ALTER TABLE `coursesection`
 -- Constraints for table `datagen`
 --
 ALTER TABLE `datagen`
-  ADD CONSTRAINT `datagen_ibfk_1` FOREIGN KEY (`StatsID`) REFERENCES `statsoffice` (`StatsID`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `datagen_ibfk_1` FOREIGN KEY (`StatsID`) REFERENCES `statsoffice` (`StatsID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `dept`
@@ -13569,10 +13568,10 @@ ALTER TABLE `facultyft`
 -- Constraints for table `facultyhistory`
 --
 ALTER TABLE `facultyhistory`
-  ADD CONSTRAINT `facultyhistory_ibfk_1` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `facultyhistory_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `facultyhistory_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `facultyhistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `facultyhistory_ibfk_1` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `facultyhistory_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `facultyhistory_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `facultyhistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `facultypt`
@@ -13680,10 +13679,10 @@ ALTER TABLE `student`
 -- Constraints for table `studenthistory`
 --
 ALTER TABLE `studenthistory`
-  ADD CONSTRAINT `studenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `studenthistory_ibfk_2` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `studenthistory_ibfk_3` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `studenthistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `studenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `studenthistory_ibfk_2` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `studenthistory_ibfk_3` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `studenthistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `studentmajor`
