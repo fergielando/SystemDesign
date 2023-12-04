@@ -13,8 +13,18 @@ $artCourses = [];
 while ($course = mysqli_fetch_assoc($artCoursesResult)) {
     $artCourses[] = $course;
 }
-?>
 
+// Fetching faculty in the art department
+$facultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position AS Position, f.Specialty AS Specialty FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                WHERE fd.DeptID = 'Art'";
+$facultyResult = mysqli_query($conn, $facultyQuery);
+$facultyList = [];
+while ($faculty = mysqli_fetch_assoc($facultyResult)) {
+    $facultyList[] = $faculty;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,6 +78,23 @@ while ($course = mysqli_fetch_assoc($artCoursesResult)) {
             </ul>
         </section>
 
+        <section>
+        <h2>Faculty in the Art Department</h2>
+        <table>
+            <tr>
+                <th>Faculty Name</th>
+                <th>Position</th>
+                <th>Specialty</th>
+            </tr>
+            <?php foreach ($facultyList as $faculty): ?>
+            <tr>
+                <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+                <td><?php echo $faculty['Position']; ?></td>
+                <td><?php echo $faculty['Specialty']; ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+    </section>
         <section>
             <h2>Course Offerings</h2>
             <table>

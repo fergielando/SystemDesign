@@ -1,17 +1,41 @@
 <?php
 @include 'config1.php';
 
-// Function to retrieve users from the database
-function getUsers($conn, $uid = null) {
-    $query = "SELECT * FROM user";
-    if ($uid) {
-        $query .= " WHERE uid = '$uid'";
-    }
-    $result = mysqli_query($conn, $query);
-    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+// Function to retrieve users from the database with filters
+function getUsers($conn, $filters = []) {
+   $query = "SELECT u.*, l.UserType FROM user u LEFT JOIN logintable l ON u.UID = l.UID WHERE 1=1";
+
+   foreach ($filters as $key => $value) {
+       if (!empty($value)) {
+           $value = mysqli_real_escape_string($conn, $value);
+           if ($key === 'UserType') {
+               // Filter by UserType
+               $query .= " AND l.UserType = '$value'";
+           } else {
+               // Filter by other fields
+               $query .= " AND u.$key LIKE '%$value%'";
+           }
+       }
+   }
+
+   $result = mysqli_query($conn, $query);
+   return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-$users = getUsers($conn); // Get all users initially
+
+
+// Handle filter request
+$filters = [];
+if (isset($_POST['filter'])) {
+   $filters['UID'] = $_POST['UID'] ?? '';
+    $filters['FirstName'] = $_POST['FirstName'] ?? '';
+    $filters['LastName'] = $_POST['LastName'] ?? '';
+    $filters['Gender'] = $_POST['Gender'] ?? '';
+    $filters['City'] = $_POST['City'] ?? '';
+    $filters['UserType'] = $_POST['UserType'] ?? '';
+}
+
+$users = getUsers($conn, $filters); // Get filtered users
 
 // Search for a user by UID
 if (isset($_POST['search'])) {
@@ -51,135 +75,133 @@ if (isset($_GET['uid'])) {
 }
 ?>
 <style>
-    <style>
-   .header {
-      background: #000;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-      display: flex;
-      justify-content: space-between;
-   }
+  /* General Styles */
+/* General Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background-color: #eaeaea; /* Lighter background for less strain */
+  margin: 0;
+  padding: 0;
+}
 
-   .header h1 {
-      font-size: 36px;
-   }
+.header {
+  background-color: #003366; /* Darker blue for less brightness */
+  color: #ffffff;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
 
-   .header .logo {
-         width: 50px; 
-         height: 50px; 
-      }
-   .buttons {
-      display: flex;
-      align-items: center;
-   }
+.header h1 {
+  margin: 0;
+  font-size: 24px;
+}
 
-   .back-button,
-   .create-user-button {
-      background: #333;
-      color: #fff;
-      padding: 10px 20px;
-      text-decoration: none;
-      border-radius: 5px;
-      margin-right: 10px;
-   }
+.button-container .btn {
+  background-color: #004c99; /* Muted blue */
+  color: #ffffff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+  margin-left: 10px;
+}
 
-   .back-button:hover,
-   .create-user-button:hover {
-      background: #000;
-   }
+.button-container .btn:hover {
+  background-color: #003366; /* Even darker blue on hover */
+  color: #ffffff;
+}
 
-      
-      
-   table {
-      width: 100%; /* Full width */
-      max-width: 100%; /* Ensures table is not wider than its container */
-      border-collapse: collapse;
-      table-layout: auto; /* New line: Ensures the table respects the width */
-   }
+/* Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
 
-   th, td {
-      border: 1px solid #000;
-      padding: 15px;
-      text-align: left;
-      font-size: 14px;
-      word-wrap: break-word; /* New line: Allows words to break and wrap */
-   }
+th, td {
+  border: 1px solid #ccc; /* Softer border color */
+  padding: 10px;
+  text-align: left;
+}
 
-   th {
-      background-color: #f2f2f2; /* Gives a slight background color to the header */
-   }
+th {
+  background-color: #004c99; /* Muted blue header */
+  color: #ffffff;
+}
 
-   /* Style for every other row */
-   tr:nth-child(even) {
-      background-color: #ccffcc; /* Light green background */
-   }
-  
-   .header {
-         background: #000;
-         color: #fff;
-         padding: 20px;
-         text-align: center;
-         display: flex;
-         justify-content: space-between;
-      }
+tr:nth-child(even) {
+  background-color: #f8f8f8; /* Very light gray for rows */
+}
 
-      .header h1 {
-         font-size: 36px;
-      }
+/* Form Styles */
+.filter-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin: 20px auto;
+  width: fit-content;
+}
 
-      .header .back-button {
-         background: #000;
-         color: #fff;
-         padding: 10px 20px;
-         text-decoration: none;
-         border-radius: 5px;
-         margin-right: 10px;
-      }
+.filter-container input[type="text"],
+.filter-container select {
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f0f0f0; /* Light gray for input fields */
+}
 
-      .header .btn {
-      background: #333;
-      color: #fff;
-      padding: 15px 30px; /* Adjust padding to make the buttons larger */
-      text-decoration: none;
-      border-radius: 8px;
-      margin-right: 10px;
-      font-size: 16px; /* Adjust font size for better visibility */
-   }
+.filter-container input[type="submit"] {
+  cursor: pointer;
+  background-color: #007bff; /* Soft blue instead of green */
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+}
+
+.filter-container input[type="submit"]:hover {
+  background-color: #0056b3; /* A softer blue on hover */
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .header,
+  .filter-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .button-container {
+    margin-top: 10px;
+  }
+
+  .filter-container {
+    width: 100%;
+  }
+}
+
+/* Footer Styles (if you have a footer) */
+.footer {
+  background-color: #003366;
+  color: #ffffff;
+  text-align: center;
+  padding: 10px 20px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
 
 
-      .major-container {
-         padding: 20px;
-      }
-
-      table {
-         width: 100%;
-         border-collapse: collapse;
-      }
-
-      table, th, td {
-         border: 1px solid #000;
-      }
-
-      th, td {
-         padding: 8px;
-         text-align: left;
-      }
-
-      .edit-button {
-         background: #000;
-         color: #fff;
-         padding: 10px 20px;
-         text-decoration: none;
-         border-radius: 5px;
-         margin: 5px;
-         display: inline-block;
-      }
-
-      /* Style for every other row */
-   tr:nth-child(even) {
-      background-color: #ccffcc; /* Light green background */
-   }
 </style>
 
 
@@ -193,22 +215,44 @@ if (isset($_GET['uid'])) {
 <body>
 
 <div class="header">
-   
-      <h1>Department Management</h1>
+   <h1>Department Management</h1>
+   <div class="button-container">
       <a href="admin_page1.php" class="btn">Back to Admin Page</a>
       <a href="create_a_user1.php" class="btn">Create a User</a>
       <a href="locked_out1.php" class="btn">Locked out Users</a>
-
-
+      <!-- Other buttons as needed -->
    </div>
-
-<!-- Search Form -->
-<div class="search-container">
-   <form action="" method="post">
-      <input type="text" name="search_uid" required placeholder="Enter UID to search">
-      <input type="submit" name="search" value="Search" class="form-btn">
-   </form>
 </div>
+
+  <!-- Filter Form -->
+<div class="filter-container">
+    <form action="" method="post">
+        <input type="text" name="UID" placeholder="UID">
+        <input type="text" name="FirstName" placeholder="First Name">
+        <input type="text" name="LastName" placeholder="Last Name">
+        <input type="text" name="Gender" placeholder="Gender">
+        <input type="text" name="City" placeholder="City">
+        
+        <!-- Add UserType select input -->
+        <select name="UserType">
+            <option value="">All</option>
+            <?php
+            // Fetch distinct UserTypes from the database
+            $userTypesQuery = "SELECT DISTINCT UserType FROM logintable";
+            $userTypesResult = mysqli_query($conn, $userTypesQuery);
+
+            while ($row = mysqli_fetch_assoc($userTypesResult)) {
+                $selected = ($_POST['UserType'] ?? '') === $row['UserType'] ? 'selected' : '';
+                echo '<option value="' . $row['UserType'] . '" ' . $selected . '>' . $row['UserType'] . '</option>';
+            }
+            ?>
+        </select>
+
+        <input type="submit" name="filter" value="Filter" class="form-btn">
+    </form>
+</div>
+
+
 
 <!-- Users Table -->
 <div class="user-table">
@@ -225,6 +269,8 @@ if (isset($_GET['uid'])) {
       <th>ZipCode</th>
       <th>Edit</th>
       <th>View Academic Profile</th>
+      <th>Degree Audit</th>
+      <th>Create/Edit Schedule</th>
      
    </tr>
    <?php foreach ($users as $user): ?>
@@ -239,9 +285,34 @@ if (isset($_GET['uid'])) {
       <td><?php echo htmlspecialchars($user['State']); ?></td>
       <td><?php echo htmlspecialchars($user['ZipCode']); ?></td>
       <td><a href="edit_user.php?UID=<?php echo $user['UID']; ?>">Edit</a></td>
-      <td><a href="view_academic_profile1.php?UID=<?php echo $user['UID']; ?>">View Academic Profile</a></td>
-   </tr>
-   <?php endforeach; ?>
+   <td>
+       <?php
+       if ($user['UserType'] !== 'faculty' && $user['UserType'] !== 'admin') {
+           // Link for viewing the academic profile
+           echo '<a href="view_academic_profile1.php?UID=' . $user['UID'] . '">View Academic Profile</a>';
+       }
+       ?>
+   </td>
+   <td>
+       <?php
+       // Ensure the Degree Audit link is correctly set for each user
+       if ($user['UserType'] !== 'faculty' && $user['UserType'] !== 'admin') {
+           echo '<a href="Facdegreeaudit.php?UID=' . $user['UID'] . '">Degree Audit</a>';
+       }
+       ?>
+   </td>
+   <td>
+       <?php
+       // Ensure the Degree Audit link is correctly set for each user
+       if ($user['UserType'] !== 'faculty' && $user['UserType'] !== 'admin') {
+           echo '<a href="Faccreateschedule.php?UID=' . $user['UID'] . '">Create/Update Schedule</a>';
+       }
+       ?>
+   </td>
+</tr>
+<?php
+endforeach;
+?>
 </table>
 
 </div>

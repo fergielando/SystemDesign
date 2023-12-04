@@ -1,18 +1,36 @@
 <?php
-@include 'config1.php'; // Include your database configuration file
-
+// Start the session
 session_start();
 
-// Check for user's session UID
-if (!isset($_SESSION['UID'])) {
-    echo "Please log in to assign courses.";
+// Include your database configuration file
+@include 'config1.php';
+
+// Check if a UID is passed in the URL
+if (!isset($_GET['UID'])) {
+    echo "No student selected. Redirecting to previous page.";
+    header("refresh:3;url=javascript:history.back()");
     exit;
 }
 
-$uid = $_SESSION['UID'];
+// Use the UID from the URL parameter
+$uid = mysqli_real_escape_string($conn, $_GET['UID']);
 
-// Determine the student's course type based on their StudentID
-$courseType = ($uid >= 500801) ? 'Graduate' : 'Undergraduate';
+// Query to fetch student's name from the user table
+$userQuery = "SELECT FirstName, LastName FROM user WHERE UID = '$uid'";
+$userResult = mysqli_query($conn, $userQuery);
+
+// Initialize variables to store the name
+$firstName = '';
+$lastName = '';
+
+// Fetch the result
+if ($userRow = mysqli_fetch_assoc($userResult)) {
+    $firstName = $userRow['FirstName'];
+    $lastName = $userRow['LastName'];
+}
+
+
+
 
 // Fetch available courses with additional details, including prerequisites, ordered by CRN
 $query = "SELECT
@@ -42,7 +60,6 @@ JOIN building ON room.BuildingID = building.BuildingID
 LEFT JOIN courseprerequisite ON coursesection.CourseID = courseprerequisite.CourseID
 JOIN course ON coursesection.CourseID = course.CourseID
 JOIN dept ON course.DeptID = dept.DeptID  -- Join the dept table to get DeptName
-WHERE course.CourseType = '$courseType'  -- Filter by the determined course type
 ORDER BY coursesection.CRN ASC";
 
 $result = mysqli_query($conn, $query);
@@ -238,8 +255,16 @@ $currentSemester = "20232";
    <meta http-equiv="X-UA-Compatible" content="IE-edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <div class="header">
+
+   <div class="student-name">
+    <label>Student:</label>
+    <span><?php echo $firstName . ' ' . $lastName; ?></span>
+</div>
+
+<!-- Rest of your HTML code... -->
+
       <h1>Academic Profile</h1>
-      <button class="back-button" onclick="goBack()">Back</button>
+      <a href="Update_a_user1.php" class="btn">Back</a>
    </div>
 
 
@@ -271,6 +296,13 @@ $currentSemester = "20232";
    .header h1 {
       font-size: 36px;
    }
+
+   .student-name {
+         font-size: 24px; /* Increase font size */
+         font-weight: bold; /* Optional: makes the text bold */
+         margin-top: 10px; /* Optional: adds some space above the name */
+         /* Add other styling as needed */
+      }
 
    .header a {
       text-decoration: none;
@@ -606,19 +638,18 @@ function applyFilters() {
             </thead>
             <tbody>
                <?php
-             // Fetch and display currently enrolled courses
-             $enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, course.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
-             FROM enrollment
-             JOIN coursesection ON enrollment.CRN = coursesection.CRN
-             JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
-             JOIN day ON timeslot.DayID = day.DayID
-             JOIN course ON coursesection.CourseID = course.CourseID
-             JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
-             JOIN room ON coursesection.RoomID = room.RoomID
-             JOIN building ON room.BuildingID = building.BuildingID
-             WHERE enrollment.StudentID = '$uid'";
+               // Fetch and display currently enrolled courses
+              $enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
+                           FROM enrollment
+                           JOIN coursesection ON enrollment.CRN = coursesection.CRN
+                           JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
+                           JOIN day ON timeslot.DayID = day.DayID
+                           JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
+                           JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+                           JOIN room ON coursesection.RoomID = room.RoomID
+                           JOIN building ON room.BuildingID = building.BuildingID
+                           WHERE enrollment.StudentID = '$uid'";
 $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
-
 
                while ($enrolledCourse = mysqli_fetch_assoc($enrolledCoursesResult)) {
                   echo "<tr>";

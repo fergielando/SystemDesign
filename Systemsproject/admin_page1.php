@@ -14,7 +14,7 @@ $query = "SELECT
     coursesection.AvailableSeats,
     timeslot.TimeSlotID,
     day.Weekday,
-    masterschedule.CourseName,
+    course.CourseName,
     course.deptID,
     coursesection.RoomID,
     building.BuildingName,
@@ -25,11 +25,10 @@ $query = "SELECT
 FROM coursesection
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
 JOIN day ON timeslot.DayID = day.DayID
-JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
+JOIN course ON coursesection.CourseID = course.CourseID
 JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
 JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
-JOIN course ON masterschedule.CourseID = course.CourseID
 JOIN facultyhistory ON coursesection.CRN = facultyhistory.CRN
 JOIN faculty ON facultyhistory.FacultyID = faculty.FacultyID
 JOIN user ON faculty.FacultyID = user.UID  -- Join using the foreign key constraint

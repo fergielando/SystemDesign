@@ -1,17 +1,30 @@
 <?php
 @include 'config1.php';
 
-// Fetching bus department details
+// Fetching business department details
 $busDeptQuery = "SELECT * FROM dept WHERE DeptID = 'BUS'";
 $busDeptResult = mysqli_query($conn, $busDeptQuery);
 $busDeptDetails = mysqli_fetch_assoc($busDeptResult);
 
-// Fetching bus courses
+// Fetching business courses
 $busCoursesQuery = "SELECT * FROM course WHERE DeptID = 'BUS'";
 $busCoursesResult = mysqli_query($conn, $busCoursesQuery);
 $busCourses = [];
 while ($course = mysqli_fetch_assoc($busCoursesResult)) {
     $busCourses[] = $course;
+}
+
+// Fetching faculty in the business department including their email from the logintable
+$facultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position, f.Specialty, lt.Email AS FacultyEmail FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                JOIN logintable lt ON u.UID = lt.UID
+                WHERE fd.DeptID = 'BUS'";
+
+$facultyResult = mysqli_query($conn, $facultyQuery);
+$facultyList = [];
+while ($faculty = mysqli_fetch_assoc($facultyResult)) {
+    $facultyList[] = $faculty;
 }
 ?>
 
@@ -20,7 +33,7 @@ while ($course = mysqli_fetch_assoc($busCoursesResult)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Department - UA University</title>
+    <title><?php echo $busDeptDetails['DeptName']; ?> Department - UA University</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,14 +57,13 @@ while ($course = mysqli_fetch_assoc($busCoursesResult)) {
 <body>
     <header>
         <div class="header">
-            <h1>Welcome to the Business Department</h1>
+            <h1>Welcome to the <?php echo $busDeptDetails['DeptName']; ?> Department</h1>
             <button class="back-button" onclick="goBack()">Back</button>
         </div>
     </header>
 
     <main>
-    <main>
-    <section>
+        <section>
             <h2>Message from the Chair and Manager - Olivia Lewis - Chair and Karen Turner - Manager</h2>
             <p>Welcome to the Business Department at UA University! Our department is committed to offering a comprehensive education in business theories and practices, preparing our students for success in the dynamic world of business and entrepreneurship.</p>
             <p>Contact Information for the Chair:</p>
@@ -67,6 +79,27 @@ while ($course = mysqli_fetch_assoc($busCoursesResult)) {
                 <li>Office: Room 15C</li>
             </ul>
         </section>
+        
+        <section>
+            <h2>Faculty in the <?php echo $busDeptDetails['DeptName']; ?> Department</h2>
+            <table>
+                <tr>
+                    <th>Faculty Name</th>
+                    <th>Position</th>
+                    <th>Specialty</th>
+                    <th>Email</th>
+                </tr>
+                <?php foreach ($facultyList as $faculty): ?>
+                <tr>
+                    <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+                    <td><?php echo $faculty['Position']; ?></td>
+                    <td><?php echo $faculty['Specialty']; ?></td>
+                    <td><?php echo $faculty['FacultyEmail']; ?></td> <!-- Displaying Faculty Email -->
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </section>
+        
         <section>
             <h2>Course Offerings</h2>
             <table>
@@ -87,11 +120,13 @@ while ($course = mysqli_fetch_assoc($busCoursesResult)) {
     </main>
 
     <footer>
-    <script>
-    function goBack() {
-        window.history.back();
-    }
-</script> 
+        <!-- Footer content can be added here -->
     </footer>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 </html>

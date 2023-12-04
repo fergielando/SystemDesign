@@ -13,6 +13,17 @@ $misCourses = [];
 while ($course = mysqli_fetch_assoc($misCoursesResult)) {
     $misCourses[] = $course;
 }
+// Fetching faculty in the MIS department including their emails from the logintable
+$misFacultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position, f.Specialty, lt.Email AS FacultyEmail FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                JOIN logintable lt ON u.UID = lt.UID
+                WHERE fd.DeptID = 'MIS'";
+$misFacultyResult = mysqli_query($conn, $misFacultyQuery);
+$misFacultyList = [];
+while ($faculty = mysqli_fetch_assoc($misFacultyResult)) {
+    $misFacultyList[] = $faculty;
+}
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +56,7 @@ while ($course = mysqli_fetch_assoc($misCoursesResult)) {
     <header>
         <div class="header">
             <h1>Welcome to the MIS Department</h1>
-            <a href="student_departments1.php" class="back-button">Back to Departments</a>
+            <button class="back-button" onclick="goBack()">Back</button>
         </div>
     </header>
 
@@ -66,6 +77,27 @@ while ($course = mysqli_fetch_assoc($misCoursesResult)) {
                 <li>Office: Room 4C</li>
             </ul>
         </section>
+
+        <section>
+    <h2>Faculty in the <?php echo $misDeptDetails['DeptName']; ?> Department</h2>
+    <table>
+        <tr>
+            <th>Faculty Name</th>
+            <th>Position</th>
+            <th>Specialty</th>
+            <th>Email</th> <!-- Added Email column -->
+        </tr>
+        <?php foreach ($misFacultyList as $faculty): ?>
+        <tr>
+            <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+            <td><?php echo $faculty['Position']; ?></td>
+            <td><?php echo $faculty['Specialty']; ?></td>
+            <td><?php echo $faculty['FacultyEmail']; ?></td> <!-- Displaying Faculty Email -->
+        </tr>
+        <?php endforeach; ?>
+    </table>
+</section>
+
         <section>
             <h2>Course Offerings</h2>
             <table>
@@ -86,7 +118,12 @@ while ($course = mysqli_fetch_assoc($misCoursesResult)) {
     </main>
 
     <footer>
-        <!-- Footer content can be added here -->
+    <script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+    </footer>
     </footer>
 </body>
 </html>

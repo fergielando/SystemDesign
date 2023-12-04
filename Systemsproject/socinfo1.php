@@ -13,6 +13,18 @@ $socCourses = [];
 while ($course = mysqli_fetch_assoc($socCoursesResult)) {
     $socCourses[] = $course;
 }
+
+// Fetching faculty in the Psychology department including their emails from the logintable
+$facultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position, f.Specialty, lt.Email AS FacultyEmail FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                JOIN logintable lt ON u.UID = lt.UID
+                WHERE fd.DeptID = 'SOC'";
+                $facultyResult = mysqli_query($conn, $facultyQuery);
+                $facultyList = [];
+                while ($faculty = mysqli_fetch_assoc($facultyResult)) {
+                    $facultyList[] = $faculty;
+                }
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +32,7 @@ while ($course = mysqli_fetch_assoc($socCoursesResult)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>soclososoc Department - UA University</title>
+    <title>Sociology Department - UA University</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -66,6 +78,27 @@ while ($course = mysqli_fetch_assoc($socCoursesResult)) {
                 <li>Phone: (555) 214-3214</li>
                 <li>Office: Room 10C</li>
             </ul>
+        </section>
+
+
+        <section>
+            <h2>Faculty in the <?php echo $socDeptDetails['DeptName']; ?> Department</h2>
+            <table>
+                <tr>
+                    <th>Faculty Name</th>
+                    <th>Position</th>
+                    <th>Specialty</th>
+                    <th>Email</th> <!-- Added Email column -->
+                </tr>
+                <?php foreach ($facultyList as $faculty): ?>
+                <tr>
+                    <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+                    <td><?php echo $faculty['Position']; ?></td>
+                    <td><?php echo $faculty['Specialty']; ?></td>
+                    <td><?php echo $faculty['FacultyEmail']; ?></td> <!-- Displaying Faculty Email -->
+                </tr>
+                <?php endforeach; ?>
+            </table>
         </section>
 
         <section>

@@ -1,3 +1,33 @@
+<?php
+@include 'config1.php';
+
+// Fetching BIO depBIOment details
+$BIODeptQuery = "SELECT * FROM dept WHERE DeptID = 'BIO'";
+$BIODeptResult = mysqli_query($conn, $BIODeptQuery);
+$BIODeptDetails = mysqli_fetch_assoc($BIODeptResult);
+
+// Fetching BIO courses
+$BIOCoursesQuery = "SELECT * FROM course WHERE DeptID = 'BIO'";
+$BIOCoursesResult = mysqli_query($conn, $BIOCoursesQuery);
+$BIOCourses = [];
+while ($course = mysqli_fetch_assoc($BIOCoursesResult)) {
+    $BIOCourses[] = $course;
+}
+// Fetching faculty in the BIOitics department including their emails from the logintable
+$facultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position, f.Specialty, lt.Email AS FacultyEmail FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                JOIN logintable lt ON u.UID = lt.UID
+                WHERE fd.DeptID = 'BIO'";
+$facultyResult = mysqli_query($conn, $facultyQuery);
+$facultyList = [];
+while ($faculty = mysqli_fetch_assoc($facultyResult)) {
+    $facultyList[] = $faculty;
+}
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,13 +52,15 @@
         th {
             background-color: #f2f2f2;
         }
+
+
     </style>
 </head>
 <body>
     <header>
     <div class="header">
       <h1>Welcome to the Bio Department</h1>
-      <a href="student_departments1.php" class="back-button">Back to Departments</a>
+      <button class="back-button" onclick="goBack()">Back</button>
    </div>
     </header>
 
@@ -47,6 +79,26 @@
                 <li>Phone: (555) 456-7890</li>
                 <li>Office: Room 4C</li>
             </ul>
+        </section> 
+
+        <section>
+            <h2>Faculty in the Biology Department</h2>
+            <table>
+                <tr>
+                    <th>Faculty Name</th>
+                    <th>Position</th>
+                    <th>Specialty</th>
+                    <th>Email</th> <!-- Added Email column -->
+                </tr>
+                <?php foreach ($facultyList as $faculty): ?>
+                <tr>
+                    <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+                    <td><?php echo $faculty['Position']; ?></td>
+                    <td><?php echo $faculty['Specialty']; ?></td>
+                    <td><?php echo $faculty['FacultyEmail']; ?></td> <!-- Displaying Faculty Email -->
+                </tr>
+                <?php endforeach; ?>
+            </table>
         </section>
 
         <section>
@@ -204,7 +256,11 @@
     </main>
 
     <footer>
-        <!-- Footer content can be added here -->
+    <script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
     </footer>
 </body>
 </html>

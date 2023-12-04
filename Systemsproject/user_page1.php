@@ -3,18 +3,35 @@
 @include 'config1.php';
 session_start();
 
-// Fetch enrolled courses for the current student
+
 $uid = $_SESSION['UID'];
-$enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
-          FROM enrollment
-          JOIN coursesection ON enrollment.CRN = coursesection.CRN
-          JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
-          JOIN day ON timeslot.DayID = day.DayID
-          JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
-          JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
-          JOIN room ON coursesection.RoomID = room.RoomID
-          JOIN building ON room.BuildingID = building.BuildingID
-          WHERE enrollment.StudentID = '$uid'";
+
+$enrolledCoursesQuery = "SELECT
+    coursesection.CRN,
+    coursesection.CourseID,
+    coursesection.AvailableSeats,
+    timeslot.TimeSlotID,
+    day.Weekday,
+    masterschedule.CourseName,
+    room.RoomNum,
+    building.BuildingName,
+    periodd.StartTime,
+    periodd.EndTime,
+    user.FirstName AS FacultyFirstName,
+    user.LastName AS FacultyLastName,
+    coursesection.SectionNum
+FROM enrollment
+JOIN coursesection ON enrollment.CRN = coursesection.CRN
+JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
+JOIN day ON timeslot.DayID = day.DayID
+JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
+JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+JOIN room ON coursesection.RoomID = room.RoomID
+JOIN building ON room.BuildingID = building.BuildingID
+JOIN user ON coursesection.FacultyID = user.UID
+WHERE enrollment.StudentID = '$uid'";
+
+
 $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
 
 // Check if the student has any enrolled courses
@@ -227,8 +244,7 @@ th:last-child {
     <p>Welcome, <?php echo $_SESSION['user_name']; ?>. Welcome to UA University! You are currently in your <?php echo $studentYear; ?> year. Here is your current schedule:</p>
 </div>
 
-
-   <?php if ($enrolledCourses !== false): ?>
+<?php if ($enrolledCourses !== false): ?>
     <table>
         <thead>
             <tr>
@@ -250,6 +266,8 @@ th:last-child {
                                     echo $course['CourseName'] . "<br>";
                                     echo "Room: " . $course['RoomNum'] . "<br>";
                                     echo "Building: " . $course['BuildingName'] . "<br>";
+                                    echo "Professor: " . $course['FacultyFirstName'] . " " . $course['FacultyLastName'] . "<br>"; // Display Faculty Name
+                                    echo "Section: " . $course['SectionNum'] . "<br>"; // Display Section Number
                                 }
                             }
                             ?>
@@ -262,7 +280,6 @@ th:last-child {
 <?php else: ?>
     <p>No courses registered for this semester.</p>
 <?php endif; ?>
-
     <div class="buttons">
     <a href="student_academic_profile1.php" class="btn">Academic Profile</a>
     <a href="student_course_catalog1.php" class="btn">Course Catalog</a>
