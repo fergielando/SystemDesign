@@ -10,28 +10,20 @@ if (!isset($_SESSION['admin_name'])) {
 }
 
 // Handle account management actions
-if (isset($_POST['reset_login'])) {
-    $uid_to_reset = mysqli_real_escape_string($conn, $_POST['uid_to_reset']);
-
-    // Reset the NumOfLogin value for the user
-    $reset_login_query = "UPDATE logintable SET NumOfLogin = 0 WHERE UID = '$uid_to_reset'";
-    mysqli_query($conn, $reset_login_query);
-
-    // Redirect or display a success message
-}
-
 if (isset($_POST['unlock_account'])) {
     $uid_to_unlock = mysqli_real_escape_string($conn, $_POST['uid_to_unlock']);
 
     // Unlock the user account
     $unlock_account_query = "UPDATE logintable SET NumOfLogin = 0 WHERE UID = '$uid_to_unlock'";
+    $unlock_account_query2 = "UPDATE logintable SET LockedOut = 0 WHERE UID = '$uid_to_unlock'";
     mysqli_query($conn, $unlock_account_query);
+	mysqli_query($conn, $unlock_account_query2);
 
     // Redirect or display a success message
 }
 
 // Fetch and display a list of locked or flagged accounts
-$locked_accounts_query = "SELECT * FROM logintable WHERE NumOfLogin > 0";
+$locked_accounts_query = "SELECT * FROM logintable WHERE LockedOut = 1";
 $locked_accounts_result = mysqli_query($conn, $locked_accounts_query);
 ?>
 
@@ -60,8 +52,6 @@ $locked_accounts_result = mysqli_query($conn, $locked_accounts_query);
                 <td>
                     <form method="post" action="">
                         <input type="hidden" name="uid_to_reset" value="<?php echo $row['UID']; ?>">
-                        <input type="submit" name="reset_login" value="Reset Login Attempts">
-                    </form>
                     <form method="post" action="">
                         <input type="hidden" name="uid_to_unlock" value="<?php echo $row['UID']; ?>">
                         <input type="submit" name="unlock_account" value="Unlock Account">

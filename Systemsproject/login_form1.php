@@ -23,27 +23,28 @@ if (isset($_POST['submit'])) {
 
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_array($result);
-
-        if ($row['NumOfLogin'] >= 3) {
+			if ($row['NumOfLogin'] >= 3) {
             // Account is locked
-            $error[] = 'Account locked. Please contact the administrator.';
+				$error[] = 'Account locked. Please contact the administrator.';
+				$updateLockedOut = "UPDATE logintable SET LockedOut = 1 WHERE UID = '{$row['UID']}'";
+				mysqli_query($conn, $updateLockedOut);
 
             // After locking the account, send an email with a temporary password
-            if ($row['NumOfLogin'] >= 2) {
-                $temporaryPassword = generateRandomPassword(); // Generate a random temporary password
-                $hashedTempPassword = md5($temporaryPassword); // Hash the temporary password
+				if ($row['NumOfLogin'] >= 2) {
+					$temporaryPassword = generateRandomPassword(); // Generate a random temporary password
+					$hashedTempPassword = md5($temporaryPassword); // Hash the temporary password
 
                 // Update the user's password in the database with the temporary password
-                $updateTempPassword = "UPDATE logintable SET Password = '$hashedTempPassword' WHERE UID = '{$row['UID']}'";
-                mysqli_query($conn, $updateTempPassword);
+					$updateTempPassword = "UPDATE logintable SET Password = '$hashedTempPassword' WHERE UID = '{$row['UID']}'";
+					mysqli_query($conn, $updateTempPassword);
 
                 // Send the temporary password to the user's email
-                $to = $row['Email']; // User's email address
-                $subject = 'Temporary Password';
-                $message = "Your account has been locked due to multiple failed login attempts. Here is your temporary password: $temporaryPassword";
+					$to = 'jsalvado@oldwestbury.edu'; // User's email address
+					$subject = "$email Locked Out";
+					$msg = "$email has been locked due to multiple failed login attempts. Here is their temporary password: $temporaryPassword";
 
                 // You may need to configure your SMTP settings for the mail() function to work correctly
-                mail($to, $subject, $message);
+					mail($to, $subject, $msg);
             }
         } else {
             if ($row['Password'] == $password) {
@@ -71,6 +72,7 @@ if (isset($_POST['submit'])) {
                 }
             } else {
                 // Failed login attempt, increment login attempts
+				if ( !($row['UserType'] == 'admin')) {
                 $updateFailedAttempts = "UPDATE logintable SET NumOfLogin = NumOfLogin + 1 WHERE UID = '{$row['UID']}'";
                 mysqli_query($conn, $updateFailedAttempts);
 
@@ -80,9 +82,14 @@ if (isset($_POST['submit'])) {
                     // Lock the account after 3 failed attempts
                     $updateLockAccount = "UPDATE logintable SET NumOfLogin = 3 WHERE UID = '{$row['UID']}'";
                     mysqli_query($conn, $updateLockAccount);
+					$updateLockedOut2 = "UPDATE logintable SET LockedOut = 1 WHERE UID = '{$row['UID']}'";
+					mysqli_query($conn, $updateLockedOut2);
                 }
-            }
-        }
+            } else {
+				$error[] = 'Incorrect email or password!';
+				}
+		}
+       }
     } else {
         $error[] = 'Incorrect email or password!';
     }
