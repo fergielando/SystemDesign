@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2023 at 08:27 PM
+-- Generation Time: Dec 04, 2023 at 11:03 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -1108,7 +1108,7 @@ INSERT INTO `advisor` (`StudentID`, `FacultyID`, `DOA`) VALUES
 CREATE TABLE `attendance` (
   `StudentID` int(11) NOT NULL,
   `CRN` int(11) NOT NULL,
-  `CourseID` varchar(25) DEFAULT NULL,
+  `CourseID` varchar(100) DEFAULT NULL,
   `ClassDate` date NOT NULL,
   `Present` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1958,7 +1958,7 @@ INSERT INTO `courseprerequisite` (`CourseID`, `PRcourseID`, `MinGrade`, `DOLU`) 
 
 CREATE TABLE `coursesection` (
   `CRN` int(11) NOT NULL,
-  `CourseID` varchar(25) DEFAULT NULL,
+  `CourseID` varchar(100) DEFAULT NULL,
   `SectionNum` int(11) DEFAULT NULL,
   `FacultyID` int(11) DEFAULT NULL,
   `TimeSlotID` varchar(100) DEFAULT NULL,
@@ -2301,7 +2301,7 @@ INSERT INTO `coursesection` (`CRN`, `CourseID`, `SectionNum`, `FacultyID`, `Time
 (327, 'EL6400', 1, 400108, '8Fri', '1H', 20232, 20),
 (328, 'EL6450', 1, 400123, '9Fri', '1M', 20232, 20),
 (329, 'EL6500', 1, 400138, '10Fri', '5H', 20232, 20),
-(330, 'BS6550', 1, 400004, '11Fri', '6M', 20232, 20),
+(330, 'MS1890', 1, 400350, '11Fri', '6M', 20232, 20),
 (331, 'BS6551', 1, 400019, '2Mon', '1M', 20232, 20),
 (332, 'BS6552', 1, 400034, '2Mon', '2M', 20232, 20),
 (333, 'BS6553', 1, 400049, '3Mon', '2W', 20232, 20),
@@ -2752,7 +2752,7 @@ INSERT INTO `coursesection` (`CRN`, `CourseID`, `SectionNum`, `FacultyID`, `Time
 (778, 'EL6400', 1, 400108, '8Fri', '1H', 20241, 20),
 (779, 'EL6450', 1, 400123, '9Fri', '1M', 20241, 20),
 (780, 'EL6500', 1, 400138, '10Fri', '5H', 20241, 20),
-(781, 'BS6550', 1, 400004, '11Fri', '6M', 20241, 20),
+(781, 'MS1890', 1, 400350, '11Fri', '6M', 20241, 20),
 (782, 'BS6551', 1, 400019, '1Mon', '1M', 20241, 20),
 (783, 'BS6552', 1, 400034, '2Mon', '2M', 20241, 20),
 (784, 'BS6553', 1, 400049, '3Mon', '2W', 20241, 20),
@@ -2873,7 +2873,13 @@ INSERT INTO `coursesection` (`CRN`, `CourseID`, `SectionNum`, `FacultyID`, `Time
 (899, 'BU6450', 1, 400106, '8Mon', '2M', 20241, 20),
 (900, 'BU6500', 1, 400121, '9Mon', '2W', 20241, 20),
 (901, 'BU6550', 1, 400136, '10Mon', '7M', 20241, 20),
-(902, 'MS6550', 1, 400150, '11Mon', '1M', 20241, 20);
+(902, 'MS6550', 1, 400150, '11Mon', '1M', 20241, 20),
+(903, 'MS5172', 1, 400165, '11Mon', '6W', 20232, 20),
+(904, 'MS5172', 1, 400165, '11Mon', '6W', 20241, 20),
+(905, 'MS5203', 1, 400180, '1Tues', '5H', 20232, 20),
+(906, 'MS5203', 1, 400180, '1Tues', '5H', 20241, 20),
+(907, 'MS5429', 1, 400195, '3Wed', '5H', 20232, 20),
+(908, 'MS5429', 1, 400195, '3Wed', '5H', 20241, 20);
 
 -- --------------------------------------------------------
 
@@ -3876,7 +3882,7 @@ INSERT INTO `facultyft` (`FacultyID`, `NumOfClass`, `OfficeID`) VALUES
 CREATE TABLE `facultyhistory` (
   `FacultyID` int(11) NOT NULL,
   `CRN` int(11) NOT NULL,
-  `CourseID` varchar(25) DEFAULT NULL,
+  `CourseID` varchar(100) DEFAULT NULL,
   `SemesterID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -9005,7 +9011,7 @@ INSERT INTO `student` (`StudentID`, `MajorID`, `StudentYear`, `StudentType`) VAL
 CREATE TABLE `studenthistory` (
   `StudentID` int(11) NOT NULL,
   `CRN` int(11) NOT NULL,
-  `CourseID` varchar(25) DEFAULT NULL,
+  `CourseID` varchar(100) DEFAULT NULL,
   `SemesterID` int(11) DEFAULT NULL,
   `Grade` varchar(3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -13518,11 +13524,11 @@ ALTER TABLE `courseprerequisite`
 -- Constraints for table `coursesection`
 --
 ALTER TABLE `coursesection`
-  ADD CONSTRAINT `coursesection_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `coursesection_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `coursesection_ibfk_4` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `coursesection_ibfk_5` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `coursesection_ibfk_6` FOREIGN KEY (`TimeSlotID`) REFERENCES `timeslot` (`TimeSlotID`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `coursesection_ibfk_6` FOREIGN KEY (`TimeSlotID`) REFERENCES `timeslot` (`TimeSlotID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_7` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `datagen`
@@ -13679,7 +13685,7 @@ ALTER TABLE `student`
 -- Constraints for table `studenthistory`
 --
 ALTER TABLE `studenthistory`
-  ADD CONSTRAINT `studenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE
+  ADD CONSTRAINT `studenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `studenthistory_ibfk_2` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `studenthistory_ibfk_3` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `studenthistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE CASCADE ON UPDATE CASCADE;
