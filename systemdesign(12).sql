@@ -13491,9 +13491,9 @@ ALTER TABLE `advisor`
 -- Constraints for table `attendance`
 --
 ALTER TABLE `attendance`
-  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `attendance_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `attendance_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `classroom`
@@ -13505,7 +13505,7 @@ ALTER TABLE `classroom`
 -- Constraints for table `course`
 --
 ALTER TABLE `course`
-  ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `courseprerequisite`
@@ -13518,17 +13518,17 @@ ALTER TABLE `courseprerequisite`
 -- Constraints for table `coursesection`
 --
 ALTER TABLE `coursesection`
-  ADD CONSTRAINT `coursesection_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `coursesection_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `coursesection_ibfk_4` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `coursesection_ibfk_5` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `coursesection_ibfk_6` FOREIGN KEY (`TimeSlotID`) REFERENCES `timeslot` (`TimeSlotID`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `coursesection_ibfk_5` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `coursesection_ibfk_6` FOREIGN KEY (`TimeSlotID`) REFERENCES `timeslot` (`TimeSlotID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `datagen`
 --
 ALTER TABLE `datagen`
-  ADD CONSTRAINT `datagen_ibfk_1` FOREIGN KEY (`StatsID`) REFERENCES `statsoffice` (`StatsID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `datagen_ibfk_1` FOREIGN KEY (`StatsID`) REFERENCES `statsoffice` (`StatsID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `dept`
@@ -13554,7 +13554,7 @@ ALTER TABLE `faculty`
 -- Constraints for table `facultydept`
 --
 ALTER TABLE `facultydept`
-  ADD CONSTRAINT `facultydept_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `facultydept_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `facultydept_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
@@ -13568,10 +13568,10 @@ ALTER TABLE `facultyft`
 -- Constraints for table `facultyhistory`
 --
 ALTER TABLE `facultyhistory`
-  ADD CONSTRAINT `facultyhistory_ibfk_1` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `facultyhistory_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `facultyhistory_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `facultyhistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `facultyhistory_ibfk_1` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `facultyhistory_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `facultyhistory_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `facultyhistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `facultypt`
@@ -13621,7 +13621,7 @@ ALTER TABLE `logintable`
 -- Constraints for table `major`
 --
 ALTER TABLE `major`
-  ADD CONSTRAINT `major_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `major_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `majorprerequisite`
@@ -13641,7 +13641,7 @@ ALTER TABLE `masterschedule`
 -- Constraints for table `minor`
 --
 ALTER TABLE `minor`
-  ADD CONSTRAINT `minor_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `minor_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `minorprerequisite`
@@ -13679,10 +13679,10 @@ ALTER TABLE `student`
 -- Constraints for table `studenthistory`
 --
 ALTER TABLE `studenthistory`
-  ADD CONSTRAINT `studenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `studenthistory_ibfk_2` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `studenthistory_ibfk_3` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `studenthistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `studenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE
+  ADD CONSTRAINT `studenthistory_ibfk_2` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `studenthistory_ibfk_3` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `studenthistory_ibfk_4` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `studentmajor`
