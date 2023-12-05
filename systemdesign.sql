@@ -1744,7 +1744,7 @@ INSERT INTO `courseprerequisite` (`CourseID`, `PRcourseID`, `MinGrade`, `DOLU`) 
 ('CS5198', 'CS3211', 'C', '2023-05-11'),
 ('CS5226', 'CS2510', 'C', '2023-05-11'),
 ('CS5226', 'CS2511', 'C', '2023-05-11'),
-('CS5329', 'CS3240', 'C', '2023-05-11'),
+('CS5329', 'CS3420', 'C', '2023-05-11'),
 ('CS5490', 'CS2512', 'C', '2023-05-11'),
 ('CS5490', 'CS2513', 'C', '2023-05-11'),
 ('CS5490', 'CS2514', 'C', '2023-05-11'),
@@ -1805,7 +1805,7 @@ INSERT INTO `courseprerequisite` (`CourseID`, `PRcourseID`, `MinGrade`, `DOLU`) 
 ('MA3180', 'MA3030', 'C', '2023-05-11'),
 ('MA3180', 'MA3160', 'C', '2023-05-11'),
 ('MA3210', 'MA2310', 'C', '2023-05-11'),
-('MA3310', 'MA2320', 'C', '2023-05-11'),
+('MA3330', 'MA2320', 'C', '2023-05-11'),
 ('MA3520', 'MA2320', 'C', '2023-05-11'),
 ('MA3520', 'MA3030', 'C', '2023-05-11'),
 ('MA4360', 'MA2320', 'C', '2023-05-11'),
@@ -13517,6 +13517,13 @@ ALTER TABLE `classroom`
 --
 ALTER TABLE `course`
   ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE CASCADE ON UPDATE CASCADE;
+  
+--
+-- Constraints for table `courseprerequisite`
+--
+ALTER TABLE `courseprerequisite`
+  ADD CONSTRAINT `courseprerequisite_ibfk_1` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `courseprerequisite_ibfk_2` FOREIGN KEY (`PRcourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `coursesection`
