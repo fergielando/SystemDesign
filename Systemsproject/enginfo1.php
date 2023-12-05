@@ -13,6 +13,18 @@ $engCourses = [];
 while ($course = mysqli_fetch_assoc($engCoursesResult)) {
     $engCourses[] = $course;
 }
+
+// Fetching faculty in the English department including their emails from the logintable
+$facultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position, f.Specialty, lt.Email AS FacultyEmail FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                JOIN logintable lt ON u.UID = lt.UID
+                WHERE fd.DeptID = 'ENG'";
+$facultyResult = mysqli_query($conn, $facultyQuery);
+$facultyList = [];
+while ($faculty = mysqli_fetch_assoc($facultyResult)) {
+    $facultyList[] = $faculty;
+}
 ?>
 
 <!DOCTYPE html>
@@ -54,19 +66,46 @@ while ($course = mysqli_fetch_assoc($engCoursesResult)) {
     <section>
             <h2>Message from the Chair and Manager - Michael Williams - Chair and Cynthia Green - Manager</h2>
             <p>Welcome to the English Department at UA University! Our department is dedicated to exploring the depth and richness of English literature and language, encouraging critical thinking, and fostering a love for literary studies among our students.</p>
+            <ul>
+                <li>Email: <a href="mailto:englishdepartment@ua.uni">englishdepartment@ua.uni</a></li>
+            </ul>
             <p>Contact Information for the Chair:</p>
             <ul>
-                <li>Email: <a href="mailto:michael.williams@UAuni.edu">michael.williams@UAuni.edu</a></li>
+                <li>Name: Michael Williams</li>
+                <li>Email: <a href="mailto:MichaelWilliams400003@ua.uni">MichaelWilliams400003@ua.uni</a></li>
                 <li>Phone: (555) 345-6789</li>
                 <li>Office: Room 3C</li>
             </ul>
             <p>Contact Information for the Manager:</p>
             <ul>
+                <li>Name: Cynthia Green</li>
                 <li>Email: <a href="mailto:CynthiaGreen400018@ua.uni">CynthiaGreen400018@ua.uni</a></li>
                 <li>Phone: (555) 583-4324</li>
                 <li>Office: Room 3C</li>
             </ul>
         </section>
+
+        <section>
+            <h2>Faculty in the <?php echo $engDeptDetails['DeptName']; ?> Department</h2>
+            <table>
+                <tr>
+                    <th>Faculty Name</th>
+                    <th>Position</th>
+                    <th>Specialty</th>
+                    <th>Email</th> <!-- Added Email column -->
+                </tr>
+                <?php foreach ($facultyList as $faculty): ?>
+                <tr>
+                    <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+                    <td><?php echo $faculty['Position']; ?></td>
+                    <td><?php echo $faculty['Specialty']; ?></td>
+                    <td><?php echo $faculty['FacultyEmail']; ?></td> <!-- Displaying Faculty Email -->
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </section>
+
+
 
         <section>
             <h2>Course Offerings</h2>

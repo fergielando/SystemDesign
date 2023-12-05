@@ -13,6 +13,19 @@ $ecoCourses = [];
 while ($course = mysqli_fetch_assoc($ecoCoursesResult)) {
     $ecoCourses[] = $course;
 }
+
+// Fetching faculty in the Economics department including their emails from the logintable
+$facultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position, f.Specialty, lt.Email AS FacultyEmail FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                JOIN logintable lt ON u.UID = lt.UID
+                WHERE fd.DeptID = 'ECO'";
+$facultyResult = mysqli_query($conn, $facultyQuery);
+$facultyList = [];
+while ($faculty = mysqli_fetch_assoc($facultyResult)) {
+    $facultyList[] = $faculty;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -54,19 +67,47 @@ while ($course = mysqli_fetch_assoc($ecoCoursesResult)) {
     <section>
             <h2>Message from the Chair and Manager - David Lee - Chair and Amanda Carter - Manager</h2>
             <p>Welcome to the Economics Department at UA University! Our department is committed to providing a deep understanding of economic theories and practices, equipping our students with the analytical skills needed to excel in the global economic landscape.</p>
+            <ul>
+                <li>Department Email: <a href="mailto:economicsdepartment@ua.uni">economicsdepartment@ua.uni</a></li>
+            </ul>
             <p>Contact Information for the Chair:</p>
             <ul>
-                <li>Email: <a href="mailto:david.lee@UAuni.edu">david.lee@UAuni.edu</a></li>
+                <li>Name: David Lee</li>
+                <li>Email: <a href="mailto:DavidLee400007@ua.uni">DavidLee400007@ua.uni</a></li>
                 <li>Phone: (555) 789-0123</li>
                 <li>Office: Room 7C</li>
             </ul>
             <p>Contact Information for the Manager:</p>
             <ul>
+                <li>Name: Amanda Carter</li>
                 <li>Email: <a href="mailto:AmandaCarter400022@ua.uni">AmandaCarter400022@ua.uni</a></li>
                 <li>Phone: (555) 543-7647</li>
                 <li>Office: Room 7C</li>
             </ul>
         </section>
+
+
+        <section>
+            <h2>Faculty in the <?php echo $ecoDeptDetails['DeptName']; ?> Department</h2>
+            <table>
+                <tr>
+                    <th>Faculty Name</th>
+                    <th>Position</th>
+                    <th>Specialty</th>
+                    <th>Email</th> <!-- Added Email column -->
+                </tr>
+                <?php foreach ($facultyList as $faculty): ?>
+                <tr>
+                    <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+                    <td><?php echo $faculty['Position']; ?></td>
+                    <td><?php echo $faculty['Specialty']; ?></td>
+                    <td><?php echo $faculty['FacultyEmail']; ?></td> <!-- Displaying Faculty Email -->
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </section>
+
+
 
         <section>
             <h2>Course Offerings</h2>

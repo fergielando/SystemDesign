@@ -13,8 +13,18 @@ $artCourses = [];
 while ($course = mysqli_fetch_assoc($artCoursesResult)) {
     $artCourses[] = $course;
 }
-?>
 
+// Fetching faculty in the art department
+$facultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position AS Position, f.Specialty AS Specialty FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                WHERE fd.DeptID = 'Art'";
+$facultyResult = mysqli_query($conn, $facultyQuery);
+$facultyList = [];
+while ($faculty = mysqli_fetch_assoc($facultyResult)) {
+    $facultyList[] = $faculty;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,20 +64,42 @@ while ($course = mysqli_fetch_assoc($artCoursesResult)) {
     <section>
             <h2>Message from the Chair and Manager - Linda Young - Chair and Samuel Parker - Manager</h2>
             <p>Welcome to the Art Department at UA University! Our department fosters creativity and critical thinking in the visual arts, and is committed to excellence in nurturing and challenging the artistic skills of our students.</p>
+             <ul>
+                <li>Department Email: <a href="mailto:artdepartment@ua.uni">artdepartment@ua.uni</a></li>
+            </ul>
             <p>Contact Information for the Chair:</p>
             <ul>
-                <li>Email: <a href="mailto:linda.young@UAuni.edu">linda.young@UAuni.edu</a></li>
+                <li>Name: Linda Young</li>
+                <li>Email: <a href="mailto:LindaYoung400012@ua.uni">LindaYoung400012@ua.uni</a></li>
                 <li>Phone: (555) 234-5678</li>
                 <li>Office: Room 12C</li>
             </ul>
             <p>Contact Information for the Manager:</p>
             <ul>
+                <li>Name: Samuel Parker</li>
                 <li>Email: <a href="mailto:SamuelParker400027@ua.uni">SamuelParker400027@ua.uni</a></li>
                 <li>Phone: (555) 123-4134</li>
                 <li>Office: Room 12C</li>
             </ul>
         </section>
 
+        <section>
+        <h2>Faculty in the Art Department</h2>
+        <table>
+            <tr>
+                <th>Faculty Name</th>
+                <th>Position</th>
+                <th>Specialty</th>
+            </tr>
+            <?php foreach ($facultyList as $faculty): ?>
+            <tr>
+                <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+                <td><?php echo $faculty['Position']; ?></td>
+                <td><?php echo $faculty['Specialty']; ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+    </section>
         <section>
             <h2>Course Offerings</h2>
             <table>

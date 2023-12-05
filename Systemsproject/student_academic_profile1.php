@@ -332,7 +332,7 @@ if (isset($_POST['update_user'])) {
 
    <div class="header">
       <h1>Academic Profile</h1>
-      <a href="user_page1.php" class="back-button">Back to Student Portal</a>
+      <button class="back-button" onclick="goBack()">Back</button>
       <a href="Create Schedule1.php" class="back-button">Create Schedule</a>
       <a href="DegreeAudit1.php" class="back-button">Degree Audit</a>
    </div>
@@ -506,8 +506,10 @@ if (isset($_POST['register_major_submit'])) {
          </form>
       </div>
    </div>
-
-   <!-- Add any other elements or styling as needed -->
-
+   <script>
+   function goBack() {
+            window.history.back();
+        }
+        </script>
 </body>
 </html>

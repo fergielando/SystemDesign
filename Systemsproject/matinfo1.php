@@ -13,6 +13,17 @@ $matCourses = [];
 while ($course = mysqli_fetch_assoc($matCoursesResult)) {
     $matCourses[] = $course;
 }
+// Fetching faculty in the Math department including their emails from the logintable
+$facultyQuery = "SELECT f.FacultyID, u.FirstName AS FacultyFirstName, u.LastName AS FacultyLastName, f.Position, f.Specialty, lt.Email AS FacultyEmail FROM faculty f
+                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+                JOIN user u ON f.FacultyID = u.UID
+                JOIN logintable lt ON u.UID = lt.UID
+                WHERE fd.DeptID = 'MAT'";
+$facultyResult = mysqli_query($conn, $facultyQuery);
+$facultyList = [];
+while ($faculty = mysqli_fetch_assoc($facultyResult)) {
+    $facultyList[] = $faculty;
+}
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +55,7 @@ while ($course = mysqli_fetch_assoc($matCoursesResult)) {
 <body>
     <header>
         <div class="header">
-            <h1>Welcome to the Math Depmatment</h1>
+            <h1>Welcome to the Math Department</h1>
             <button class="back-button" onclick="goBack()">Back</button>
         </div>
     </header>
@@ -54,19 +65,45 @@ while ($course = mysqli_fetch_assoc($matCoursesResult)) {
     <section>
             <h2>Message from the Chair and Manager - Jennifer Hall - Chair and Thomas Turner - Manager</h2>
             <p>Welcome to the Mathematics Department at UA University! Our department is committed to excellence in mathematical education and research, offering a rigorous curriculum and fostering a dynamic environment for exploring the vast world of mathematics.</p>
+             <ul>
+                <li>Department Email: <a href="mailto:mathdepartment@ua.uni">mathdepartment@ua.uni</a></li>
+            </ul>
             <p>Contact Information for the Chair:</p>
             <ul>
-                <li>Email: <a href="mailto:jennifer.hall@UAuni.edu">jennifer.hall@UAuni.edu</a></li>
+                <li>Name: Jennifer Hall</li>
+                <li>Email: <a href="mailto:JenniferHall400008@ua.uni">JenniferHall400008@ua.uni</a></li>
                 <li>Phone: (555) 890-1234</li>
                 <li>Office: Room 8C</li>
             </ul>
             <p>Contact Information for the Manager:</p>
             <ul>
+                <li>Name: Thomas Turner</li>
                 <li>Email: <a href="mailto:ThomasTurner400023@ua.uni">ThomasTurner400023@ua.uni</a></li>
                 <li>Phone: (555) 546-1203</li>
                 <li>Office: Room 8C</li>
             </ul>
         </section>
+
+        <section>
+            <h2>Faculty in the <?php echo $matDeptDetails['DeptName']; ?> Department</h2>
+            <table>
+                <tr>
+                    <th>Faculty Name</th>
+                    <th>Position</th>
+                    <th>Specialty</th>
+                    <th>Email</th> <!-- Added Email column -->
+                </tr>
+                <?php foreach ($facultyList as $faculty): ?>
+                <tr>
+                    <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+                    <td><?php echo $faculty['Position']; ?></td>
+                    <td><?php echo $faculty['Specialty']; ?></td>
+                    <td><?php echo $faculty['FacultyEmail']; ?></td> <!-- Displaying Faculty Email -->
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </section>
+        
 
 
         <section>

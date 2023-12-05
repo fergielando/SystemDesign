@@ -5,15 +5,16 @@ session_start();
 // Include your database configuration file
 @include 'config1.php';
 
-// Check if a UID is stored in the session and redirect if not found
-if (!isset($_SESSION['UID'])) {
-    echo "User not authenticated. Redirecting to login page.";
-    // Redirect to login page or another appropriate page
-    header("Location: login.php");
+// Check if a UID is passed in the URL
+if (!isset($_GET['UID'])) {
+    echo "No student selected. Redirecting to previous page.";
+    header("refresh:3;url=javascript:history.back()");
     exit;
 }
 
-$uid = $_SESSION['UID'];
+// Use the UID from the URL parameter
+$uid = mysqli_real_escape_string($conn, $_GET['UID']);
+
 
 // Retrieve the student's information from the database
 $queryUserInfo = "SELECT FirstName, LastName, UID FROM user WHERE UID = '$uid'";

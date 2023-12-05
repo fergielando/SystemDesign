@@ -30,16 +30,18 @@ if ($facultyRow = mysqli_fetch_assoc($facultyResult)) {
 }
 
 // Fetch the courses assigned to the faculty
-$scheduleQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, course.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, facultyhistory.SemesterID
-                  FROM facultyhistory
-                  JOIN coursesection ON facultyhistory.CourseID = coursesection.CourseID
+$scheduleQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, course.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, coursesection.SemesterID
+                  FROM coursesection
                   JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
                   JOIN day ON timeslot.DayID = day.DayID
                   JOIN course ON coursesection.CourseID = course.CourseID 
                   JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
                   JOIN room ON coursesection.RoomID = room.RoomID
                   JOIN building ON room.BuildingID = building.BuildingID
-                  WHERE facultyhistory.FacultyID = '$UID'";
+                  WHERE coursesection.FacultyID = '$UID'
+                  ORDER BY coursesection.SemesterID";
+
+
 
 $scheduleResult = mysqli_query($conn, $scheduleQuery);
 
@@ -208,15 +210,15 @@ while ($row = mysqli_fetch_assoc($scheduleResult)) {
    <h1>Welcome to U.A. University</h1>
    <div class="button-container">
       <a href="logout1.php" class="btn">Logout</a>
-      <a href="FacMajor1.php" class="btn">Majors</a>
-      <a href="facminor1.php" class="btn">Minors</a>
+      <a href="student_majors1.php" class="btn">Majors</a>
+      <a href="student_minor1.php" class="btn">Minors</a>
       <a href="facdepartment.php" class="btn">Departments</a>
       <a href="faculty_page1.php" class="btn">Master Schedule</a>
    </div>
 </header>
 
    <?php
-   
+  
 
    // Retrieve unique SemesterIDs for filtering
    $uniqueSemesters = array_unique(array_column($courses, 'SemesterID'));
@@ -252,6 +254,7 @@ while ($row = mysqli_fetch_assoc($scheduleResult)) {
                <div class="course-table" data-semester-id="<?php echo htmlspecialchars($course['SemesterID']); ?>">
                    <table>
                        <tr><th>CRN</th><td><?php echo htmlspecialchars($course['CRN']); ?></td></tr>
+                       <tr><th>Course ID</th><td><?php echo htmlspecialchars($course['CourseID']); ?></td></tr> <!-- Added line for CourseID -->
                        <tr><th>Course Name</th><td><?php echo htmlspecialchars($course['CourseName']); ?></td></tr>
                        <tr><th>Day</th><td><?php echo htmlspecialchars($course['Weekday']); ?></td></tr>
                        <tr><th>Building</th><td><?php echo htmlspecialchars($course['BuildingName']); ?></td></tr>
