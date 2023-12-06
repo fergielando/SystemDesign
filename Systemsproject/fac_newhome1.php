@@ -30,16 +30,36 @@ if ($facultyRow = mysqli_fetch_assoc($facultyResult)) {
 }
 
 // Fetch the courses assigned to the faculty
-$scheduleQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.AvailableSeats, timeslot.TimeSlotID, day.Weekday, masterschedule.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime, coursesection.SemesterID
-                  FROM coursesection
-                  JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID 
-                  JOIN day ON timeslot.DayID = day.DayID
-                  JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID 
-                  JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
-                  JOIN room ON coursesection.RoomID = room.RoomID
-                  JOIN building ON room.BuildingID = building.BuildingID
-                  WHERE coursesection.FacultyID = '$UID'
-                  ORDER BY coursesection.SemesterID";
+$scheduleQuery = "SELECT 
+cs.CRN, 
+cs.CourseID, 
+cs.AvailableSeats, 
+cs.SemesterID,  -- Added SemesterID
+ts.TimeSlotID, 
+d.Weekday, 
+c.CourseName, 
+r.RoomNum, 
+b.BuildingName, 
+p.StartTime, 
+p.EndTime
+FROM 
+coursesection cs
+JOIN 
+timeslot ts ON cs.TimeSlotID = ts.TimeSlotID 
+JOIN 
+day d ON ts.DayID = d.DayID
+JOIN 
+course c ON cs.CourseID = c.CourseID 
+JOIN 
+periodd p ON ts.PeriodID = p.PeriodID
+JOIN 
+room r ON cs.RoomID = r.RoomID
+JOIN 
+building b ON r.BuildingID = b.BuildingID
+WHERE 
+cs.FacultyID = '$UID'
+
+";
 
 
 
@@ -49,6 +69,20 @@ $courses = [];
 while ($row = mysqli_fetch_assoc($scheduleResult)) {
     $courses[] = $row;
 }
+
+// Fetch the students advised by the faculty member
+$advisingQuery = "SELECT adv.StudentID, usr.FirstName, usr.LastName, adv.DOA 
+                  FROM advisor adv
+                  JOIN user usr ON adv.StudentID = usr.UID
+                  WHERE adv.FacultyID = '$UID'";
+$advisingResult = mysqli_query($conn, $advisingQuery);
+
+$advisedStudents = [];
+while ($row = mysqli_fetch_assoc($advisingResult)) {
+    $advisedStudents[] = $row;
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -201,6 +235,25 @@ while ($row = mysqli_fetch_assoc($scheduleResult)) {
     color: #000; /* Black text color on hover */
 }
 
+/* Styles for the advised students table */
+.advised-students-table {
+    margin: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.advised-students-table th, .advised-students-table td {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: left;
+    color: black;
+}
+
+.advised-students-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
    </style>
 </head>
@@ -290,5 +343,33 @@ while ($row = mysqli_fetch_assoc($scheduleResult)) {
            });
        });
    </script>
+
+
+<!-- Advised Students Section -->
+<div class="advised-students-section">
+    <h2>Advised Students</h2>
+    <div class="table-container">
+        <table class="advised-students-table">
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Date of Advising</th>
+            </tr>
+            <?php foreach ($advisedStudents as $student): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($student['StudentID']); ?></td>
+                    <!-- Make student name a clickable link -->
+                    <td>
+                        <a href="facacademicprof.php?UID=<?php echo urlencode($student['StudentID']); ?>">
+                            <?php echo htmlspecialchars($student['FirstName']) . ' ' . htmlspecialchars($student['LastName']); ?>
+                        </a>
+                    </td>
+                    <td><?php echo htmlspecialchars($student['DOA']); ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
+</div>
+
 </body>
 </html>

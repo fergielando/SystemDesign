@@ -46,13 +46,14 @@ while ($rowMinor = mysqli_fetch_assoc($resultMinors)) {
 }
 
 // Fetch course history including grades
-$courseHistoryQuery = "SELECT coursesection.CRN, coursesection.CourseID, masterschedule.CourseName, studenthistory.Grade
+$courseHistoryQuery = "SELECT coursesection.CRN, coursesection.CourseID, course.CourseName, studenthistory.Grade
                        FROM studenthistory
                        JOIN coursesection ON studenthistory.CRN = coursesection.CRN
-                       JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
+                       JOIN course ON coursesection.CourseID = course.CourseID
                        WHERE studenthistory.StudentID = '$uid'";
 $courseHistoryResult = mysqli_query($conn, $courseHistoryQuery);
 $courseHistory = [];
+
 
 while ($course = mysqli_fetch_assoc($courseHistoryResult)) {
     $courseHistory[] = $course;
@@ -82,14 +83,15 @@ $allMajorPrerequisites = [];
 
 // Fetch prerequisites for each major
 foreach ($majors as $major) {
-   $majorId = $major['MajorID']; 
-   $prerequisitesQuery = "SELECT majorprerequisite.PRmajorID, majorprerequisite.MinGrade, majorprerequisite.DOLU, masterschedule.CourseName
-                          FROM majorprerequisite 
-                          JOIN masterschedule ON majorprerequisite.PRmajorID = masterschedule.CourseID
-                          WHERE majorprerequisite.MajorID = '$majorId'";
-   $prerequisites = fetchPrerequisitesWithGradeCheck($conn, $prerequisitesQuery, $courseHistory);
-   $allMajorPrerequisites[$major['MajorName']] = $prerequisites;
-}
+    $majorId = $major['MajorID']; 
+    $prerequisitesQuery = "SELECT majorprerequisite.PRmajorID, majorprerequisite.MinGrade, majorprerequisite.DOLU, course.CourseName
+                           FROM majorprerequisite 
+                           JOIN course ON majorprerequisite.PRmajorID = course.CourseID
+                           WHERE majorprerequisite.MajorID = '$majorId'";
+    $prerequisites = fetchPrerequisitesWithGradeCheck($conn, $prerequisitesQuery, $courseHistory);
+    $allMajorPrerequisites[$major['MajorName']] = $prerequisites;
+ }
+ 
 
 // Array to hold all prerequisites for all minors
 $allMinorPrerequisites = [];
@@ -97,9 +99,9 @@ $allMinorPrerequisites = [];
 // Fetch prerequisites for each minor
 foreach ($minors as $minor) {
    $minorId = $minor['MinorID']; 
-   $prerequisitesQuery = "SELECT minorprerequisite.PRminorID, minorprerequisite.MinGrade, minorprerequisite.DOLU, masterschedule.CourseName
+   $prerequisitesQuery = "SELECT minorprerequisite.PRminorID, minorprerequisite.MinGrade, minorprerequisite.DOLU, course.CourseName
                           FROM minorprerequisite 
-                          JOIN masterschedule ON minorprerequisite.PRminorID = masterschedule.CourseID
+                          JOIN course ON minorprerequisite.PRminorID = course.CourseID
                           WHERE minorprerequisite.MinorID = '$minorId'";
    $prerequisites = fetchPrerequisitesWithGradeCheck($conn, $prerequisitesQuery, $courseHistory);
    $allMinorPrerequisites[$minor['MinorName']] = $prerequisites;

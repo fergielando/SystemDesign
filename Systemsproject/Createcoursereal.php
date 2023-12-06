@@ -1,4 +1,3 @@
-
 <?php
 @include 'config1.php'; // Include your database configuration file
 
@@ -11,38 +10,7 @@ if (!isset($_SESSION['UID'])) {
 }
 
 $uid = $_SESSION['UID'];
-
-$availableSlotsQuery = "
-SELECT 
-    t.TimeSlotID, 
-    d.Weekday, 
-    p.StartTime, 
-    p.EndTime, 
-    b.BuildingName, 
-    r.RoomNum, 
-    r.RoomID
-FROM timeslot t
-JOIN day d ON t.DayID = d.DayID
-JOIN periodd p ON t.PeriodID = p.PeriodID
-JOIN room r ON 1 = 1
-JOIN building b ON r.BuildingID = b.BuildingID
-LEFT JOIN coursesection cs ON t.TimeSlotID = cs.TimeSlotID AND r.RoomID = cs.RoomID
-WHERE cs.CRN IS NULL
-ORDER BY d.Weekday, p.StartTime, r.RoomNum;";
-
-
-
-
-$availableSlotsResult = mysqli_query($conn, $availableSlotsQuery);
-
-$availableSlots = [];
-while ($slotRow = mysqli_fetch_assoc($availableSlotsResult)) {
-    $availableSlots[] = $slotRow;
-}
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -52,7 +20,7 @@ while ($slotRow = mysqli_fetch_assoc($availableSlotsResult)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Course</title>
     <style>
-      body {
+     body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
   margin: 0;
@@ -107,12 +75,11 @@ input[type="submit"] {
 input[type="submit"]:hover {
   background-color: #4cae4c;
 }
-
-    </style>
+        </style>
 </head>
 <body>
     <h1>Create Course</h1>
-    <form action="process_create_course.php" method="POST">
+    <form action="processcreatecoursereal.php" method="POST">
         <!-- Input field for course ID -->
         <label for="course_id">Course ID:</label>
         <input type="text" id="course_id" name="course_id" required><br>
@@ -125,6 +92,8 @@ input[type="submit"]:hover {
         <label for="dept_id">Department ID:</label>
         <select id="dept_id" name="dept_id" required>
             <?php
+            // Include your database configuration file
+            @include 'config1.php';
 
             // Fetch existing department IDs from the database
             $deptQuery = "SELECT DeptID FROM dept";
@@ -139,29 +108,6 @@ input[type="submit"]:hover {
             ?>
         </select><br>
 
-
-       
-<select id="timeslot" name="timeslot" required>
-    <?php foreach ($availableSlots as $slot): ?>
-        <option value="<?php echo $slot['TimeSlotID'] . '_' . $slot['RoomID']; ?>">
-    <?php echo $slot['Weekday'] . ', ' . $slot['StartTime'] . '-' . $slot['EndTime'] . ', ' . $slot['BuildingName'] . ' - Room ' . $slot['RoomNum']; ?>
-</option>
-    <?php endforeach; ?>
-</select>
-
-<!-- Input field for CRN -->
-<label for="CRN">CRN:</label>
-        <input type="text" id="CRN" name="CRN" required><br>
-
-
-       <!-- Hidden or Read-only field for SemesterID -->
-       <label for="semester_id">Semester ID:</label>
-        <input type="text" id="semester_id" name="semester_id" value="20241" readonly><br>
-
-        <!-- Input field for Available Seats -->
-        <label for="available_seats">Available Seats:</label>
-        <input type="number" id="available_seats" name="available_seats" required><br>
-
         <!-- Input field for course credits -->
         <label for="credits">Credits:</label>
         <input type="text" id="credits" name="credits" required><br>
@@ -174,15 +120,7 @@ input[type="submit"]:hover {
         <label for="course_type">Course Type:</label>
         <input type="text" id="course_type" name="course_type" required><br>
 
-        <!-- Input field for section number -->
-        <label for="section_num">Section Number:</label>
-        <input type="text" id="section_num" name="section_num" required><br>
-
-        <!-- Input field for faculty ID -->
-        <label for="faculty_id">Faculty ID:</label>
-        <input type="text" id="faculty_id" name="faculty_id" required><br>
-
-       <!-- Input fields for course prerequisites -->
+        <!-- Input fields for course prerequisites -->
 <label for="pr_course_id">Prerequisite Course ID:</label>
 <input type="text" id="pr_course_id" name="pr_course_id"><br>
 
@@ -191,9 +129,8 @@ input[type="submit"]:hover {
 
 <label for="dolu">DOLU:</label>
 <input type="text" id="dolu" name="dolu"><br>
-
-        <!-- Submit button -->
-        <input type="submit" value="Create Course">
-    </form>
+   <!-- Submit button -->
+   <input type="submit" value="Create Course">
+        </form>
 </body>
 </html>

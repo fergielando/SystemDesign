@@ -356,9 +356,8 @@ table tr:nth-child(odd) {
 <div class="header">
    <h1>Academic Profile</h1>
    <div class="button-container">
-   <a href="faccreateschedule.php?UID=<?php echo $uid; ?>" class="btn">Create Schedule</a>
-       <a href="facdegreeaudit.php?UID=<?php echo $uid; ?>" class="btn">Degree Audit</a>
-       <a href="Update_a_user1.php" class="btn">Back</a>
+       <a href="Facdegreeaudit.php?UID=<?php echo $uid; ?>" class="btn">Degree Audit</a>
+       <a href="fac_newhome1.php" class="btn">Back</a>
        </div>
 </div>
 
@@ -492,87 +491,6 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
             <?php endforeach; ?>
          </tbody>
       </table>
-
-      <h2>Assign Major</h2>
-      <form action="" method="post">
-         <select name="major">
-            <option value="" disabled selected>Select a major</option>
-            <?php foreach ($majors as $major) : ?>
-               <option value="<?php echo $major['MajorID']; ?>"><?php echo $major['MajorName']; ?></option>
-            <?php endforeach; ?>
-         </select>
-         <input type="submit" name="assign_major" value="Assign Major" class="create-button">
-      </form>
-      <h2>Assign Minor</h2>
-      <form action="" method="post">
-         <select name="minor">
-            <option value="" disabled selected>Select a minor</option>
-            <?php foreach ($minors as $minor) : ?>
-               <option value="<?php echo $minor['MinorID']; ?>"><?php echo $minor['MinorName']; ?></option>
-            <?php endforeach; ?>
-         </select>
-         <input type="submit" name="assign_minor" value="Assign Minor" class="create-button">
-      </form>
-
-
-      <h2>Drop Major</h2>
-   <form action="" method="post">
-      <select name="drop_major">
-         <option value="" disabled selected>Select a major to drop</option>
-         <?php foreach ($userMajors as $userMajor) : ?>
-            <option value="<?php echo $userMajor; ?>"><?php echo $userMajor; ?></option>
-         <?php endforeach; ?>
-      </select>
-      <input type="submit" name="drop_major_submit" value="Drop Major" class="create-button">
-   </form>
-
-   <h2>Drop Minor</h2>
-<form action="" method="post">
-   <select name="drop_minor">
-      <option value="" disabled selected>Select a minor to drop</option>
-      <?php foreach ($userMinors as $userMinor) : ?>
-         <option value="<?php echo $userMinor; ?>"><?php echo $userMinor; ?></option>
-      <?php endforeach; ?>
-   </select>
-   <input type="submit" name="drop_minor_submit" value="Drop Minor" class="create-button">
-</form>
-
-
-
-
-               <?php
-
-
-
-
-               
-
-               // Function to register a major for a student
-if (isset($_POST['register_major_submit'])) {
-    $selectedMajorID = mysqli_real_escape_string($conn, $_POST['register_major']);
-
-    // Check if the registration already exists
-    $checkRegistrationQuery = "SELECT * FROM studentmajor WHERE StudentID = '$uid' AND MajorID = '$selectedMajorID'";
-    $checkRegistrationResult = mysqli_query($conn, $checkRegistrationQuery);
-
-    if (mysqli_num_rows($checkRegistrationResult) > 0) {
-        // If the registration exists, show a message or handle it as needed
-        echo "You are already registered for this major.";
-    } else {
-        // If the registration doesn't exist, insert it into the database
-        $registerMajorQuery = "INSERT INTO studentmajor (StudentID, MajorID) VALUES ('$uid', '$selectedMajorID')";
-        mysqli_query($conn, $registerMajorQuery);
-
-        // Optionally, you can add a success message or redirect the user
-        echo "Major registered successfully!";
-    }
-}
-               ?>
-            </tbody>
-         </table>
-      </div>
-   </div
-
 
 
 <!-- Advisor section -->

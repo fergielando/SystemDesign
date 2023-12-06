@@ -7,7 +7,6 @@ if (!isset($_SESSION['admin_name'])) {
    header('location:login_form1.php');
 }
 
-// Fetch available courses with additional details, ordered by CRN (Include this part only)
 $query = "SELECT
     coursesection.CRN,
     coursesection.CourseID,
@@ -21,7 +20,8 @@ $query = "SELECT
     periodd.StartTime,
     periodd.EndTime,
     user.FirstName AS FacultyFirstName,
-    user.LastName AS FacultyLastName
+    user.LastName AS FacultyLastName,
+    coursesection.SemesterID  -- Include semesterID column
 FROM coursesection
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
 JOIN day ON timeslot.DayID = day.DayID
@@ -29,9 +29,8 @@ JOIN course ON coursesection.CourseID = course.CourseID
 JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
 JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
-JOIN facultyhistory ON coursesection.CRN = facultyhistory.CRN
-JOIN faculty ON facultyhistory.FacultyID = faculty.FacultyID
-JOIN user ON faculty.FacultyID = user.UID  -- Join using the foreign key constraint
+JOIN faculty ON coursesection.FacultyID = faculty.FacultyID
+JOIN user ON faculty.FacultyID = user.UID
 ORDER BY coursesection.CRN ASC";
 
 
@@ -42,6 +41,15 @@ $result = mysqli_query($conn, $query);
 $courses = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $courses[] = $row;
+}
+
+// Fetch distinct semester IDs for the filter
+$query = "SELECT DISTINCT semesterID FROM coursesection"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$semesterIDs = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $semesterIDs[] = $row['semesterID'];
 }
 
 // Fetch distinct days for the filter
@@ -98,7 +106,11 @@ while ($row = mysqli_fetch_assoc($result)) {
    <meta name="viewport" content="width device-width, initial-scale=1.0">
    <title>Admin Panel</title>
 
-   
+  
+
+
+
+
  <!-- Add the styles for the table, search feature, and filters here or in a separate CSS file -->
  <style>
        .header {
@@ -179,6 +191,20 @@ while ($row = mysqli_fetch_assoc($result)) {
          font-size: 16px;
       }
 
+      .edit-btn {
+    display: inline-block;
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.edit-btn:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
       .search-container button {
          padding: 10px 20px;
          background-color: #000;
@@ -238,6 +264,11 @@ while ($row = mysqli_fetch_assoc($result)) {
       <h1>Master Schedule</h1>
       <div class="button-container">
          <a href="admin_page1.php" class="btn">Back</a>
+         <a href="createcoursesection.php" class="btn">Create Course Section</a>
+         <a href="deletecoursesection.html" class="btn">Delete Course Section</a>
+         <a href="Updatecoursesection.php" class="btn">Update Course Section</a>
+
+
       </div>
       </head>
    </div>
@@ -255,6 +286,16 @@ while ($row = mysqli_fetch_assoc($result)) {
       <button onclick="searchTable()">Search</button>
       <button onclick="resetTable()">Reset</button>
    </div>
+
+   <div class="filter-container">
+        <label for="semesterFilter">Semester ID:</label>
+        <select id="semesterFilter" onchange="filterTable('semesterFilter', 'Semester ID')">
+            <option value="">All</option>
+            <?php foreach ($semesterIDs as $semesterID): ?>
+                <option value="<?php echo $semesterID; ?>"><?php echo $semesterID; ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
    <!-- Filter container for Department -->
    <div class="filter-container">
@@ -325,36 +366,47 @@ while ($row = mysqli_fetch_assoc($result)) {
    <!-- Add similar filter containers for other columns if needed -->
 
    <table>
-   <thead>
-    <tr>
-        <th>CRN</th>
-        <th>Course Name</th>
-        <th>Department ID</th>
-        <th>Day</th>
-        <th>Building</th>
-        <th>Room ID</th>
-        <th>Time</th>
-        <th>Professor Name</th>  <!-- Add faculty name header -->
-    </tr>
-</thead>
-
-<tbody>
-    <?php foreach ($courses as $course): ?>
+    <thead>
         <tr>
-            <td><?php echo $course['CRN']; ?></td>
-            <td><?php echo $course['CourseName']; ?></td>
-            <td><?php echo $course['deptID']; ?></td>
-            <td><?php echo $course['Weekday']; ?></td>
-            <td><?php echo $course['BuildingName']; ?></td>
-            <td><?php echo $course['RoomID']; ?></td>
-            <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
-            <td><?php echo $course['FacultyFirstName'] . " " . $course['FacultyLastName']; ?></td>  <!-- Display faculty name -->
+        <th>CRN</th>
+<th>Course Name</th>
+<th>Department ID</th>
+<th>Day</th>
+<th>Building</th>
+<th>Room ID</th>
+<th>Time</th>
+<th>Professor Name</th>
+<th>Semester ID</th>
+<th>Edit</th>
+<th>Class Roster</th> <!-- Add this line -->
         </tr>
-    <?php endforeach; ?>
-</tbody>
+    </thead>
 
-   </table>
+    <tbody>
+    <?php foreach ($courses as $course): ?>
+    <tr>
+        <td><?php echo $course['CRN']; ?></td>
+        <td><?php echo $course['CourseName']; ?></td>
+        <td><?php echo $course['deptID']; ?></td>
+        <td><?php echo $course['Weekday']; ?></td>
+        <td><?php echo $course['BuildingName']; ?></td>
+        <td><?php echo $course['RoomID']; ?></td>
+        <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+        <td><?php echo $course['FacultyFirstName'] . " " . $course['FacultyLastName']; ?></td>
+        <td><?php echo $course['SemesterID']; ?></td>
+        <td>
+            <?php if ($course['SemesterID'] !== '20232'): ?>
+                <a href="editcoursesection.php?CRN=<?php echo urlencode($course['CRN']); ?>" class="edit-btn">Edit</a>
+            <?php endif; ?>
+        </td>
+        <td>
+            <a href="classroster.php?CRN=<?php echo urlencode($course['CRN']); ?>" class="class-roster-btn">Class Roster</a>
+        </td>
+    </tr>
+<?php endforeach; ?>
 
+    </tbody>
+</table>
    <script>
       function searchTable() {
          var input, filter, table, tr, td, i, txtValue;

@@ -15,24 +15,25 @@ $uid = $_SESSION['UID'];
 $courseType = ($uid >= 500801) ? 'Graduate' : 'Undergraduate';
 
 // Fetch available courses with additional details, including prerequisites, ordered by CRN
+// Fetch available courses with additional details, including prerequisites, ordered by CRN
 $query = "SELECT
     coursesection.CRN,
-    coursesection.CourseID,
-    coursesection.AvailableSeats,
-    timeslot.TimeSlotID,
-    day.Weekday,
-    course.CourseName,
-    room.RoomNum,
-    building.BuildingName,
-    periodd.StartTime,
-    periodd.EndTime,
-    coursesection.SectionNum,
-    coursesection.SemesterID,
-    courseprerequisite.PRcourseID,
-    courseprerequisite.MinGrade,
-    course.CourseType,
-    course.Credits,
-    dept.DeptName  -- Include the DeptName column from the dept table
+    MAX(coursesection.CourseID) AS CourseID,
+    MAX(coursesection.AvailableSeats) AS AvailableSeats,
+    MAX(timeslot.TimeSlotID) AS TimeSlotID,
+    MAX(day.Weekday) AS Weekday,
+    MAX(course.CourseName) AS CourseName,
+    MAX(room.RoomNum) AS RoomNum,
+    MAX(building.BuildingName) AS BuildingName,
+    MAX(periodd.StartTime) AS StartTime,
+    MAX(periodd.EndTime) AS EndTime,
+    MAX(coursesection.SectionNum) AS SectionNum,
+    MAX(coursesection.SemesterID) AS SemesterID,
+    MAX(courseprerequisite.PRcourseID) AS PRcourseID,
+    MAX(courseprerequisite.MinGrade) AS MinGrade,
+    MAX(course.CourseType) AS CourseType,
+    MAX(course.Credits) AS Credits,
+    MAX(dept.DeptName) AS DeptName
 FROM coursesection
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
 JOIN day ON timeslot.DayID = day.DayID
@@ -41,9 +42,12 @@ JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
 LEFT JOIN courseprerequisite ON coursesection.CourseID = courseprerequisite.CourseID
 JOIN course ON coursesection.CourseID = course.CourseID
-JOIN dept ON course.DeptID = dept.DeptID  -- Join the dept table to get DeptName
-WHERE course.CourseType = '$courseType'  -- Filter by the determined course type
+JOIN dept ON course.DeptID = dept.DeptID
+WHERE course.CourseType = '$courseType'
+GROUP BY coursesection.CRN
 ORDER BY coursesection.CRN ASC";
+
+
 
 $result = mysqli_query($conn, $query);
 
@@ -81,6 +85,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
                 echo "Course with CRN $selectedCRN has already been dropped in this semester.";
                 exit;
             }
+
+           // Check for student hold
+$checkHoldQuery = "SELECT * FROM Hold WHERE StudentID = '$uid'";
+$checkHoldResult = mysqli_query($conn, $checkHoldQuery);
+
+if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
+    // The student has a hold
+    $holdInfo = mysqli_fetch_assoc($checkHoldResult);
+    
+    // Display a larger, red error message with a 6-second delay
+    echo "<div style='font-size: 24px; color: red;'>You have a hold on your account of type: " . $holdInfo['HoldType'] . " since " . $holdInfo['DateOfHold'] . "</div>";
+    
+    // Redirect back to the previous page after 6 seconds
+    echo "<script>setTimeout(function() { window.history.back(); }, 6000);</script>";
+    exit;
+}
+
+// If the student doesn't have a hold, proceed with class assignment logic
+// ...
+
+
     
             // Retrieve prerequisite information for the selected course
             $prerequisiteQuery = "SELECT PRcourseID, MinGrade FROM courseprerequisite WHERE CourseID = (SELECT CourseID FROM coursesection WHERE CRN = '$selectedCRN')";

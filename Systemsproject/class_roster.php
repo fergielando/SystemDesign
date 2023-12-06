@@ -12,13 +12,14 @@ if (!isset($_GET['CRN'])) {
 $CRN = $_GET['CRN'];
 
 // Fetch course details
-$courseInfoQuery = "SELECT coursesection.CourseID, masterschedule.CourseName 
+$courseInfoQuery = "SELECT coursesection.CourseID, course.CourseName 
                     FROM coursesection
-                    JOIN masterschedule ON coursesection.CourseID = masterschedule.CourseID
+                    JOIN course ON coursesection.CourseID = course.CourseID
                     WHERE CRN = '$CRN'";
 $courseInfoResult = mysqli_query($conn, $courseInfoQuery);
 $courseID = '';
 $courseName = '';
+
 
 if ($courseRow = mysqli_fetch_assoc($courseInfoResult)) {
     $courseID = $courseRow['CourseID'];

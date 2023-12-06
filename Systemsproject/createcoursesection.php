@@ -12,6 +12,14 @@ if (!isset($_SESSION['UID'])) {
 
 $uid = $_SESSION['UID'];
 
+// Query to get all courses
+$allCoursesQuery = "SELECT CourseID, CourseName FROM course";
+$allCoursesResult = mysqli_query($conn, $allCoursesQuery);
+$allCourses = [];
+while ($courseRow = mysqli_fetch_assoc($allCoursesResult)) {
+    $allCourses[] = $courseRow;
+}
+
 $availableSlotsQuery = "
 SELECT 
     t.TimeSlotID, 
@@ -20,7 +28,8 @@ SELECT
     p.EndTime, 
     b.BuildingName, 
     r.RoomNum, 
-    r.RoomID
+    r.RoomID,
+    r.RoomType  -- Add this line to fetch RoomType
 FROM timeslot t
 JOIN day d ON t.DayID = d.DayID
 JOIN periodd p ON t.PeriodID = p.PeriodID
@@ -28,6 +37,7 @@ JOIN room r ON 1 = 1
 JOIN building b ON r.BuildingID = b.BuildingID
 LEFT JOIN coursesection cs ON t.TimeSlotID = cs.TimeSlotID AND r.RoomID = cs.RoomID
 WHERE cs.CRN IS NULL
+AND r.RoomType <> 'office'
 ORDER BY d.Weekday, p.StartTime, r.RoomNum;";
 
 
@@ -40,17 +50,13 @@ while ($slotRow = mysqli_fetch_assoc($availableSlotsResult)) {
     $availableSlots[] = $slotRow;
 }
 ?>
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Course</title>
+    <title>Create Course Section</title>
     <style>
       body {
   font-family: Arial, sans-serif;
@@ -111,41 +117,26 @@ input[type="submit"]:hover {
     </style>
 </head>
 <body>
-    <h1>Create Course</h1>
-    <form action="process_create_course.php" method="POST">
-        <!-- Input field for course ID -->
-        <label for="course_id">Course ID:</label>
-        <input type="text" id="course_id" name="course_id" required><br>
+    <h1>Create Course Section</h1>
+    <form action="coursesectionprocess.php" method="POST">
+     
 
-        <!-- Input field for course name -->
-        <label for="course_name">Course Name:</label>
-        <input type="text" id="course_name" name="course_name" required><br>
+        <!-- Dropdown for selecting a course -->
+        <label for="course_id">Select Course:</label>
+        <select id="course_id" name="course_id" required>
+            <?php foreach ($allCourses as $course): ?>
+                <option value="<?php echo $course['CourseID']; ?>">
+                    <?php echo $course['CourseID'] . ' - ' . $course['CourseName']; ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-        <!-- Dropdown list for department ID -->
-        <label for="dept_id">Department ID:</label>
-        <select id="dept_id" name="dept_id" required>
-            <?php
-
-            // Fetch existing department IDs from the database
-            $deptQuery = "SELECT DeptID FROM dept";
-            $deptResult = mysqli_query($conn, $deptQuery);
-
-            if ($deptResult && mysqli_num_rows($deptResult) > 0) {
-                while ($deptRow = mysqli_fetch_assoc($deptResult)) {
-                    $deptID = $deptRow['DeptID'];
-                    echo "<option value='$deptID'>$deptID</option>";
-                }
-            }
-            ?>
-        </select><br>
-
-
-       
-<select id="timeslot" name="timeslot" required>
+             
+        <select id="timeslot" name="timeslot" required>
     <?php foreach ($availableSlots as $slot): ?>
         <option value="<?php echo $slot['TimeSlotID'] . '_' . $slot['RoomID']; ?>">
-    <?php echo $slot['Weekday'] . ', ' . $slot['StartTime'] . '-' . $slot['EndTime'] . ', ' . $slot['BuildingName'] . ' - Room ' . $slot['RoomNum']; ?>
-</option>
+            <?php echo $slot['Weekday'] . ', ' . $slot['StartTime'] . '-' . $slot['EndTime'] . ', ' . $slot['BuildingName'] . ' - Room ' . $slot['RoomNum'] . ' (' . $slot['RoomType'] . ')'; ?>
+        </option>
     <?php endforeach; ?>
 </select>
 
@@ -162,18 +153,6 @@ input[type="submit"]:hover {
         <label for="available_seats">Available Seats:</label>
         <input type="number" id="available_seats" name="available_seats" required><br>
 
-        <!-- Input field for course credits -->
-        <label for="credits">Credits:</label>
-        <input type="text" id="credits" name="credits" required><br>
-
-        <!-- Input field for course description -->
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" required></textarea><br>
-
-        <!-- Input field for course type -->
-        <label for="course_type">Course Type:</label>
-        <input type="text" id="course_type" name="course_type" required><br>
-
         <!-- Input field for section number -->
         <label for="section_num">Section Number:</label>
         <input type="text" id="section_num" name="section_num" required><br>
@@ -182,15 +161,6 @@ input[type="submit"]:hover {
         <label for="faculty_id">Faculty ID:</label>
         <input type="text" id="faculty_id" name="faculty_id" required><br>
 
-       <!-- Input fields for course prerequisites -->
-<label for="pr_course_id">Prerequisite Course ID:</label>
-<input type="text" id="pr_course_id" name="pr_course_id"><br>
-
-<label for="min_grade">Minimum Grade:</label>
-<input type="text" id="min_grade" name="min_grade"><br>
-
-<label for="dolu">DOLU:</label>
-<input type="text" id="dolu" name="dolu"><br>
 
         <!-- Submit button -->
         <input type="submit" value="Create Course">
