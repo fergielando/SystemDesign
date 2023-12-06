@@ -20,6 +20,7 @@ $courseInfoResult = mysqli_query($conn, $courseInfoQuery);
 $courseID = '';
 $courseName = '';
 
+
 if ($courseRow = mysqli_fetch_assoc($courseInfoResult)) {
     $courseID = $courseRow['CourseID'];
     $courseName = $courseRow['CourseName'];
