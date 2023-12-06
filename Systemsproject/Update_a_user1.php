@@ -75,133 +75,135 @@ if (isset($_GET['uid'])) {
 }
 ?>
 <style>
-  /* General Styles */
-/* General Styles */
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
-  background-color: #eaeaea; /* Lighter background for less strain */
-  margin: 0;
-  padding: 0;
-}
-
-.header {
-  background-color: #003366; /* Darker blue for less brightness */
-  color: #ffffff;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 24px;
+.button-container {
+   background-color: #000; /* Black background for the container */
+   padding: 10px;
+   text-align: center;
 }
 
 .button-container .btn {
-  background-color: #004c99; /* Muted blue */
-  color: #ffffff;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: background-color 0.2s, color 0.2s;
-  margin-left: 10px;
+   background-color: transparent; /* Transparent background for buttons */
+   color: #fff; /* White text */
+   padding: 10px 20px;
+   margin: 5px;
+   border: 2px solid #fff; /* White border */
+   border-radius: 5px;
+   text-decoration: none; /* Remove underline from links */
+   font-size: 16px;
+   transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
 }
 
 .button-container .btn:hover {
-  background-color: #003366; /* Even darker blue on hover */
-  color: #ffffff;
+   background-color: #90ee90; /* Light green background on hover */
+   color: #000; /* Black text on hover */
 }
+      .header {
+         background: #000; 
+         color: #fff; 
+         padding: 20px;
+         background-color: #000;
+         text-align: left;
+         margin-top: 20px;
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+      }
 
-/* Table Styles */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
+      .header h1 {
+         font-size: 36px; 
+         margin: 0;
+      }
 
-th, td {
-  border: 1px solid #ccc; /* Softer border color */
-  padding: 10px;
-  text-align: left;
-}
+      .header .logo {
+         width: 50px;
+         height: 50px;
+      }
 
-th {
-  background-color: #004c99; /* Muted blue header */
-  color: #ffffff;
-}
+      .welcome-statement {
+         color: #333;
+         font-size: 18px;
+         padding: 40px;
+         text-align: center;
+         font-family: 'Poppins', cursive; 
+         border: 2px solid #444; 
+         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); 
+      }
 
-tr:nth-child(even) {
-  background-color: #f8f8f8; /* Very light gray for rows */
-}
+      table {
+         width: 100%; /* Full width */
+         max-width: 100%; /* Ensures table is not wider than its container */
+         border-collapse: collapse;
+         table-layout: auto; /* New line: Ensures the table respects the width */
+      }
 
-/* Form Styles */
-.filter-container {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin: 20px auto;
-  width: fit-content;
-}
+      th, td {
+         border: 1px solid #000;
+         padding: 15px;
+         text-align: left;
+         font-size: 14px;
+         word-wrap: break-word; /* New line: Allows words to break and wrap */
+      }
 
-.filter-container input[type="text"],
-.filter-container select {
-  padding: 8px;
-  margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f0f0f0; /* Light gray for input fields */
-}
+      th {
+         background-color: #f2f2f2; /* Gives a slight background color to the header */
+      }
 
-.filter-container input[type="submit"] {
-  cursor: pointer;
-  background-color: #007bff; /* Soft blue instead of green */
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-}
+      /* Style for every other row */
+      tr:nth-child(even) {
+         background-color: #ccffcc; /* Light green background */
+      }
 
-.filter-container input[type="submit"]:hover {
-  background-color: #0056b3; /* A softer blue on hover */
-}
+      /* Hover effect for rows */
+      tr:hover {
+         background-color: #e6ffe6; /* Lighter green on hover */
+      }
 
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .header,
-  .filter-container {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+      td, th {
+         padding: 10px;
+         border: 1px solid #ccc;
+         text-align: center;
+      }
+      .search-container {
+         margin: 20px 0;
+         text-align: center;
+      }
 
-  .button-container {
-    margin-top: 10px;
-  }
+      .search-container input[type="text"] {
+         padding: 10px;
+         border: 1px solid #ccc;
+         border-radius: 5px;
+         font-size: 16px;
+      }
 
-  .filter-container {
-    width: 100%;
-  }
-}
+      .search-container button {
+         padding: 10px 20px;
+         background-color: #000;
+         color: #fff;
+         border: none;
+         border-radius: 5px;
+         cursor: pointer;
+         font-size: 16px;
+      }
 
-/* Footer Styles (if you have a footer) */
-.footer {
-  background-color: #003366;
-  color: #ffffff;
-  text-align: center;
-  padding: 10px 20px;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-}
+      .search-container button:hover {
+         background-color: #333;
+      }
 
+      .filter-container {
+         display: flex;
+         justify-content: space-between;
+         margin: 10px 0;
+         padding: 10px;
+         background-color: #f2f2f2;
+      }
 
+      .filter-container label {
+         font-weight: bold;
+      }
+
+      .filter-container select {
+         padding: 5px;
+      }
 </style>
 
 
@@ -220,6 +222,7 @@ tr:nth-child(even) {
       <a href="admin_page1.php" class="btn">Back to Admin Page</a>
       <a href="create_a_user1.php" class="btn">Create a User</a>
       <a href="locked_out1.php" class="btn">Locked out Users</a>
+      <a href="manage_holds.php" class="btn">Create Hold</a>
       <!-- Other buttons as needed -->
    </div>
 </div>
@@ -269,8 +272,6 @@ tr:nth-child(even) {
       <th>ZipCode</th>
       <th>Edit</th>
       <th>View Academic Profile</th>
-      <th>Degree Audit</th>
-      <th>Create/Edit Schedule</th>
      
    </tr>
    <?php foreach ($users as $user): ?>
@@ -293,22 +294,11 @@ tr:nth-child(even) {
        }
        ?>
    </td>
-   <td>
-       <?php
-       // Ensure the Degree Audit link is correctly set for each user
-       if ($user['UserType'] !== 'faculty' && $user['UserType'] !== 'admin') {
-           echo '<a href="Facdegreeaudit.php?UID=' . $user['UID'] . '">Degree Audit</a>';
-       }
-       ?>
-   </td>
-   <td>
-       <?php
-       // Ensure the Degree Audit link is correctly set for each user
-       if ($user['UserType'] !== 'faculty' && $user['UserType'] !== 'admin') {
-           echo '<a href="Faccreateschedule.php?UID=' . $user['UID'] . '">Create/Update Schedule</a>';
-       }
-       ?>
-   </td>
+
+
+
+
+
 </tr>
 <?php
 endforeach;

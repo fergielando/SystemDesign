@@ -18,6 +18,7 @@ $query = "SELECT
     periodd.EndTime,
     user.FirstName AS FacultyFirstName,
     user.LastName AS FacultyLastName
+	semester.SemesterName
 FROM coursesection
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
 JOIN day ON timeslot.DayID = day.DayID
@@ -28,6 +29,7 @@ JOIN building ON room.BuildingID = building.BuildingID
 JOIN facultyhistory ON coursesection.CRN = facultyhistory.CRN
 JOIN faculty ON facultyhistory.FacultyID = faculty.FacultyID
 JOIN user ON faculty.FacultyID = user.UID  -- Join using the foreign key constraint
+JOIN semester ON coursesection.SemesterID = semester.SemesterID  -- Join using the foreign key constraint
 ORDER BY coursesection.CRN ASC";
 
 
@@ -83,6 +85,14 @@ $result = mysqli_query($conn, $query);
 $times = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $times[] = $row['Time'];
+}
+// Fetch distinct semester names for the filter
+$query = "SELECT DISTINCT semester.SemesterName FROM semester"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$semesterNames = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $semesterNames[] = $row['SemesterName'];
 }
 ?>
 
@@ -299,13 +309,11 @@ while ($row = mysqli_fetch_assoc($result)) {
 </div>
 
 <div class="filter-container">
-   <label for="facultyFilter">Faculty Member:</label>
-   <select id="facultyFilter" onchange="filterTable('facultyFilter', 'Faculty Name')">
+   <label for="semesterFilter">Semester:</label>
+   <select id="semesterFilter" onchange="filterTable('semesterFilter', 'Semester')">
       <option value="">All</option>
-      <?php foreach ($facultyMembers as $facultyMember): ?>
-         <option value="<?php echo $facultyMember['FacultyFirstName'] . ' ' . $facultyMember['FacultyLastName']; ?>">
-            <?php echo $facultyMember['FacultyFirstName'] . ' ' . $facultyMember['FacultyLastName']; ?>
-         </option>
+      <?php foreach ($semesters as $semester): ?>
+         <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
       <?php endforeach; ?>
    </select>
 </div>
@@ -326,6 +334,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         <th>Room ID</th>
         <th>Time</th>
         <th>Professor Name</th>  <!-- Add faculty name header -->
+		 <th>Semester</th>
     </tr>
 </thead>
 
@@ -340,6 +349,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             <td><?php echo $course['RoomID']; ?></td>
             <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
             <td><?php echo $course['FacultyFirstName'] . " " . $course['FacultyLastName']; ?></td>  <!-- Display faculty name -->
+			  <td><?php echo $course['SemesterName']; ?></td>
         </tr>
     <?php endforeach; ?>
 </tbody>

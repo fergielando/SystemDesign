@@ -1,84 +1,74 @@
 <?php
-@include 'config1.php'; // Include your database configuration file
+@include 'config1.php';
 
-session_start();
+// Check if the course ID is set in the query string
+if (isset($_GET['id'])) {
+    $course_id = $_GET['id'];
 
-// Check for user's session UID
-if (!isset($_SESSION['UID'])) {
-    echo "Please log in to update courses.";
-    exit;
-}
+    // Fetch course details from the database
+    $query = "SELECT * FROM course WHERE CourseID = '$course_id'";
+    $result = mysqli_query($conn, $query);
 
-$uid = $_SESSION['UID'];
-
-// Check if CRN is provided via GET request
-if (isset($_GET['CRN'])) {
-    $crn = $_GET['CRN'];
-
-    // Retrieve course details for the specified CRN
-    $selectQuery = "SELECT * FROM coursesection WHERE CRN = $crn"; // Adjust the query to select the appropriate columns
-    $selectResult = mysqli_query($conn, $selectQuery);
-
-    if ($selectResult && $course = mysqli_fetch_assoc($selectResult)) {
-        // Display a form to edit the course details
-        // You can create a form with input fields to update the course information
-        // Populate the input fields with the existing course details from $course array
-
-        // Define variables for each field with default values in case they are undefined
-        $courseName = isset($course['CourseName']) ? $course['CourseName'] : '';
-        $sectionNum = isset($course['SectionNum']) ? $course['SectionNum'] : '';
-        // Add more fields as needed
-
-        // ...
+    if ($result && mysqli_num_rows($result) > 0) {
+        $course = mysqli_fetch_assoc($result);
     } else {
-        echo "Course not found.";
+        die("Course not found.");
     }
 } else {
-    echo "CRN not provided.";
+    die("Invalid request.");
 }
 
-// Handle form submissions to update the course details
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Retrieve updated course details from the form
-    $updatedCourseName = isset($_POST['courseName']) ? $_POST['courseName'] : '';
-    $updatedSectionNum = isset($_POST['sectionNum']) ? $_POST['sectionNum'] : '';
-    // Add more fields as needed
+// Handle form submission to update course details
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $course_name = $_POST['course_name'];
+    $dept_id = $_POST['dept_id'];
+    $credits = $_POST['credits'];
+    $description = $_POST['description'];
+    $course_type = $_POST['course_type'];
 
-    // Perform the database update query
-    $updateQuery = "UPDATE coursesection SET CourseName = '$updatedCourseName', SectionNum = '$updatedSectionNum' WHERE CRN = $crn";
-    $updateResult = mysqli_query($conn, $updateQuery);
-
-    if ($updateResult) {
-        echo "Course with CRN $crn has been updated successfully.";
+    // Update query
+    $update_query = "UPDATE course SET CourseName='$course_name', DeptID='$dept_id', Credits='$credits', Description='$description', CourseType='$course_type' WHERE CourseID='$course_id'";
+    
+    if (mysqli_query($conn, $update_query)) {
+        echo "<p>Course updated successfully. You will be redirected in 5 seconds...</p>";
+        // JavaScript for redirecting after 5 seconds
+        echo "<script>
+                setTimeout(function(){
+                    window.location.href = 'course_catalog1.php'; // Replace with your desired redirect location
+                }, 5000);
+              </script>";
     } else {
-        echo "Error: Course update failed.";
+        echo "Error updating course: " . mysqli_error($conn);
     }
-}
+}    
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE-edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Update Course</title>
-   <link rel="stylesheet" href="css/fatman1.css">
+    <meta charset="UTF-8">
+    <title>Update Course</title>
+    <!-- Add your CSS styles here -->
 </head>
 <body>
-   <h1>Update Course</h1>
+    <h2>Update Course</h2>
+    <form method="post" action="">
+        <label for="course_name">Course Name:</label>
+        <input type="text" name="course_name" id="course_name" value="<?php echo $course['CourseName']; ?>"><br>
 
-   <!-- Display a form to edit the course details -->
-   <form method="POST">
-       <label for="courseName">Course Name:</label>
-       <input type="text" id="courseName" name="courseName" value="<?php echo $courseName; ?>" required>
-       
-       <label for="sectionNum">Section:</label>
-       <input type="text" id="sectionNum" name="sectionNum" value="<?php echo $sectionNum; ?>" required>
-       
-       <!-- Add more input fields for other course attributes as needed -->
-       
-       <input type="submit" value="Update Course">
-   </form>
+        <label for="dept_id">Department ID:</label>
+        <input type="text" name="dept_id" id="dept_id" value="<?php echo $course['DeptID']; ?>"><br>
+
+        <label for="credits">Credits:</label>
+        <input type="number" name="credits" id="credits" value="<?php echo $course['Credits']; ?>"><br>
+
+        <label for="description">Description:</label>
+        <textarea name="description" id="description"><?php echo $course['Description']; ?></textarea><br>
+
+        <label for="course_type">Course Type:</label>
+        <input type="text" name="course_type" id="course_type" value="<?php echo $course['CourseType']; ?>"><br>
+
+        <input type="submit" value="Update Course">
+    </form>
 </body>
 </html>

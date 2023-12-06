@@ -190,6 +190,24 @@ if (isset($_POST['update_user'])) {
     header("Location: student_academic_profile1.php");
     exit;
 }
+
+// Retrieve holds for the student
+$queryHolds = "SELECT HoldID, DateOfHold, HoldType FROM hold WHERE StudentID = '$uid'";
+$resultHolds = mysqli_query($conn, $queryHolds);
+$holds = [];
+
+while ($rowHold = mysqli_fetch_assoc($resultHolds)) {
+    $holds[] = $rowHold;
+}
+
+
+$advisorQuery = "SELECT u.FirstName, u.LastName, l.Email 
+                 FROM advisor a 
+                 JOIN user u ON a.FacultyID = u.UID 
+                 JOIN logintable l ON u.UID = l.UID 
+                 WHERE a.StudentID = '$uid'";
+$advisorResult = mysqli_query($conn, $advisorQuery);
+
 ?>
 
 <!DOCTYPE html>
@@ -323,18 +341,63 @@ if (isset($_POST['update_user'])) {
         transition: background-color 0.3s; /* Smooth transition for background color change */
     }
 
-    .back-button:hover {
-        background-color: #4caf50; /* Green color when hovered */
-    }
+    .button-container {
+   background-color: #000; /* Black background for the container */
+   padding: 10px;
+   text-align: center;
+}
+
+.button-container .btn {
+   background-color: transparent; /* Transparent background for buttons */
+   color: #fff; /* White text */
+   padding: 10px 20px;
+   margin: 5px;
+   border: 2px solid #fff; /* White border */
+   border-radius: 5px;
+   text-decoration: none; /* Remove underline from links */
+   font-size: 16px;
+   transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
+}
+
+.button-container .btn:hover {
+   background-color: #90ee90; /* Light green background on hover */
+   color: #000; /* Black text on hover */
+}
+    
+/* Hold section */
+.student-holds-container {
+    position: absolute;
+    top: 140px;
+    right: 70px;
+    width: 300px; /* Adjust width as needed */
+    background-color: #fff;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for box effect */
+}
+
+.advisor-container {
+    position: absolute;
+    bottom: 10px;
+    right: 90px;
+    background-color: #fff;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 300px; /* Adjust the width as needed */
+}
     </style>
 </head>
 <body>
 
+
+
    <div class="header">
       <h1>Academic Profile</h1>
-      <button class="back-button" onclick="goBack()">Back</button>
+      <div class="button-container">
       <a href="Create Schedule1.php" class="back-button">Create Schedule</a>
       <a href="DegreeAudit1.php" class="back-button">Degree Audit</a>
+      <a href="user_page1.php" class="back-button">Back</a>
+   </div>
+   </head>
    </div>
 
    <div class="academic-profile-container">
@@ -342,6 +405,30 @@ if (isset($_POST['update_user'])) {
       <img src="profpic.jpg" alt="User Image" width="200">
       <p><strong>User ID:</strong> <?php echo $user['UID']; ?></p>
       <p><strong>Name:</strong> <?php echo $user['FirstName'] . ' ' . $user['LastName']; ?></p>
+      </div>
+      
+
+      <div class="student-holds-container">
+      <h2>Holds</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Hold ID</th>
+            <th>Date of Hold</th>
+            <th>Hold Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($holds as $hold) : ?>
+            <tr>
+                <td><?php echo $hold['HoldID']; ?></td>
+                <td><?php echo $hold['DateOfHold']; ?></td>
+                <td><?php echo $hold['HoldType']; ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+</div>
 
       <h2>Current Major(s)</h2>
       <table>
@@ -421,47 +508,8 @@ if (isset($_POST['update_user'])) {
 
 
 
-
-      <div class="top-right-container">
-      <h2>Course History</h2>
-      <table class="enrolled-courses-table">
-            <thead>
-               <tr>
-                  <th>CRN</th>
-                  <th>Course Name</th>
-                  <th>Day</th>
-                  <th>Building</th>
-                  <th>Room</th>
-                  <th>Section</th>
-                  <th>Time</th>
-               </tr>
-            </thead>
-            <tbody>
                <?php
-               // Fetch and display currently enrolled courses
-               $enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, course.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
-                                       FROM studenthistory
-                                       JOIN coursesection ON studenthistory.CRN = coursesection.CRN
-                                       JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
-                                       JOIN day ON timeslot.DayID = day.DayID
-                                       JOIN course ON coursesection.CourseID = course.CourseID
-                                       JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
-                                       JOIN room ON coursesection.RoomID = room.RoomID
-                                       JOIN building ON room.BuildingID = building.BuildingID
-                                       WHERE studenthistory.StudentID = '$uid'";
-               $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
-
-               while ($enrolledCourse = mysqli_fetch_assoc($enrolledCoursesResult)) {
-                  echo "<tr>";
-                  echo "<td>{$enrolledCourse['CRN']}</td>";
-                  echo "<td>{$enrolledCourse['CourseName']}</td>";
-                  echo "<td>{$enrolledCourse['Weekday']}</td>";
-                  echo "<td>{$enrolledCourse['BuildingName']}</td>";
-                  echo "<td>{$enrolledCourse['RoomNum']}</td>";
-                  echo "<td>{$enrolledCourse['SectionNum']}</td>";
-                  echo "<td>{$enrolledCourse['StartTime']} to {$enrolledCourse['EndTime']}</td>";
-                  echo "</tr>";
-               }
+               
 
                // Function to register a major for a student
 if (isset($_POST['register_major_submit'])) {
@@ -513,3 +561,26 @@ if (isset($_POST['register_major_submit'])) {
         </script>
 </body>
 </html>
+
+<!-- Advisor section -->
+<div class="advisor-container">
+    <h2>Student Advisors</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            while ($advisor = mysqli_fetch_assoc($advisorResult)) {
+                echo "<tr>";
+                echo "<td>{$advisor['FirstName']} {$advisor['LastName']}</td>";
+                echo "<td>{$advisor['Email']}</td>";
+                echo "</tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
