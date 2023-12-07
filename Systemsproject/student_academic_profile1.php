@@ -23,7 +23,10 @@ if (isset($_SESSION['UID'])) {
 }
 
 // Retrieve majors, minors, and enrolled courses
-$queryMajors = "SELECT * FROM major";
+$selectedStudentType = "SELECT StudentType FROM student WHERE StudentID = '$uid'";
+
+if($selectedStudentType == 'Undergraduate'){
+$queryMajors = "SELECT * FROM major WHERE MajorID > 0 AND MajorID < 31";
 $resultMajors = mysqli_query($conn, $queryMajors);
 $majors = [];
 
@@ -31,12 +34,48 @@ while ($rowMajor = mysqli_fetch_assoc($resultMajors)) {
     $majors[] = $rowMajor;
 }
 
-$queryMinors = "SELECT * FROM minor";
+$queryMinors = "SELECT * FROM minor WHERE MinorID > 0 AND MinorID < 31";
 $resultMinors = mysqli_query($conn, $queryMinors);
 $minors = [];
 
 while ($rowMinor = mysqli_fetch_assoc($resultMinors)) {
     $minors[] = $rowMinor;
+}
+}
+elseif($selectedStudentType == 'Masters' OR $selectedStudentType == 'PHD'){
+$queryMajors = "SELECT * FROM major WHERE MajorID > 30";
+$resultMajors = mysqli_query($conn, $queryMajors);
+$majors = [];
+
+while ($rowMajor = mysqli_fetch_assoc($resultMajors)) {
+    $majors[] = $rowMajor;
+}
+
+$queryMinors = "SELECT * FROM minor WHERE MinorID > 30";
+$resultMinors = mysqli_query($conn, $queryMinors);
+$minors = [];
+
+while ($rowMinor = mysqli_fetch_assoc($resultMinors)) {
+    $minors[] = $rowMinor;
+}
+}
+
+else{
+$queryMajors = "SELECT * FROM major WHERE MajorID > 0";
+$resultMajors = mysqli_query($conn, $queryMajors);
+$majors = [];
+
+while ($rowMajor = mysqli_fetch_assoc($resultMajors)) {
+    $majors[] = $rowMajor;
+}
+
+$queryMinors = "SELECT * FROM minor WHERE MinorID > 0";
+$resultMinors = mysqli_query($conn, $queryMinors);
+$minors = [];
+
+while ($rowMinor = mysqli_fetch_assoc($resultMinors)) {
+    $minors[] = $rowMinor;
+}
 }
 
 $queryUserMajors = "SELECT MajorName FROM studentmajor INNER JOIN major ON studentmajor.MajorID = major.MajorID WHERE StudentID = '$uid'";
@@ -77,6 +116,30 @@ if (isset($_POST['assign_major'])) {
             mysqli_query($conn, $assignMajorQuery);
         } else {
             // If the assignment doesn't exist, insert it into the database
+			if($selectedMajorID > 0 AND $selectedMajorID < 31){
+			   $queryDeptID = "SELECT DeptID FROM major WHERE MajorID = '$selectedMajorID'";
+			   $resultDeptID = mysqli_query($conn, $queryDeptID);
+			   $row = mysqli_fetch_assoc($resultDeptID);
+			   $selectedDeptID = $row['DeptID'];
+			   $assignDept = "UPDATE undergradstudent SET DeptID = '$selectedDeptID' WHERE StudentID = '$uid'";
+                mysqli_query($conn, $assignDept);
+			}
+			elseif($selectedMajorID > 30){
+			   $queryDeptID = "SELECT DeptID FROM major WHERE MajorID = '$selectedMajorID'";
+			   $resultDeptID = mysqli_query($conn, $queryDeptID);
+			   $row = mysqli_fetch_assoc($resultDeptID);
+			   $selectedDeptID = $row['DeptID'];
+			    $assignDept = "UPDATE gradstudent SET DeptID = '$selectedDeptID' WHERE StudentID = '$uid'";
+                mysqli_query($conn, $assignDept);
+			}
+			elseif($selectedMajorID == 0){
+			   $queryDeptID = "SELECT DeptID FROM major WHERE MajorID = '$selectedMajorID'";
+			   $resultDeptID = mysqli_query($conn, $queryDeptID);
+			   $row = mysqli_fetch_assoc($resultDeptID);
+			   $selectedDeptID = $row['DeptID'];
+				$assignDept = "UPDATE gradstudent SET DeptID = 'NULL' WHERE StudentID = '$uid'";
+                mysqli_query($conn, $assignDept);
+			}
             $assignMajorQuery = "INSERT INTO studentmajor (StudentID, MajorID) VALUES ('$uid', '$selectedMajorID')";
             mysqli_query($conn, $assignMajorQuery);
         }

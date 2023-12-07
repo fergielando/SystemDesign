@@ -3,7 +3,7 @@
 
 // Function to retrieve users from the database with filters
 function getUsers($conn, $filters = []) {
-   $query = "SELECT u.*, l.UserType FROM user u LEFT JOIN logintable l ON u.UID = l.UID WHERE 1=1";
+   $query = "SELECT u.*, l.UserType FROM user u LEFT JOIN logintable l ON u.UID = l.UID WHERE 1=1 && u.UID > 0";
 
    foreach ($filters as $key => $value) {
        if (!empty($value)) {
@@ -288,7 +288,7 @@ if (isset($_GET['uid'])) {
       <td><a href="edit_user.php?UID=<?php echo $user['UID']; ?>">Edit</a></td>
    <td>
        <?php
-       if ($user['UserType'] !== 'faculty' && $user['UserType'] !== 'admin') {
+       if ($user['UserType'] !== 'faculty' && $user['UserType'] !== 'admin' && $user['UserType'] !== 'statsoffice') {
            // Link for viewing the academic profile
            echo '<a href="view_academic_profile1.php?UID=' . $user['UID'] . '">View Academic Profile</a>';
        }

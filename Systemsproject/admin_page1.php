@@ -33,6 +33,7 @@ JOIN building ON room.BuildingID = building.BuildingID
 JOIN faculty ON coursesection.FacultyID = faculty.FacultyID
 JOIN user ON faculty.FacultyID = user.UID
 JOIN semester ON coursesection.SemesterID = semester.SemesterID  -- Join using the foreign key constraint
+WHERE coursesection.CRN > 0
 ORDER BY coursesection.CRN ASC";
 
 $result = mysqli_query($conn, $query);

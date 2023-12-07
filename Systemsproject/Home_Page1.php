@@ -31,6 +31,7 @@ JOIN facultyhistory ON coursesection.CRN = facultyhistory.CRN
 JOIN faculty ON facultyhistory.FacultyID = faculty.FacultyID
 JOIN user ON faculty.FacultyID = user.UID  -- Join using the foreign key constraint
 JOIN semester ON coursesection.SemesterID = semester.SemesterID  -- Join using the foreign key constraint
+WHERE coursesection.CRN > 0
 ORDER BY coursesection.CRN ASC";
 
 
