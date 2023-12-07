@@ -104,7 +104,7 @@ while ($row = mysqli_fetch_assoc($result)) {
       <img src="ua.png" alt="U.A. Logo" class="logo">
       <h1>U.A. University Course Catalog</h1>
       <div class="buttons">
-         <a href="Home_Page1.php" class="btn">Back to Home Page</a>
+         <a href="index.php" class="btn">Back to Home Page</a>
       </div>
    </div>
 
@@ -138,4 +138,3 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 </body>
 </html>
-`
