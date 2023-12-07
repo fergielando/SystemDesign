@@ -3,6 +3,10 @@
 @include 'config1.php';
 session_start();
 
+if (!isset($_SESSION['UID'])) {
+    echo "Please log in. <a href='login_page1.php'>Login Here</a>";
+    exit;
+}
 
 $uid = $_SESSION['UID'];
 
