@@ -39,7 +39,7 @@ if (isset($_POST['submit'])) {
 					mysqli_query($conn, $updateTempPassword);
 
                 // Send the temporary password to the user's email
-					$to = 'jsalvado@oldwestbury.edu'; // User's email address
+					$to = 'admin@uauniversityproject.online'; // User's email address
 					$subject = "$email Locked Out";
 					$msg = "$email has been locked due to multiple failed login attempts. Here is their temporary password: $temporaryPassword";
 
