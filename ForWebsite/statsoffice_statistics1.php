@@ -18,10 +18,18 @@ $clientInfo = mysqli_fetch_assoc($clientInfoResult);
 $clientname = $clientInfo['ClientName'];
 
 $queryugcount = "SELECT COUNT(StudentID) FROM undergradstudent WHERE StudentID <> 0";
-$undergrad_count = mysqli_query($conn, $queryugcount);
+$undergradresult = mysqli_query($conn, $queryugcount);
+$undergradInfo = mysqli_fetch_assoc($undergradresult);
+$undergrad_count = $undergradInfo['COUNT(StudentID)'];
 
 $querygrcount = "SELECT COUNT(StudentID) FROM gradstudent WHERE StudentID <> 0";
-$grad_count = mysqli_query($conn, $querygrcount);
+$gradresult = mysqli_query($conn, $querygrcount);
+$gradInfo = mysqli_fetch_assoc($gradresult);
+$grad_count = $gradInfo['COUNT(StudentID)'];
+
+$undergradpercent = ($undergrad_count) / ($undergrad_count + $grad_count) * 100;
+
+$gradpercent = ($grad_count) / ($undergrad_count + $grad_count) * 100;
 
 $queryftcount = "SELECT SUM(count)
 FROM (
@@ -33,7 +41,9 @@ FROM (
     FROM undergradstudentft
     WHERE StudentID <> 0
 ) AS x;";
-$fulltime_count = mysqli_query($conn, $queryftcount);
+$fulltimeresult = mysqli_query($conn, $queryftcount);
+$fulltimeInfo = mysqli_fetch_assoc($fulltimeresult);
+$fulltime_count = $fulltimeInfo['SUM(count)'];
 
 $queryptcount = "SELECT SUM(count)
 FROM (
@@ -45,7 +55,37 @@ FROM (
     FROM undergradstudentpt
     WHERE StudentID <> 0
 ) AS x;";
-$parttime_count = mysqli_query($conn, $queryptcount);
+$parttimeresult = mysqli_query($conn, $queryptcount);
+$parttimeInfo = mysqli_fetch_assoc($parttimeresult);
+$parttime_count = $parttimeInfo['SUM(count)'];
+
+$fulltimepercent = ($fulltime_count) / ($fulltime_count + $parttime_count) * 100;
+
+$parttimepercent = ($parttime_count) / ($fulltime_count + $parttime_count) * 100;
+
+$querymasterscount = "SELECT COUNT(StudentID) FROM gradstudent WHERE (GradStudentType = 'Masters Full Time' OR GradStudentType = 'Masters Part Time')";
+$mastersresult = mysqli_query($conn, $querymasterscount);
+$mastersInfo = mysqli_fetch_assoc($mastersresult);
+$masters_count = $mastersInfo['COUNT(StudentID)'];
+
+$queryphdcount = "SELECT COUNT(StudentID) FROM gradstudent WHERE (GradStudentType = 'PHD Full Time' OR GradStudentType = 'PHD Part Time')";
+$phdresult = mysqli_query($conn, $queryphdcount);
+$phdInfo = mysqli_fetch_assoc($phdresult);
+$phd_count = $phdInfo['COUNT(StudentID)'];
+
+$masterspercent = ($masters_count) / ($masters_count + $phd_count) * 100;
+
+$phdpercent = ($phd_count) / ($masters_count + $phd_count) * 100;
+
+$querymajorscount = "SELECT COUNT(MajorID) FROM major WHERE MajorID <> 0";
+$majorsresult = mysqli_query($conn, $querymajorscount);
+$majorsInfo = mysqli_fetch_assoc($majorsresult);
+$majors_count = $majorsInfo['COUNT(MajorID)'];
+
+$queryminorscount = "SELECT COUNT(MinorID) FROM minor WHERE MinorID <> 0";
+$minorsresult = mysqli_query($conn, $queryminorscount);
+$minorsInfo = mysqli_fetch_assoc($minorsresult);
+$minors_count = $minorsInfo['COUNT(MinorID)'];
 
 ?>
 
@@ -208,12 +248,26 @@ $parttime_count = mysqli_query($conn, $queryptcount);
 </head>
 <body>
    <div class="header">
-      <h1>U.A. University Statistics</h1>
+      <h1>U.A. University Latest Statistics</h1>
        <a href="statsoffice_page1.php" class="back-button">Back to Home Page</a>
    </div>
 
    <div class="welcome-statement">
-    <p>Welcome, <?php echo $_SESSION['statsoffice_name']; ?>. Welcome to UA University! As a Statistics Office representative, You represent <?php echo $clientname; ?>. These are the latest statistics as of <?php echo $currentDate; ?></p>
+    <p>Welcome, <?php echo $_SESSION['statsoffice_name']; ?>. Welcome to UA University! As a Statistics Office representative, You represent <?php echo $clientname; ?>. These are the latest statistics as of <?php echo $currentDate; ?>:</p>
+	<p>Number of Undergraduates: <?php echo $undergrad_count; ?></p>
+	<p>Percentage of Undergraduates: <?php echo $undergradpercent; ?>%</p>
+	<p>Number of Graduates: <?php echo $grad_count; ?></p>
+	<p>Percentage of Graduates: <?php echo $gradpercent; ?>%</p>
+	<p>Number of Full Time Students: <?php echo $fulltime_count; ?></p>
+	<p>Percentage of Full Time Students: <?php echo $fulltimepercent; ?>%</p>
+	<p>Number of Part Time Students: <?php echo $parttime_count; ?></p>
+	<p>Percentage of Part Time Students: <?php echo $parttimepercent; ?>%</p>
+	<p>Number of Masters Graduate Students: <?php echo $masters_count; ?></p>
+	<p>Percent of Masters Graduate Students: <?php echo $masterspercent; ?>%</p>
+	<p>Number of PHD Graduate Students: <?php echo $phd_count; ?></p>
+	<p>Percent of PHD Graduate Students: <?php echo $phdpercent; ?>%</p>
+	<p>Number of Available Majors: <?php echo $majors_count; ?></p>
+	<p>Number of Available Minors: <?php echo $minors_count; ?></p>
    </div>
 
    <script>
