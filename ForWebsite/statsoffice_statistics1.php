@@ -87,6 +87,53 @@ $minorsresult = mysqli_query($conn, $queryminorscount);
 $minorsInfo = mysqli_fetch_assoc($minorsresult);
 $minors_count = $minorsInfo['COUNT(MinorID)'];
 
+$passedCoursesQuery = "SELECT DISTINCT sh.StudentID
+                       FROM studenthistory sh
+                       WHERE sh.Grade IN ('A', 'A-', 'B+', 'B', 'B-', 'C+', 'C')";
+
+$resultPassedCourses = mysqli_query($conn, $passedCoursesQuery);
+
+$querytotalcount = "SELECT COUNT(StudentID) FROM student WHERE StudentID <> 0";
+$totalresult = mysqli_query($conn, $querytotalcount);
+$totalInfo = mysqli_fetch_assoc($totalresult);
+$total_count = $totalInfo['COUNT(StudentID)'];
+
+if ($resultPassedCourses) {
+    $totalStudents = mysqli_num_rows($resultPassedCourses);
+
+    // Query to count students who have completed major prerequisites
+    $majorPrerequisitesQuery = "SELECT DISTINCT sm.StudentID
+                                FROM studentmajor sm
+                                INNER JOIN majorprerequisite mp ON sm.MajorID = mp.MajorID
+                                INNER JOIN studenthistory sh ON sm.StudentID = sh.StudentID
+                                WHERE sh.CourseID = mp.PRmajorID";
+
+    $resultMajorPrerequisites = mysqli_query($conn, $majorPrerequisitesQuery);
+
+    // Query to count students who have completed minor prerequisites (if applicable)
+    $minorPrerequisitesQuery = "SELECT DISTINCT sm.StudentID
+                                FROM studentminor sm
+                                INNER JOIN minorprerequisite mp ON sm.MinorID = mp.MinorID
+                                INNER JOIN studenthistory sh ON sm.StudentID = sh.StudentID
+                                WHERE sh.CourseID = mp.PRminorID";
+
+    $resultMinorPrerequisites = mysqli_query($conn, $minorPrerequisitesQuery);
+
+    if ($resultMajorPrerequisites && $resultMinorPrerequisites) {
+        $studentsWithMajorPrerequisites = mysqli_num_rows($resultMajorPrerequisites);
+        $studentsWithMinorPrerequisites = mysqli_num_rows($resultMinorPrerequisites);
+
+        // Calculate graduation rate
+        $studentsWithAllPrerequisites = min($studentsWithMajorPrerequisites, $studentsWithMinorPrerequisites);
+        $graduationRate = ($studentsWithAllPrerequisites / $totalStudents) * 100;
+
+    } else {
+        echo "Failed to fetch prerequisite data.";
+    }
+} else {
+    echo "Failed to fetch passed courses data.";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -266,8 +313,10 @@ $minors_count = $minorsInfo['COUNT(MinorID)'];
 	<p>Percent of Masters Graduate Students: <?php echo $masterspercent; ?>%</p>
 	<p>Number of PHD Graduate Students: <?php echo $phd_count; ?></p>
 	<p>Percent of PHD Graduate Students: <?php echo $phdpercent; ?>%</p>
+	<p>Total Number of Students: <?php echo $total_count; ?></p>
 	<p>Number of Available Majors: <?php echo $majors_count; ?></p>
 	<p>Number of Available Minors: <?php echo $minors_count; ?></p>
+	<p>Graduation Rate: <?php echo round($graduationRate, 2); ?>%</p>
    </div>
 
    <script>
