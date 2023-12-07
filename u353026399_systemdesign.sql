@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Dec 07, 2023 at 04:18 PM
+-- Generation Time: Dec 07, 2023 at 05:49 PM
 -- Server version: 10.6.16-MariaDB-cll-lve
 -- PHP Version: 7.2.34
 
@@ -3342,20 +3342,6 @@ INSERT INTO `coursesection` (`CRN`, `CourseID`, `SectionNum`, `FacultyID`, `Time
 (99999997, 'CS2512', 1, 0, '0', '0', 0, 0),
 (99999998, 'CS2511', 1, 0, '0', '0', 0, 0),
 (99999999, 'CS2510', 1, 0, '0', '0', 0, 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `datagen`
---
-
-CREATE TABLE `datagen` (
-  `DataID` int(11) NOT NULL,
-  `StatsID` int(11) DEFAULT NULL,
-  `GeneratedData` varchar(5000) DEFAULT NULL,
-  `DateGenerated` timestamp NULL DEFAULT NULL,
-  `DataType` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -17669,14 +17655,6 @@ ALTER TABLE `coursesection`
   ADD KEY `coursesection_ibfk_6` (`TimeSlotID`);
 
 --
--- Indexes for table `datagen`
---
-ALTER TABLE `datagen`
-  ADD PRIMARY KEY (`DataID`),
-  ADD KEY `StatsID` (`StatsID`),
-  ADD KEY `DataID` (`DataID`);
-
---
 -- Indexes for table `day`
 --
 ALTER TABLE `day`
@@ -17997,12 +17975,6 @@ ALTER TABLE `coursesection`
   ADD CONSTRAINT `coursesection_ibfk_5` FOREIGN KEY (`SemesterID`) REFERENCES `semester` (`SemesterID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `coursesection_ibfk_6` FOREIGN KEY (`TimeSlotID`) REFERENCES `timeslot` (`TimeSlotID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `coursesection_ibfk_7` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `datagen`
---
-ALTER TABLE `datagen`
-  ADD CONSTRAINT `datagen_ibfk_1` FOREIGN KEY (`StatsID`) REFERENCES `statsoffice` (`StatsID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `dept`
