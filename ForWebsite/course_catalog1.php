@@ -1,6 +1,4 @@
-
-
-   <?php
+<?php
 @include 'config1.php';
 
 session_start();

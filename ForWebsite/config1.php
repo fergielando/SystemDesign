@@ -1,5 +1,5 @@
 <?php
 
-$conn = mysqli_connect('localhost','id21633923_root','Systemsdesign5910','id21633923_systemdesign');
+$conn = mysqli_connect('localhost','u353026399_root','Systemsdesign5910@','u353026399_systemdesign');
 
 ?>

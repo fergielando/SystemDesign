@@ -205,8 +205,6 @@ if (isset($_GET['uid'])) {
          padding: 5px;
       }
 </style>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>

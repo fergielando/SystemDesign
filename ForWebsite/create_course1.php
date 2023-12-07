@@ -1,4 +1,3 @@
-
 <?php
 @include 'config1.php'; // Include your database configuration file
 

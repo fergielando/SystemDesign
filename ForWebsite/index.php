@@ -1,4 +1,3 @@
-
 <?php
 // Include your database configuration file and session start if needed
 @include 'config1.php';

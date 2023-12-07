@@ -119,6 +119,7 @@ if(isset($_POST['clear'])) {
    
     header('location:Create_a_user1.php');
  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -198,13 +199,17 @@ if(isset($_POST['clear'])) {
    <div class="form-container">
       <form action="" method="post">
          <h3>Create a User</h3>
+         
          <?php
+         
          if(isset($error)){
             foreach($error as $error){
                echo '<span class="error-msg">'.$error.'</span>';
             };
          };
+         
          ?>
+         
         <input type="text" name="uid" required placeholder="UID">
       <input type="text" name="firstName" required placeholder="First Name">
       <input type="text" name="lastName" required placeholder="Last Name">
@@ -250,4 +255,5 @@ if(isset($_POST['clear'])) {
    </div>
 
 </body>
+
 </html>
