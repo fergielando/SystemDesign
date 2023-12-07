@@ -11,6 +11,34 @@ $course = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $course[] = $row;
 }
+
+// Fetch distinct department IDs for the filter
+$query = "SELECT DISTINCT course.deptID FROM course";
+$result = mysqli_query($conn, $query);
+
+$departmentIDs = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $departmentIDs[] = $row['deptID'];
+}
+
+// Fetch distinct credits for the filter
+$query = "SELECT DISTINCT course.Credits FROM course";
+$result = mysqli_query($conn, $query);
+
+$credit = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $credit[] = $row['Credits'];
+}
+
+// Fetch distinct course type for the filter
+$query = "SELECT DISTINCT course.CourseType FROM course";
+$result = mysqli_query($conn, $query);
+
+$coursetype = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $coursetype[] = $row['CourseType'];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -111,6 +139,45 @@ while ($row = mysqli_fetch_assoc($result)) {
    <div class="welcome-message">
       <p>Welcome, Visitor. This is the Course Catalog Page!</p>
    </div>
+   
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search...">
+      <button onclick="searchTable()">Search</button>
+      <button onclick="resetTable()">Reset</button>
+   </div>
+   
+   <!-- Filter container for Department -->
+   <div class="filter-container">
+   <label for="deptFilter">Department:</label>
+   <select id="deptFilter" onchange="filterTable('deptFilter', 'Department ID')">
+      <option value="">All</option>
+      <?php foreach ($departmentIDs as $deptID): ?>
+         <option value="<?php echo $deptID; ?>"><?php echo $deptID; ?></option>
+      <?php endforeach; ?>
+   </select>
+</div>
+
+   <!-- Filter container for Credits -->
+   <div class="filter-container">
+   <label for="creditsFilter">Credits:</label>
+   <select id="creditsFilter" onchange="filterTable('creditsFilter', 'Credits')">
+      <option value="">All</option>
+      <?php foreach ($credit as $Credits): ?>
+         <option value="<?php echo $Credits; ?>"><?php echo $Credits; ?></option>
+      <?php endforeach; ?>
+   </select>
+</div>
+
+   <!-- Filter container for Course Type -->
+   <div class="filter-container">
+   <label for="coursetypeFilter">Course Type:</label>
+   <select id="coursetypeFilter" onchange="filterTable('coursetypeFilter', 'CourseType')">
+      <option value="">All</option>
+      <?php foreach ($coursetype as $CourseType): ?>
+         <option value="<?php echo $CourseType; ?>"><?php echo $CourseType; ?></option>
+      <?php endforeach; ?>
+   </select>
+</div>
 
    <div class="department-container">
       <h2>Courses</h2>
@@ -138,4 +205,3 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 </body>
 </html>
-`

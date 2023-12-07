@@ -14,7 +14,7 @@ if (isset($_POST['create'])) {
     // Your code to insert a new department into the database
     $insertQuery = "INSERT INTO dept (DeptID, DeptName, ChairID, DeptManager, Email, PhoneNum, RoomID) VALUES ('$newDeptID', '$newDeptName', '$newChairId', '$newDeptManager', '$newEmail', '$newPhoneNum', '$newRoomID')";
     if (mysqli_query($conn, $insertQuery)) {
-        header('location:department_page.php');
+        header('location:Departments_page1.php');
     } else {
         echo "Department creation failed: " . mysqli_error($conn);
     }

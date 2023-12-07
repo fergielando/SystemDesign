@@ -344,7 +344,7 @@ while ($row = mysqli_fetch_assoc($result)) {
    <label for="semesterFilter">Semester:</label>
    <select id="semesterFilter" onchange="filterTable('semesterFilter', 'Semester')">
       <option value="">All</option>
-      <?php foreach ($semesters as $semester): ?>
+      <?php foreach ($semesterNames as $semester): ?>
          <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
       <?php endforeach; ?>
    </select>

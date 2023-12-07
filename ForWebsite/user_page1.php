@@ -33,7 +33,8 @@ JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
 JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
 JOIN user ON coursesection.FacultyID = user.UID
-WHERE enrollment.StudentID = '$uid'";
+LEFT JOIN studenthistory ON enrollment.StudentID = studenthistory.StudentID AND coursesection.SemesterID = studenthistory.SemesterID
+WHERE enrollment.StudentID = '$uid'AND studenthistory.SemesterID = '20232'";
 
 
 $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);

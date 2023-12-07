@@ -264,6 +264,7 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
       <a href="student_majors1.php" class="btn">Majors</a>
       <a href="student_minor1.php" class="btn">Minors</a>
       <a href="facdepartment.php" class="btn">Departments</a>
+	  <a href="faculty_course_catalog1.php" class="btn">Course Catalog</a>
       <a href="faculty_page1.php" class="btn">Master Schedule</a>
    </div>
 </header>

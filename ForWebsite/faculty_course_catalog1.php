@@ -3,6 +3,10 @@
 
 session_start();
 
+if (!isset($_SESSION['faculty_name'])) {
+    header('location: login_form1.php');
+}
+
 // Retrieve course data from the database
 $query = "SELECT * FROM course WHERE CourseID <> 'NULL'";
 $result = mysqli_query($conn, $query);
@@ -47,7 +51,7 @@ while ($row = mysqli_fetch_assoc($result)) {
    <meta charset="UTF-8">
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Course Catalog</title>
+   <title>Student Course Catalog</title>
 
    <link rel="stylesheet" href="css/fatman1.css">
    <style>
@@ -132,20 +136,18 @@ while ($row = mysqli_fetch_assoc($result)) {
       <img src="ua.png" alt="U.A. Logo" class="logo">
       <h1>U.A. University Course Catalog</h1>
       <div class="buttons">
-         <a href="index.php" class="btn">Back to Home Page</a>
+         <a href="fac_newhome1.php" class="btn">Back to Faculty Portal</a>
       </div>
    </div>
 
    <div class="welcome-message">
-      <p>Welcome, Visitor. This is the Course Catalog Page!</p>
+      <p>Welcome, <?php echo $_SESSION['faculty_name']; ?>. This is the Course Catalog Page!</p>
    </div>
-   
     <div class="search-container">
       <input type="text" id="searchInput" placeholder="Search...">
       <button onclick="searchTable()">Search</button>
       <button onclick="resetTable()">Reset</button>
    </div>
-   
    <!-- Filter container for Department -->
    <div class="filter-container">
    <label for="deptFilter">Department:</label>

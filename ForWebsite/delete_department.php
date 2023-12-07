@@ -9,21 +9,22 @@ if (!isset($_SESSION['UID'])) {
     exit;
 }
 
+$uid = $_SESSION['UID'];
+
 // Process delete request
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $DeptID = mysqli_real_escape_string($conn, $_POST['DeptID']);
+if (isset($_GET['DeptID'])) {
+    $deptid = $_GET['DeptID'];
 
-    // Perform additional validation if necessary
-
-    // Delete query
-    $deleteQuery = "DELETE FROM coursesection WHERE DeptID = '$DeptID'";
+    // Perform the course deletion based on the DeptID
+    $deleteQuery = "DELETE FROM coursesection WHERE DeptID = $deptID";
     $deleteResult = mysqli_query($conn, $deleteQuery);
 
     if ($deleteResult) {
-        echo "Course section with DeptID $DeptID deleted successfully.";
-        // Redirect or other actions
+        echo "Department with DeptID $deptID has been deleted successfully.";
     } else {
-        echo "Error deleting Department: " . mysqli_error($conn);
+        echo "Error: Department deletion failed.";
     }
+} else {
+    echo "DeptID not provided.";
 }
 ?>

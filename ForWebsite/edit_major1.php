@@ -31,7 +31,7 @@ if (isset($_POST['update'])) {
 
     if (mysqli_query($conn, $updateQuery)) {
         // Redirect back to the majors list page after the update is successful
-        header('location:Majors1.php');
+        header('location:majors1.php');
     } else {
         // Handle the case where the update fails
         echo "Update failed. Please try again.";

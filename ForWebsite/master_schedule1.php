@@ -266,7 +266,6 @@ while ($row = mysqli_fetch_assoc($result)) {
          <a href="admin_page1.php" class="btn">Back</a>
          <a href="createcoursesection.php" class="btn">Create Course Section</a>
          <a href="deletecoursesection.html" class="btn">Delete Course Section</a>
-         <a href="Updatecoursesection.php" class="btn">Update Course Section</a>
 
 
       </div>
@@ -395,7 +394,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         <td><?php echo $course['FacultyFirstName'] . " " . $course['FacultyLastName']; ?></td>
         <td><?php echo $course['SemesterID']; ?></td>
         <td>
-            <?php if ($course['SemesterID'] !== '20232'): ?>
+            <?php if ($course['SemesterID'] !== '0'): ?>
                 <a href="editcoursesection.php?CRN=<?php echo urlencode($course['CRN']); ?>" class="edit-btn">Edit</a>
             <?php endif; ?>
         </td>

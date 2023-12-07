@@ -17,7 +17,7 @@ $query = "SELECT
     periodd.StartTime,
     periodd.EndTime,
     user.FirstName AS FacultyFirstName,
-    user.LastName AS FacultyLastName
+    user.LastName AS FacultyLastName,
 	semester.SemesterName
 FROM coursesection
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
