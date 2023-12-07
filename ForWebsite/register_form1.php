@@ -1,7 +1,7 @@
 <?php
 
 @include 'config1.php';
-
+$currentDate = date('Y-m-d');
 if(isset($_POST['submit'])){
 
    $uid = mysqli_real_escape_string($conn, $_POST['uid']);
