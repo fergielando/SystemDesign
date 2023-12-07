@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Dec 07, 2023 at 04:53 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1:3306
+-- Generation Time: Dec 07, 2023 at 04:18 PM
+-- Server version: 10.6.16-MariaDB-cll-lve
+-- PHP Version: 7.2.34
 
 SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -19,9 +19,9 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `systemdesign`
+-- Database: `u353026399_systemdesign`
 --
-CREATE DATABASE IF NOT EXISTS `u353026399_systemdesign` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+CREATE DATABASE IF NOT EXISTS `u353026399_systemdesign` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `u353026399_systemdesign`;
 
 -- --------------------------------------------------------
