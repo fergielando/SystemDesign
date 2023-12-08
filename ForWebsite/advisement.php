@@ -5,7 +5,7 @@
 // Fetch faculty information from the 'advisor' table
 $query = "SELECT DISTINCT advisor.FacultyID, user.FirstName, user.LastName 
           FROM advisor
-          INNER JOIN user ON advisor.FacultyID = user.UID;
+          INNER JOIN user ON advisor.FacultyID = user.UID";
 
 $result = mysqli_query($conn, $query);
 

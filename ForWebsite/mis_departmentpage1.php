@@ -86,7 +86,7 @@
     <h1>U.A. University Admin Page</h1>
     <div class="buttons">
         <a href="logout1.php" class="btn">Logout</a>
-        <a href="Create_a_user1.php" class="btn">Create a user</a>
+        <a href="create_a_user1.php" class="btn">Create a user</a>
         <a href="Update_a_user1.php" class="btn">Update a user</a>
         <a href="Departments_page1.php" class="btn">Departments</a>
     </div>
