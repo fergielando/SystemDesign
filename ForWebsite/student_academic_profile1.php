@@ -24,6 +24,13 @@ if (isset($_SESSION['UID'])) {
 
 // Retrieve majors, minors, and enrolled courses
 $selectedStudentType = "SELECT StudentType FROM student WHERE StudentID = '$uid'";
+$resultStudentType = mysqli_query($conn, $selectedStudentType);
+
+
+if ($resultStudentType) {
+    $row = mysqli_fetch_assoc($resultStudentType);
+    $selectedStudentType = $row['StudentType'];
+
 
 if($selectedStudentType == 'Undergraduate'){
 $queryMajors = "SELECT * FROM major WHERE MajorID > 0 AND (MajorID < 31 OR MajorID > 45)";
@@ -34,7 +41,7 @@ while ($rowMajor = mysqli_fetch_assoc($resultMajors)) {
     $majors[] = $rowMajor;
 }
 
-$queryMinors = "SELECT * FROM minor WHERE MinorID > 0 AND (MinorID < 31 OR MinorID >45)";
+$queryMinors = "SELECT * FROM minor WHERE MinorID > 0 AND (MinorID < 31 OR MinorID > 45)";
 $resultMinors = mysqli_query($conn, $queryMinors);
 $minors = [];
 
@@ -75,6 +82,7 @@ $minors = [];
 
 while ($rowMinor = mysqli_fetch_assoc($resultMinors)) {
     $minors[] = $rowMinor;
+}
 }
 }
 
