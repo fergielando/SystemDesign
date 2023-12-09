@@ -109,9 +109,14 @@ if (isset($_POST['assign_major'])) {
     $countUserMajorsQuery = "SELECT COUNT(*) as totalMajors FROM studentmajor WHERE StudentID = '$uid'";
     $countUserMajorsResult = mysqli_query($conn, $countUserMajorsQuery);
     $countUserMajors = mysqli_fetch_assoc($countUserMajorsResult);
-
-    if ($countUserMajors['totalMajors'] < 2) {
-        // If the student has declared less than two majors, proceed to assign the major
+	
+    $countUserMinorsQuery = "SELECT COUNT(*) as totalMinors FROM studentminor WHERE StudentID = '$uid'";
+    $countUserMinorsResult = mysqli_query($conn, $countUserMinorsQuery);
+    $countUserMinors = mysqli_fetch_assoc($countUserMinorsResult);
+	
+	
+        // If the student has declared less than (two majors OR one major + one minor), proceed to assign the major
+    if (($countUserMajors['totalMajors'] < 2) && !($countUserMajors['totalMajors'] == 1 && $countUserMinors['totalMinors'] == 1)) {
         // Check if the assignment already exists
         $checkAssignmentQuery = "SELECT * FROM studentmajor WHERE StudentID = '$uid' AND MajorID = '$selectedMajorID'";
         $checkAssignmentResult = mysqli_query($conn, $checkAssignmentQuery);
@@ -149,10 +154,12 @@ if (isset($_POST['assign_major'])) {
             $assignMajorQuery = "INSERT INTO studentmajor (StudentID, MajorID) VALUES ('$uid', '$selectedMajorID')";
             mysqli_query($conn, $assignMajorQuery);
         }
-        
+         // Refresh the page to reflect the changes
+        header("Location: view_academic_profile1.php");
+        exit;
     } else {
         // The student has already declared two majors, show an error message or handle it as needed
-        echo "You can only declare up to two majors.";
+        echo "You can only declare up to two majors or one major with one minor.";
     }
 }
 
@@ -161,14 +168,21 @@ if (isset($_POST['assign_minor'])) {
     $countUserMajorsQuery = "SELECT COUNT(*) as totalMajors FROM studentmajor WHERE StudentID = '$uid'";
     $countUserMajorsResult = mysqli_query($conn, $countUserMajorsQuery);
     $countUserMajors = mysqli_fetch_assoc($countUserMajorsResult);
+	
+    $countUserMinorsQuery = "SELECT COUNT(*) as totalMinors FROM studentminor WHERE StudentID = '$uid'";
+    $countUserMinorsResult = mysqli_query($conn, $countUserMinorsQuery);
+    $countUserMinors = mysqli_fetch_assoc($countUserMinorsResult);
 
-    if ($countUserMajors['totalMajors'] >= 2) {
-        // The student has already declared two majors, show an error message or handle it as needed
-        echo "You can only declare up to two majors. Minor assignment failed.";
-    } 
-	elseif($countUserMinors['totalMinors'] >= 1){
+	if ($countUserMajors['totalMajors'] >= 2 || $countUserMinors['totalMinors'] >= 1) {
+		if ($countUserMajors['totalMajors'] >= 2) {
+			// The student has already declared two majors or one minor, show an error message or handle it as needed
+			echo "You can only declare up to two majors. Minor assignment failed.";
+			}
+		else{
 		echo "You can only declare one minor. Minor assignment failed.";
-	}	
+		}
+		echo "Minor assignment failed.";
+		}
 	else {
         // Continue with the minor assignment process
         $selectedMinorID = mysqli_real_escape_string($conn, $_POST['minor']);
@@ -184,7 +198,9 @@ if (isset($_POST['assign_minor'])) {
             $assignMinorQuery = "INSERT INTO studentminor (StudentID, MinorID) VALUES ('$uid', '$selectedMinorID')";
             mysqli_query($conn, $assignMinorQuery);
             
-          
+            // Optionally, refresh the page to reflect the changes
+            header("Location: view_academic_profile1.php");
+            exit;
         }
     }
 }
