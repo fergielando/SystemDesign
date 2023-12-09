@@ -26,7 +26,7 @@ if (isset($_SESSION['UID'])) {
 $selectedStudentType = "SELECT StudentType FROM student WHERE StudentID = '$uid'";
 
 if($selectedStudentType == 'Undergraduate'){
-$queryMajors = "SELECT * FROM major WHERE MajorID > 0 AND MajorID < 31";
+$queryMajors = "SELECT * FROM major WHERE MajorID > 0 AND (MajorID < 31 OR MajorID > 45)";
 $resultMajors = mysqli_query($conn, $queryMajors);
 $majors = [];
 
@@ -34,7 +34,7 @@ while ($rowMajor = mysqli_fetch_assoc($resultMajors)) {
     $majors[] = $rowMajor;
 }
 
-$queryMinors = "SELECT * FROM minor WHERE MinorID > 0 AND MinorID < 31";
+$queryMinors = "SELECT * FROM minor WHERE MinorID > 0 AND (MinorID < 31 OR MinorID >45)";
 $resultMinors = mysqli_query($conn, $queryMinors);
 $minors = [];
 
