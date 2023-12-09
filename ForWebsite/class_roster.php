@@ -3,6 +3,11 @@
 @include 'config1.php';
 session_start();
 
+if (!isset($_SESSION['UID'])) {
+    echo "Please log in. <a href='login_page1.php'>Login Here</a>";
+    exit;
+}
+
 // Check if CRN is provided
 if (!isset($_GET['CRN'])) {
     echo "No course selected.";
@@ -10,6 +15,10 @@ if (!isset($_GET['CRN'])) {
 }
 
 $CRN = $_GET['CRN'];
+
+// Set default timezone (use before the others)
+date_default_timezone_set('America/New_York');
+
 
 // Fetch course details
 $courseInfoQuery = "SELECT coursesection.CourseID, course.CourseName 
@@ -29,21 +38,52 @@ if ($courseRow = mysqli_fetch_assoc($courseInfoResult)) {
     exit;
 }
 
-// Fetch course days
-$courseDaysQuery = "SELECT day.Weekday
-                    FROM coursesection
-                    JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
-                    JOIN day ON timeslot.DayID = day.DayID
-                    WHERE coursesection.CRN = '$CRN'";
-$courseDaysResult = mysqli_query($conn, $courseDaysQuery);
-$courseDays = [];
-while ($dayRow = mysqli_fetch_assoc($courseDaysResult)) {
-    $courseDays[] = strtolower($dayRow['Weekday']);
+// Fetch course period details and days
+$periodQuery = "SELECT periodd.StartTime, periodd.EndTime, GROUP_CONCAT(DISTINCT timeslot.DayID) AS ClassDays
+                FROM coursesection
+                JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
+                JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+                WHERE coursesection.CRN = '$CRN'
+                GROUP BY periodd.StartTime, periodd.EndTime";
+$periodResult = mysqli_query($conn, $periodQuery);
+
+$currentDay = date('N'); // Get the numeric representation of the current day (1 for Monday, 2 for Tuesday, etc.)
+$currentDateTime = time(); // Get current timestamp
+
+$isWithinClassHours = false;
+
+while ($period = mysqli_fetch_assoc($periodResult)) {
+    $startTime = strtotime($period['StartTime']);
+    $endTime = strtotime($period['EndTime']);
+    $classDays = explode(',', $period['ClassDays']);
+
+    // Check if it's a class day and within class hours
+    if (in_array($currentDay, $classDays)) {
+        if ($currentDateTime >= $startTime && $currentDateTime <= strtotime('23:59:59')) {
+            $isWithinClassHours = true;
+            break; // Stop checking once we find a valid time slot
+        }
+    }
 }
 
-// Check if today is a course day
-$currentWeekday = strtolower(date('l')); // e.g., 'monday'
-$isCourseDay = in_array($currentWeekday, $courseDays);
+// Fetch semester start and end dates based on CRN
+$semesterDatesQuery = "SELECT semester.StartTime, semester.EndTime
+                        FROM coursesection
+                        JOIN semester ON coursesection.SemesterID = semester.SemesterID
+                        WHERE coursesection.CRN = '$CRN'";
+$semesterDatesResult = mysqli_query($conn, $semesterDatesQuery);
+$semesterDates = mysqli_fetch_assoc($semesterDatesResult);
+
+$semesterStartDate = strtotime($semesterDates['StartTime']);
+$semesterEndDate = strtotime($semesterDates['EndTime']);
+
+// Calculate the date 4 days after the semester end
+$fourDaysAfterEnd = strtotime('+4 days', $semesterEndDate);
+
+$currentDate = time();
+
+$isWithinSemesterDates = ($currentDate >= $semesterEndDate && $currentDate <= $fourDaysAfterEnd);
+
 
 // Fetch students, majors, and minors
 $rosterQuery = "SELECT student.StudentID, user.FirstName, user.LastName, enrollment.Grade,
@@ -213,19 +253,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['assignGrade'])) {
                 <td><?php echo htmlspecialchars($student['StudentID']); ?></td>
                 <td><?php echo htmlspecialchars($student['FirstName']); ?></td>
                 <td><?php echo htmlspecialchars($student['LastName']); ?></td>
-                <td><?php echo htmlspecialchars($student['Majors']); ?></td>
-                <td><?php echo htmlspecialchars($student['Minors']); ?></td>
+                <td><?php echo isset($student['Majors']) ? htmlspecialchars($student['Majors']) : ''; ?></td>
+                <td><?php echo isset($student['Minors']) ? htmlspecialchars($student['Minors']) : ''; ?></td>
                 <td><?php echo htmlspecialchars($student['Grade']); ?></td>
                 <td>
+		              <?php if ($isWithinSemesterDates): ?>
                     <form action="class_roster.php?CRN=<?php echo htmlspecialchars($CRN); ?>" method="post">
                         <input type="hidden" name="StudentID" value="<?php echo htmlspecialchars($student['StudentID']); ?>">
                         <input type="hidden" name="CRN" value="<?php echo htmlspecialchars($CRN); ?>">
                         <input type="text" name="Grade" placeholder="Enter grade">
                         <button type="submit" name="assignGrade">Assign</button>
                     </form>
+					<?php else: ?>
+					<span>Grade assignment is not available until <?php echo date('Y-m-d', $semesterEndDate);?>.</span>
+					<?php endif; ?>
                 </td>
                 <td>
-                    <?php if ($isCourseDay): ?>
+                    <?php if ($isWithinClassHours): ?>
                         <form action="record_attendance.php" method="post">
                             <input type="hidden" name="StudentID" value="<?php echo htmlspecialchars($student['StudentID']); ?>">
                             <input type="hidden" name="CRN" value="<?php echo htmlspecialchars($CRN); ?>">
