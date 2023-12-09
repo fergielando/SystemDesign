@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Dec 07, 2023 at 07:55 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1:3306
+-- Generation Time: Dec 09, 2023 at 03:13 AM
+-- Server version: 10.6.16-MariaDB-cll-lve
+-- PHP Version: 7.2.34
 
 SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -19,7 +19,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `systemdesign`
+-- Database: `u353026399_systemdesign`
 --
 CREATE DATABASE IF NOT EXISTS `systemdesign` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `systemdesign`;
@@ -1330,7 +1330,6 @@ INSERT INTO `course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Descriptio
 ('CS6450', 'Advanced Software Testing and Quality Assurance', 'CIS', 6, 'Dive into advanced software testing methodologies, test automation, and quality assurance techniques to ensure the reliability and robustness of software applications.', 'Graduate'),
 ('CS6500', 'Enterprise Architecture and IT Governance', 'CIS', 6, 'Explore the principles of enterprise architecture and IT governance to align IT strategies with business goals. Focus on creating a structured and efficient IT environment.', 'Graduate'),
 ('CS6550', 'Cybersecurity Incident Handling and Response', 'CIS', 6, 'Develop skills in identifying, mitigating, and responding to cybersecurity incidents. Explore incident response plans, threat hunting, and incident handling best practices.', 'Graduate'),
-('CS9000', 'Cloud Computing 12', 'CIS', 4, 'booo', 'Undergraduate'),
 ('EL1000', 'English Composition I: Exposition', 'ENG', 3, 'Designed to develop and refine studentsâ€™ ability to read, write and think critically. Selected essays will be read and studied as models of rhetorical style, enabling students to detect for themselves the effective use of language and to develop an appreciation for masterpieces of non fiction prose. Students will learn to develop the extended essay with particular attention to discovery and organization. Oral communication skills will be sharpened by directed discussion and by presentation and criticism of class papers. A grade of C or above is required to pass this course.', 'Undergraduate'),
 ('EL1010', 'Writing Workshop', 'ENG', 3, 'This course will provide students in English Composition with additional writing support. Students in this course will meet for an additional one hour and 30 minutes per week. During this time students will practice effective writing and reading strategies and engage in one-on-one tutoring sessions with their instructor.', 'Undergraduate'),
 ('EL2001', 'Public Speaking', 'ENG', 3, 'Designed to give the student the poise and confidence necessary to think and speak freely before an audience. This course proceeds from audience analysis through motivation, supporting materials, organization, and delivery.', 'Undergraduate'),
@@ -1457,7 +1456,7 @@ INSERT INTO `course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Descriptio
 ('MS2000', 'Applied Statistics', 'MIS', 3, 'This class introduces statistical concepts and techniques used in various fields, emphasizing practical applications in data analysis and decision-making.', 'Undergraduate'),
 ('MS3030', 'Discrete Mathematics', 'MIS', 3, 'This class covers mathematical topics like combinatorics, graph theory, and logic that are essential for computer science and algorithm analysis.', 'Undergraduate'),
 ('MS3240', 'Operating System', 'MIS', 3, 'This course focuses on improving communication skills relevant to the technology industry, including technical writing, presentation, and documentation.', 'Undergraduate'),
-('MS4100', 'Technical Communications', 'MIS', 3, '', 'Undergraduate'),
+('MS4100', 'Technical Communications', 'MIS', 3, 'Emphasis on technical writing and public speaking skills. Application of report-writing fundamentals to technical correspondence, technical reports, user manuals. Detailed analysis of the problem of conveying technical information to technical and non-technical audiences in written, as well as oral form. Term project involving written paper on a technical subject and an oral presentation of the subject in class.', 'Undergraduate'),
 ('MS4720', 'Internet and Web Technologies', 'MIS', 3, 'Students explore web development concepts, including HTML, CSS, JavaScript, and web application design, along with internet-related technologies and protocols.', 'Undergraduate'),
 ('MS5098', 'Computer Vision and Image Processing', 'MIS', 3, 'This course explores image and video analysis, object detection, and computer vision applications, along with the mathematics and algorithms behind them.', 'Undergraduate'),
 ('MS5109', 'Blockchain Technology and Cryptocurrencies', 'MIS', 3, 'Students explore blockchain technology, its applications beyond cryptocurrencies, and the principles of building secure and decentralized systems.', 'Undergraduate'),
@@ -1495,9 +1494,9 @@ INSERT INTO `course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Descriptio
 ('PE4100', 'International Organizations in the Global Economy', 'ECO', 3, 'This course explores various approaches to international organizations and the contribution these organizations make to the creation, maintenance, and change of world order. Current issues facing the United Nations and its specialized agencies, the Bretton Woods financial institutions, and regional organizations will be examined. While much attention is given in this course to the role of permanent, intergovernmental organizations, the course also examines the role of nongovernmental organizations, international law, treaties, and norms in international relations.', 'Undergraduate'),
 ('PE4275', 'Applied Econometrics', 'ECO', 3, 'Builds on the knowledge and skills in statistics by the study of simple and multiple regression analysis to test empirical propositions in economics and to forecast economic time series. Students are also required to become fluent in the use of a statistics computer program.', 'Undergraduate'),
 ('PE4290', 'Environmental Economics', 'ECO', 3, 'This course examines issues involved in sustainable development and is designed as a broad survey covering the most critical topics in environmental economics. The significant contribution that economic analysis can make in understanding the nature of problems in sustainable development and in providing possible solutions is the central focus of the course. Market failures are the cause of many of our most serious environmental problems but can be remedied with economic tools. The role that economic and political institutions play in allocating natural resources is examined. Students are exposed to a number of emerging sustainability issues including global warming and given ample opportunities to develop their own perspective.', 'Undergraduate'),
-('PE4409', 'Urban Economics', 'ECO', 3, 'This course examines the evolution of cities and metropolitan areas as centers of production and the relationship of urban economics to regional, national, and international economics. Attention is paid to the failure to meet the needs of significant numbers of people in urban areas.', 'Undergraduate'),
-('PE4430', 'Health Economics', 'ECO', 3, 'Health Economics provides a broad overview of healthcare delivery and finance systems, both in the U.S. and abroad, and explores the role that economic theory plays in the national healthcare reform debate. The student will be introduced to a number of basic theoretical tools used in economics to explain the allocation of scarce resources in healthcare markets. The course will also explore a number of controversial questions involving the rationing of care, â€œmarket failuresâ€ in the current healthcare system, disparities in access to care, and the extent to which recent healthcare reform legislation addresses these issues.', 'Undergraduate');
+('PE4409', 'Urban Economics', 'ECO', 3, 'This course examines the evolution of cities and metropolitan areas as centers of production and the relationship of urban economics to regional, national, and international economics. Attention is paid to the failure to meet the needs of significant numbers of people in urban areas.', 'Undergraduate');
 INSERT INTO `course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Description`, `CourseType`) VALUES
+('PE4430', 'Health Economics', 'ECO', 3, 'Health Economics provides a broad overview of healthcare delivery and finance systems, both in the U.S. and abroad, and explores the role that economic theory plays in the national healthcare reform debate. The student will be introduced to a number of basic theoretical tools used in economics to explain the allocation of scarce resources in healthcare markets. The course will also explore a number of controversial questions involving the rationing of care, â€œmarket failuresâ€ in the current healthcare system, disparities in access to care, and the extent to which recent healthcare reform legislation addresses these issues.', 'Undergraduate'),
 ('PE4440', 'Food and Wine Economics', 'ECO', 3, 'The purpose of this course is to provide students with a systematic introduction to basic economic concepts and issues as they relate to the food and wine industry. The process requires an understanding of the microeconomic and macroeconomic forces influencing the decisions of producers and consumers. Topics include supply and demand of food and wine, food and wine production function, both under perfect and imperfect competition as well as an introduction to behavioral economics. The course also addresses concepts in natural resources such as the tragedy of the commons and externalities, as well as government programs.', 'Undergraduate'),
 ('PE4455', 'Economic Development', 'ECO', 3, 'A comparative study of economic development strategies and problems of Third World countries. The course will locate the application of development strategies in different institutional and political settings. The implication of debt repayment on economic development will also be examined.', 'Undergraduate'),
 ('PE4460', 'International Finance', 'ECO', 3, 'Surveys three areas: international financial markets; open-economy macroeconomics; and international monetary systems and policy. Specific topics include position taking, arbitrage, parity conditions, international banking, monetary and fiscal policy, capital mobility, fixed and flexible exchange rates, the gold standard, Bretton Woods, and the current â€œfree marketâ€ international monetary order.', 'Undergraduate'),
@@ -1631,11 +1630,11 @@ INSERT INTO `course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Descriptio
 ('SY6250', 'Social Stratification and Inequality', 'SOC', 6, 'Examines the structures and dynamics of social inequality based on class, race, gender, and other dimensions, exploring theories and empirical research on stratification and mobility.', 'Graduate'),
 ('SY6300', 'Globalization and Social Change', 'SOC', 6, 'Analyzes the impact of globalization on societies, economies, cultures, and identities, exploring interconnectedness, transnationalism, and global social movements.', 'Graduate'),
 ('SY6350', 'Sociology of Health and Illness', 'SOC', 6, 'Explores the social determinants of health, healthcare systems, medicalization, and health disparities, examining how social factors influence health outcomes and healthcare practices.', 'Graduate'),
-('SY6400', 'Urban Sociology', 'SOC', 6, 'Focuses on the study of cities and urban life, examining issues such as urbanization, community dynamics, social inequalities in urban areas, and the impact of urban policies.', 'Graduate'),
+('SY6400', 'Urban Sociology', 'SOC', 6, 'Focuses on the study of cities and urban life, examining issues such as urbanization, community dynamics, social inequalities in urban areas, and the impact of urban policies.', 'Graduate');
+INSERT INTO `course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Description`, `CourseType`) VALUES
 ('SY6450', 'Gender and Society', 'SOC', 6, 'Investigates the intersection of gender with social institutions, identities, and power dynamics, exploring feminist theories and empirical research on gender roles and inequalities.', 'Graduate'),
 ('SY6500', 'Sociology of Culture', 'SOC', 6, 'Analyzes the production, diffusion, and consumption of culture, studying cultural practices, symbolic systems, and the role of culture in shaping social life.', 'Graduate'),
-('SY6550', 'Environmental Sociology', 'SOC', 6, 'Explores the relationship between society and the environment, studying environmental attitudes, movements, policies, and the social dimensions of environmental issues.', 'Graduate');
-INSERT INTO `course` (`CourseID`, `CourseName`, `DeptID`, `Credits`, `Description`, `CourseType`) VALUES
+('SY6550', 'Environmental Sociology', 'SOC', 6, 'Explores the relationship between society and the environment, studying environmental attitudes, movements, policies, and the social dimensions of environmental issues.', 'Graduate'),
 ('VA2000', 'Introduction to Art', 'ART', 3, 'Studio course designed to introduce first-year students to exercises that challenge their assumptions of the creative process. This course will begin to provide students with the basic visual and verbal vocabulary to proceed to the next level in the Visual Arts curriculum. The exercises will be completed using both, the fundamentals of basic art techniques such as drawing, painting, modeling and fabricating, and references from contemporary art currents.', 'Undergraduate'),
 ('VA2010', 'Introduction to Creative Thinking', 'ART', 3, 'A must for students considering careers in advertising, publishing, communications or any other discipline regarding creative visual solutions. Students solve exercises designed to challenge the way we perceive reality through conditioning and stereotypes. A variety of skills are developed at the beginners level. The objective is to develop in the students the skills to make creative visual statements avoiding conventional thinking. Required for Art majors.', 'Undergraduate'),
 ('VA2020', 'Basic Design', 'ART', 3, 'This studio course deals with the fundamental development of visual structures and the relationship among two, three, and four (time) dimensions. Through structured projects, beginning with point and visual rhythm, the course will explore line, plane, and color. Students will learn the fundamental principals to organizing these multi-dimensions as they relate to graphics, interior design, photography, etc. and how to make informed intelligent visual decisions. The relationship between the traditional crafts such as painting, sculpture and the new electronic media arts will be discussed and studied. Required for all art majors.', 'Undergraduate'),
@@ -1685,8 +1684,10 @@ CREATE TABLE `courseprerequisite` (
 --
 
 INSERT INTO `courseprerequisite` (`CourseID`, `PRcourseID`, `MinGrade`, `DOLU`) VALUES
+('BS1000', 'BS2410', 'C', '2023-12-07'),
 ('BS2410', 'BS2400', 'C', '2023-05-11'),
 ('BS2411', 'BS2401', 'C', '2023-05-11'),
+('BS2411', 'BS2410', 'C', '2023-12-07'),
 ('BS3400', 'BS2400', 'C', '2023-05-11'),
 ('BS3400', 'BS2410', 'C', '2023-05-11'),
 ('BS3450', 'BS2400', 'C', '2023-05-11'),
@@ -1978,7 +1979,7 @@ CREATE TABLE `coursesection` (
 --
 
 INSERT INTO `coursesection` (`CRN`, `CourseID`, `SectionNum`, `FacultyID`, `TimeSlotID`, `RoomID`, `SemesterID`, `AvailableSeats`) VALUES
-(0, 'CourseID', 0, 0, 'TimeSlotID', 'RoomID', 0, 0),
+(0, 'NULL', 0, 0, '0', '0', 0, 0),
 (1, 'CS2510', 1, 400002, '1Mon', '6W', 20232, 20),
 (2, 'CS2511', 1, 400017, '2Mon', '5H', 20232, 20),
 (3, 'CS2512', 1, 400032, '3Mon', '7M', 20232, 20),
@@ -3364,7 +3365,8 @@ INSERT INTO `day` (`DayID`, `WeekDay`) VALUES
 (2, 'Tuesday'),
 (3, 'Wednesday'),
 (4, 'Thursday'),
-(5, 'Friday');
+(5, 'Friday'),
+(6, 'Saturday');
 
 -- --------------------------------------------------------
 
@@ -3376,7 +3378,7 @@ CREATE TABLE `dept` (
   `DeptID` varchar(25) NOT NULL,
   `DeptName` varchar(100) DEFAULT NULL,
   `ChairID` int(11) DEFAULT NULL,
-  `DeptManager` varchar(100) DEFAULT NULL,
+  `DeptManager` int(11) DEFAULT NULL,
   `Email` varchar(100) DEFAULT NULL,
   `PhoneNum` varchar(100) DEFAULT NULL,
   `RoomID` varchar(25) DEFAULT NULL
@@ -3387,22 +3389,22 @@ CREATE TABLE `dept` (
 --
 
 INSERT INTO `dept` (`DeptID`, `DeptName`, `ChairID`, `DeptManager`, `Email`, `PhoneNum`, `RoomID`) VALUES
-('ART', 'Art', 400012, 'Samuel Parker\r\n', 'artdepartment@ua.uni', '(555) 234-5678', '12C'),
-('BIO', 'Biology', 400004, 'Joseph Adams\r\n', 'biologydepartment@ua.uni', '(555) 456-7890', '4C'),
-('BUS', 'Business', 400001, 'Karen Turner\r\n', 'businessdepartment@ua.uni', '(555) 567-8901', '15C'),
-('CHE', 'Chemistry', 400009, 'Jessica Ward\r\n', 'chemistrydepartment@ua.uni', '(555) 901-2345', '9C'),
-('CIS', 'CIS (Computer Information Systems)', 400002, 'Richard Baker\r\n', 'cisdepartment@ua.uni', '(555) 234-5678', '2C'),
-('ECO', 'Economics', 400007, 'Amanda Carter\r\n', 'economicsdepartment@ua.uni', '(555) 789-0123', '7C'),
-('ENG', 'English', 400003, 'Cynthia Green\r\n', 'englishdepartment@ua.uni', '(555) 345-6789', '3C'),
-('HIS', 'History', 400005, 'Mary Hall\r\n', 'historydepartment@ua.uni', '(555) 567-8902', '5C'),
-('MAT', 'Mathematics', 400008, 'Thomas Turner\r\n', 'mathdepartment@ua.uni', '(555) 890-1234', '8C'),
-('MIS', 'MIS (Management Information Systems)', 400015, 'Jennifer Bennett\r\n', 'misdepartment@ua.uni', '(555) 123-4567', '1C'),
-('NULL', 'NULL', 0, 'NULL', 'NULL', 'NULL', '0'),
-('PHI', 'Philosophy', 400014, 'Andrew Lewis\r\n', 'philosophydepartment@ua.uni', '(555) 456-7890', '14C'),
-('PHY', 'Physics', 400011, 'Laura Harris\r\n', 'physicsdepartment@ua.uni', '(555) 123-4567', '11C'),
-('POL', 'Politics', 400013, 'Elizabeth Morris\r\n', 'politicsdepartment@ua.uni', '(555) 345-6789', '13C'),
-('PSY', 'Psychology', 400006, 'Charles Mitchell\r\n', 'psychologydepartment@ua.uni', '(555) 678-9012', '6C'),
-('SOC', 'Sociology', 400010, 'Kevin Cooper\r\n', 'sociologydepartment@ua.uni', '(555) 012-3456', '10C');
+('ART', 'Art', 400012, 400027, 'artdepartment@ua.uni', '(555) 234-5678', '12C'),
+('BIO', 'Biology', 400004, 400019, 'biologydepartment@ua.uni', '(555) 456-7890', '4C'),
+('BUS', 'Business', 400001, 400016, 'businessdepartment@ua.uni', '(555) 567-8901', '15C'),
+('CHE', 'Chemistry', 400009, 400024, 'chemistrydepartment@ua.uni', '(555) 901-2345', '9C'),
+('CIS', 'CIS (Computer Information Systems)', 400002, 400017, 'cisdepartment@ua.uni', '(555) 234-5678', '2C'),
+('ECO', 'Economics', 400007, 400022, 'economicsdepartment@ua.uni', '(555) 789-0123', '7C'),
+('ENG', 'English', 400003, 400018, 'englishdepartment@ua.uni', '(555) 345-6789', '3C'),
+('HIS', 'History', 400005, 400020, 'historydepartment@ua.uni', '(555) 567-8902', '5C'),
+('MAT', 'Mathematics', 400008, 400023, 'mathdepartment@ua.uni', '(555) 890-1234', '8C'),
+('MIS', 'MIS (Management Information Systems)', 400015, 400030, 'misdepartment@ua.uni', '(555) 123-4567', '1C'),
+('NULL', 'NULL', 0, 0, 'NULL', 'NULL', '0'),
+('PHI', 'Philosophy', 400014, 400029, 'philosophydepartment@ua.uni', '(555) 456-7890', '14C'),
+('PHY', 'Physics', 400011, 400026, 'physicsdepartment@ua.uni', '(555) 123-4567', '11C'),
+('POL', 'Politics', 400013, 400028, 'politicsdepartment@ua.uni', '(555) 345-6789', '13C'),
+('PSY', 'Psychology', 400006, 400021, 'psychologydepartment@ua.uni', '(555) 678-9012', '6C'),
+('SOC', 'Sociology', 400010, 400025, 'sociologydepartment@ua.uni', '(555) 012-3456', '10C');
 
 -- --------------------------------------------------------
 
@@ -5542,7 +5544,7 @@ INSERT INTO `faculty` (`FacultyID`, `Position`, `Specialty`, `FacultyType`) VALU
 (400027, 'Manager(Secretary)', 'Art', 'Full Time'),
 (400028, 'Manager(Secretary)', 'Politics', 'Full Time'),
 (400029, 'Manager(Secretary)', 'Philosophy', 'Full Time'),
-(400030, 'Professor', 'MIS', 'Full Time'),
+(400030, 'Manager(Secretary)', 'MIS', 'Full Time'),
 (400031, 'Professor', 'Business ', 'Full Time'),
 (400032, 'Professor', 'CIS ', 'Full Time'),
 (400033, 'Professor', 'English', 'Full Time'),
@@ -5822,7 +5824,7 @@ INSERT INTO `faculty` (`FacultyID`, `Position`, `Specialty`, `FacultyType`) VALU
 
 CREATE TABLE `facultydept` (
   `FacultyID` int(11) NOT NULL,
-  `DeptID` varchar(25) DEFAULT NULL,
+  `DeptID` varchar(25) NOT NULL,
   `PercentTime` varchar(100) DEFAULT NULL,
   `DOA` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -9301,7 +9303,7 @@ INSERT INTO `major` (`MajorID`, `DeptID`, `MajorName`) VALUES
 (40, 'SOC', 'Sociology (Graduate)'),
 (41, 'PHY', 'Physics (Graduate)'),
 (42, 'ART', 'Art (Graduate)'),
-(43, 'POL', 'Music (Graduate)'),
+(43, 'POL', 'Politics (Graduate)'),
 (44, 'PHI', 'Philosophy (Graduate)'),
 (45, 'BUS', 'Business (Graduate)');
 
@@ -9777,7 +9779,7 @@ INSERT INTO `minor` (`MinorID`, `DeptID`, `MinorName`) VALUES
 (40, 'SOC', 'Sociology (Graduate)'),
 (41, 'PHY', 'Physics (Graduate)'),
 (42, 'ART', 'Art (Graduate)'),
-(43, 'POL', 'Music (Graduate)'),
+(43, 'POL', 'Politics (Graduate)'),
 (44, 'PHI', 'Philosophy (Graduate)'),
 (45, 'BUS', 'Business (Graduate)');
 
@@ -11294,7 +11296,7 @@ INSERT INTO `studenthistory` (`StudentID`, `CRN`, `CourseID`, `SemesterID`, `Gra
 (500010, 192, 'SY4260', 20232, 'IP'),
 (500010, 200, 'SY4570', 20232, 'IP'),
 (500011, 203, 'PH2250', 20232, 'IP'),
-(500011, 262, 'HI1020', 20232, 'IP'),
+(500011, 262, 'HI1020', 20232, 'C'),
 (500011, 270, 'HI3323', 20232, 'IP'),
 (500011, 280, 'HI5910', 20232, 'IP'),
 (500012, 101, 'PY2010', 20232, 'IP'),
@@ -13815,6 +13817,7 @@ INSERT INTO `studentmajor` (`StudentID`, `MajorID`) VALUES
 (500189, 11),
 (500208, 11),
 (500222, 11),
+(500225, 11),
 (500229, 11),
 (500258, 11),
 (500262, 11),
@@ -13953,7 +13956,6 @@ INSERT INTO `studentmajor` (`StudentID`, `MajorID`) VALUES
 (500092, 14),
 (500207, 14),
 (500209, 14),
-(500225, 14),
 (500239, 14),
 (500251, 14),
 (500271, 14),
@@ -14282,7 +14284,6 @@ INSERT INTO `studentmajor` (`StudentID`, `MajorID`) VALUES
 (500054, 24),
 (500077, 24),
 (500202, 24),
-(500225, 24),
 (500256, 24),
 (500266, 24),
 (500282, 24),
@@ -14548,6 +14549,7 @@ INSERT INTO `studentminor` (`StudentID`, `MinorID`) VALUES
 (500122, 6),
 (500123, 6),
 (500124, 6),
+(500225, 6),
 (500321, 6),
 (500322, 6),
 (500323, 6),
@@ -14907,7 +14909,7 @@ INSERT INTO `studentminor` (`StudentID`, `MinorID`) VALUES
 
 CREATE TABLE `timeslot` (
   `TimeSlotID` varchar(100) NOT NULL,
-  `DayID` int(11) DEFAULT NULL,
+  `DayID` int(11) NOT NULL,
   `PeriodID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -14917,16 +14919,6 @@ CREATE TABLE `timeslot` (
 
 INSERT INTO `timeslot` (`TimeSlotID`, `DayID`, `PeriodID`) VALUES
 ('0', 0, 0),
-('10Fri', 5, 10),
-('10Mon', 1, 10),
-('10Thu', 4, 10),
-('10Tues', 2, 10),
-('10Wed', 3, 10),
-('11Fri', 5, 11),
-('11Mon', 1, 11),
-('11Thu', 4, 11),
-('11Tues', 2, 11),
-('11Wed', 3, 11),
 ('1Fri', 5, 1),
 ('1Mon', 1, 1),
 ('1Thu', 4, 1),
@@ -14972,7 +14964,16 @@ INSERT INTO `timeslot` (`TimeSlotID`, `DayID`, `PeriodID`) VALUES
 ('9Thu', 4, 9),
 ('9Tues', 2, 9),
 ('9Wed', 3, 9),
-('NULL', 0, 0);
+('10Fri', 5, 10),
+('10Mon', 1, 10),
+('10Thu', 4, 10),
+('10Tues', 2, 10),
+('10Wed', 3, 10),
+('11Fri', 5, 11),
+('11Mon', 1, 11),
+('11Thu', 4, 11),
+('11Tues', 2, 11),
+('11Wed', 3, 11);
 
 -- --------------------------------------------------------
 
@@ -15216,7 +15217,7 @@ INSERT INTO `undergradstudent` (`StudentID`, `DeptID`, `UnderGradStudentType`) V
 (500222, 'PSY', 'Undergrad Full Time'),
 (500223, 'ECO', 'Undergrad Full Time'),
 (500224, 'ECO', 'Undergrad Full Time'),
-(500225, 'MAT', 'Undergrad Full Time'),
+(500225, 'PSY', 'Undergrad Full Time'),
 (500226, 'MAT', 'Undergrad Full Time'),
 (500227, 'CHE', 'Undergrad Full Time'),
 (500228, 'CHE', 'Undergrad Full Time'),
@@ -18069,7 +18070,8 @@ ALTER TABLE `dept`
   ADD UNIQUE KEY `DeptID_2` (`DeptID`),
   ADD KEY `DeptID` (`DeptID`),
   ADD KEY `dept_ibfk_1` (`RoomID`),
-  ADD KEY `dept_ibfk_2` (`ChairID`);
+  ADD KEY `dept_ibfk_2` (`ChairID`),
+  ADD KEY `dept_ibfk_3` (`DeptManager`);
 
 --
 -- Indexes for table `enrollment`
@@ -18090,7 +18092,7 @@ ALTER TABLE `faculty`
 -- Indexes for table `facultydept`
 --
 ALTER TABLE `facultydept`
-  ADD PRIMARY KEY (`FacultyID`),
+  ADD PRIMARY KEY (`FacultyID`,`DeptID`) USING BTREE,
   ADD KEY `FacultyID` (`FacultyID`),
   ADD KEY `facultydept_ibfk_1` (`DeptID`);
 
@@ -18267,7 +18269,7 @@ ALTER TABLE `studentminor`
 -- Indexes for table `timeslot`
 --
 ALTER TABLE `timeslot`
-  ADD PRIMARY KEY (`TimeSlotID`),
+  ADD PRIMARY KEY (`TimeSlotID`,`DayID`) USING BTREE,
   ADD KEY `DayID` (`DayID`),
   ADD KEY `PeriodID` (`PeriodID`);
 
@@ -18381,7 +18383,8 @@ ALTER TABLE `coursesection`
 --
 ALTER TABLE `dept`
   ADD CONSTRAINT `dept_ibfk_1` FOREIGN KEY (`RoomID`) REFERENCES `room` (`RoomID`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `dept_ibfk_2` FOREIGN KEY (`ChairID`) REFERENCES `faculty` (`FacultyID`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `dept_ibfk_2` FOREIGN KEY (`ChairID`) REFERENCES `faculty` (`FacultyID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `dept_ibfk_3` FOREIGN KEY (`DeptManager`) REFERENCES `faculty` (`FacultyID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `enrollment`
@@ -18400,7 +18403,7 @@ ALTER TABLE `faculty`
 -- Constraints for table `facultydept`
 --
 ALTER TABLE `facultydept`
-  ADD CONSTRAINT `facultydept_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `facultydept_ibfk_1` FOREIGN KEY (`DeptID`) REFERENCES `dept` (`DeptID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `facultydept_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
@@ -18540,7 +18543,7 @@ ALTER TABLE `studentminor`
 -- Constraints for table `timeslot`
 --
 ALTER TABLE `timeslot`
-  ADD CONSTRAINT `timeslot_ibfk_1` FOREIGN KEY (`DayID`) REFERENCES `day` (`DayID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `timeslot_ibfk_1` FOREIGN KEY (`DayID`) REFERENCES `day` (`DayID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `timeslot_ibfk_2` FOREIGN KEY (`PeriodID`) REFERENCES `periodd` (`PeriodID`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
