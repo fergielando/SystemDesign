@@ -23,7 +23,8 @@ $enrolledCoursesQuery = "SELECT
     periodd.EndTime,
     user.FirstName AS FacultyFirstName,
     user.LastName AS FacultyLastName,
-    coursesection.SectionNum
+    coursesection.SectionNum,
+	coursesection.SemesterID
 FROM enrollment
 JOIN coursesection ON enrollment.CRN = coursesection.CRN
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
@@ -33,7 +34,6 @@ JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
 JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
 JOIN user ON coursesection.FacultyID = user.UID
-LEFT JOIN studenthistory ON enrollment.StudentID = studenthistory.StudentID AND coursesection.SemesterID = studenthistory.SemesterID
 WHERE enrollment.StudentID = '$uid'AND coursesection.SemesterID = '20232'";
 
 
