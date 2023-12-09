@@ -10,6 +10,13 @@ if (!isset($_SESSION['UID'])) {
 
 $uid = $_SESSION['UID'];
 
+// Set default timezone (use before the others)
+date_default_timezone_set('America/New_York');
+
+
+if (isset($_POST['submit'])) {
+    $selectedSemester = $_POST['semester']; // Get selected SemesterID
+    // Modify the query with the selected SemesterID
 $enrolledCoursesQuery = "SELECT
     coursesection.CRN,
     coursesection.CourseID,
@@ -34,7 +41,35 @@ JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
 JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
 JOIN user ON coursesection.FacultyID = user.UID
-WHERE enrollment.StudentID = '$uid'AND coursesection.SemesterID = '20232'";
+WHERE enrollment.StudentID = '$uid' AND coursesection.SemesterID = '$selectedSemester'";
+}
+else {
+$enrolledCoursesQuery = "SELECT
+    coursesection.CRN,
+    coursesection.CourseID,
+    coursesection.AvailableSeats,
+    timeslot.TimeSlotID,
+    day.Weekday,
+    course.CourseName,
+    room.RoomNum,
+    building.BuildingName,
+    periodd.StartTime,
+    periodd.EndTime,
+    user.FirstName AS FacultyFirstName,
+    user.LastName AS FacultyLastName,
+    coursesection.SectionNum,
+	coursesection.SemesterID
+FROM enrollment
+JOIN coursesection ON enrollment.CRN = coursesection.CRN
+JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
+JOIN day ON timeslot.DayID = day.DayID
+JOIN course ON coursesection.CourseID = course.CourseID
+JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+JOIN room ON coursesection.RoomID = room.RoomID
+JOIN building ON room.BuildingID = building.BuildingID
+JOIN user ON coursesection.FacultyID = user.UID
+WHERE enrollment.StudentID = '$uid' AND coursesection.SemesterID = '20232'";
+}
 
 
 $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
@@ -71,6 +106,16 @@ $daysOfWeek = [];
 while ($row = mysqli_fetch_assoc($daysOfWeekResult)) {
     $daysOfWeek[] = $row['Weekday'];
 }
+
+// Query to fetch distinct SemesterIDs
+$distinctSemestersQuery = "SELECT DISTINCT SemesterID, SemesterName FROM semester WHERE SemesterID <> 0";
+$distinctSemestersResult = mysqli_query($conn, $distinctSemestersQuery);
+
+$semesterOptions = [];
+while ($row = mysqli_fetch_assoc($distinctSemestersResult)) {
+    $semesterOptions[$row['SemesterID']] = $row['SemesterName'];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -244,9 +289,46 @@ th:last-child {
       </div>
    </div>
    
+<?php
+$semesterName = ''; // Variable to hold the semester name
+
+// Check if a semester filter is applied
+if (isset($_POST['submit'])) {
+    $selectedSemester = $_POST['semester'];
+
+    // Fetch the semester name based on the selected SemesterID
+    $semesterNameQuery = "SELECT SemesterName FROM semester WHERE SemesterID = '$selectedSemester'";
+    $semesterNameResult = mysqli_query($conn, $semesterNameQuery);
+    $semesterData = mysqli_fetch_assoc($semesterNameResult);
+
+    // Assign the fetched semester name to the variable
+    $semesterName = $semesterData['SemesterName'];
+}
+?>   
 
    <div class="welcome-message">
-    <p>Welcome, <?php echo $_SESSION['user_name']; ?>. Welcome to UA University! You are currently in your <?php echo $studentYear; ?> year. Here is your current schedule:</p>
+    <p>Welcome, <?php echo $_SESSION['user_name']; ?>. Welcome to UA University! You are currently in your <?php echo $studentYear; ?> year. Your Student ID is: <?php echo $_SESSION['UID']; ?>. Here is your current schedule for <?php echo $semesterName; ?>:</p>
+	<p>
+	    <?php
+        // Get current date and time in desired formats
+        $currentDate = date('Y-m-d');
+        $currentTime = date('h:i A');
+        echo "<p>Current Date: $currentDate</p>";
+        echo "<p>Current Time: $currentTime</p>";
+		?>
+	</p>
+</div>
+
+<div class="semester-filter">
+    <form method="POST" action="">
+        <label for="semester">Select Semester:</label>
+        <select name="semester" id="semester">
+            <?php foreach ($semesterOptions as $semesterID => $semesterName): ?>
+                <option value="<?php echo $semesterID; ?>"><?php echo $semesterName; ?></option>
+            <?php endforeach; ?>
+        </select>
+        <input type="submit" name="submit" value="Filter">
+    </form>
 </div>
 
 <?php if ($enrolledCourses !== false): ?>
@@ -262,7 +344,12 @@ th:last-child {
         <tbody>
             <?php foreach ($timeSlots as $timeSlot): ?>
                 <tr>
-                    <td><?php echo $timeSlot['StartTime'] . " - " . $timeSlot['EndTime']; ?></td>
+                    <td><?php
+            // Convert StartTime and EndTime to AM/PM format
+            $startTime = date("h:i A", strtotime($timeSlot['StartTime']));
+            $endTime = date("h:i A", strtotime($timeSlot['EndTime']));
+            echo $startTime . " - " . $endTime;
+            ?></td>
                     <?php foreach ($daysOfWeek as $day): ?>
                         <td>
                             <?php
