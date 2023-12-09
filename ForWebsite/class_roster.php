@@ -230,7 +230,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['assignGrade'])) {
          <a href="fac_newhome1.php" class="btn">Back</a>
       </div>
    </header>
-  
+    
+	<div style="text-align: center; margin-top: 20px;">
+    <?php
+        // Get current date and time in desired formats
+        $currentDate = date('Y-m-d');
+        $currentTime = date('h:i A');
+        echo "<p>Current Date: $currentDate</p>";
+        echo "<p>Current Time: $currentTime</p>";
+		
+		// Map DayIDs to day names
+        $daysMap = [
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday'
+        ];
+
+        // Display class days
+        $classDaysString = implode(', ', array_map(function ($dayID) use ($daysMap) {
+            return $daysMap[$dayID];
+        }, $classDays));
+
+        echo "<p>This class meets on $classDaysString</p>";
+    ?>
+</div>
 
    <h1>Class Roster for Course: <?php echo htmlspecialchars($courseName); ?> (CRN: <?php echo htmlspecialchars($CRN); ?>)</h1>
 
@@ -245,6 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['assignGrade'])) {
             <th>Grade</th>
             <th>Assign Grade</th>
             <th>Attendance</th> <!-- New column for Attendance -->
+			  <th>Attendance History</th> <!-- New column header for Attendance History -->
         </tr>
     </thead>
     <tbody>
@@ -306,10 +334,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['assignGrade'])) {
                         <span>Not a course day</span>
                     <?php endif; ?>
                 </td>
+					<td>
+                    <button onclick="showAttendance('<?php echo htmlspecialchars($student['StudentID']); ?>')">Show Attendance History</button>
+                </td>
             </tr>
         <?php endforeach; ?>
     </tbody>
 </table>
+
+<div id="attendanceHistory">
+    <!-- Attendance history will be displayed here -->
+</div>
+
+<script>
+    function showAttendance(studentID) {
+        // AJAX request to fetch attendance records for the selected student
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("attendanceHistory").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "get_attendance.php?StudentID=" + studentID + "&CRN=<?php echo $CRN; ?>", true);
+        xhttp.send();
+    }
+</script>
 
 </body>
 </html>
