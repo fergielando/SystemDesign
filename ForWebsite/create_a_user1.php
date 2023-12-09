@@ -249,7 +249,7 @@ if(isset($_POST['clear'])) {
       <input type="facultyspecialty" name="facultyspecialty" placeholder="Faculty Specialty: N/A">
       <input type="statsofficetype" name="statsofficetype" placeholder="Stats Office Client: N/A">
       <input type="submit" name="submit" value="Create" class="form-btn">
-      <a href="create_a_user1.php" value ="Clear" class="clear-btn">Clear</a> <!-- Add the Clear button -->
+      <a href="Create_a_user1.php" value ="Clear" class="clear-btn">Clear</a> <!-- Add the Clear button -->
       </form>
       </form>
    </div>

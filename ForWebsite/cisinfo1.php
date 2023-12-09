@@ -1,16 +1,16 @@
 <?php
 @include 'config1.php';
 
-// Fetching POL department details
-$DeptQuery = "SELECT * FROM dept WHERE DeptID = 'POL'";
+// Fetching CIS department details
+$DeptQuery = "SELECT * FROM dept WHERE DeptID = 'CIS'";
 $DeptResult = mysqli_query($conn, $DeptQuery);
 $DeptDetails = mysqli_fetch_assoc($DeptResult);
 
-// Fetching POL courses
+// Fetching CIS courses
 $CoursesQuery = "SELECT c.*, GROUP_CONCAT(cp.PRCourseID) AS Prerequisites
                     FROM course c
                     LEFT JOIN courseprerequisite cp ON c.CourseID = cp.CourseID
-                    WHERE c.DeptID = 'POL'
+                    WHERE c.DeptID = 'CIS'
                     GROUP BY c.CourseID";
 $CoursesResult = mysqli_query($conn, $CoursesQuery);
 $Courses = [];
@@ -20,17 +20,17 @@ while ($course = mysqli_fetch_assoc($CoursesResult)) {
 }
 
 //Fetching Department Email
-$deptemailQuery = "SELECT Email FROM dept WHERE DeptID = 'POL'";
+$deptemailQuery = "SELECT Email FROM dept WHERE DeptID = 'CIS'";
 $deptemailResult = mysqli_query($conn, $deptemailQuery);
 $deptemailDetails = mysqli_fetch_assoc($deptemailResult);
 
 //Fetching Department Phone
-$deptphoneQuery = "SELECT PhoneNum FROM dept WHERE DeptID = 'POL'";
+$deptphoneQuery = "SELECT PhoneNum FROM dept WHERE DeptID = 'CIS'";
 $deptphoneResult = mysqli_query($conn, $deptphoneQuery);
 $deptphoneDetails = mysqli_fetch_assoc($deptphoneResult);
 
 //Fetching Department Office
-$deptroomQuery = "SELECT RoomID FROM dept WHERE DeptID = 'POL'";
+$deptroomQuery = "SELECT RoomID FROM dept WHERE DeptID = 'CIS'";
 $deptroomResult = mysqli_query($conn, $deptroomQuery);
 $deptroomDetails = mysqli_fetch_assoc($deptroomResult);
 
@@ -44,7 +44,7 @@ FROM dept
 				JOIN faculty  ON faculty.FacultyID = dept.ChairID
                 JOIN user  ON faculty.FacultyID = user.UID
 				JOIN logintable  ON user.UID = logintable.UID
-WHERE DeptID = 'POL'";
+WHERE DeptID = 'CIS'";
 $deptchairResult = mysqli_query($conn, $deptchairQuery);
 $deptchairDetails = mysqli_fetch_assoc($deptchairResult);
 
@@ -58,11 +58,11 @@ FROM dept
 				JOIN faculty  ON faculty.FacultyID = dept.DeptManager
                 JOIN user  ON faculty.FacultyID = user.UID
 				JOIN logintable  ON user.UID = logintable.UID
-WHERE DeptID = 'POL'";
+WHERE DeptID = 'CIS'";
 $deptmanagerResult = mysqli_query($conn, $deptmanagerQuery);
 $deptmanagerDetails = mysqli_fetch_assoc($deptmanagerResult);
 
-// Fetching faculty in the POL department including their emails from the logintable
+// Fetching faculty in the CIS department including their emails from the logintable
 $facultyQuery = "SELECT 
 f.FacultyID, 
 f.FacultyType, 
@@ -75,7 +75,7 @@ FROM faculty f
                 JOIN facultydept fd ON f.FacultyID = fd.FacultyID
                 JOIN user u ON f.FacultyID = u.UID
 				JOIN logintable lt ON u.UID = lt.UID
-                WHERE fd.DeptID = 'POL'";
+                WHERE fd.DeptID = 'CIS'";
 $facultyResult = mysqli_query($conn, $facultyQuery);
 $facultyList = [];
 while ($faculty = mysqli_fetch_assoc($facultyResult)) {
@@ -86,7 +86,7 @@ while ($faculty = mysqli_fetch_assoc($facultyResult)) {
 $MajorsQuery = "SELECT m.*, GROUP_CONCAT(mp.PRmajorID) AS Prerequisites
                     FROM major m
                     LEFT JOIN majorprerequisite mp ON m.MajorID = mp.MajorID
-                    WHERE m.DeptID = 'POL'
+                    WHERE m.DeptID = 'CIS'
                     GROUP BY m.MajorID";
 $MajorsResult = mysqli_query($conn, $MajorsQuery);
 $Majors = [];
@@ -99,7 +99,7 @@ while ($major = mysqli_fetch_assoc($MajorsResult)) {
 $MinorsQuery = "SELECT m.*, GROUP_CONCAT(mp.PRminorID) AS Prerequisites
                     FROM minor m
                     LEFT JOIN minorprerequisite mp ON m.MinorID = mp.MinorID
-                    WHERE m.DeptID = 'POL'
+                    WHERE m.DeptID = 'CIS'
                     GROUP BY m.MinorID";
 $MinorsResult = mysqli_query($conn, $MinorsQuery);
 $Minors = [];
@@ -145,29 +145,29 @@ while ($minor = mysqli_fetch_assoc($MinorsResult)) {
     </header>
 
     <main>
-    <main>
-    <section>
     <section>
             <h2>Message from the Chair and Manager - <?php echo $deptchairDetails['ChairFirstName'] . ' ' . $deptchairDetails['ChairLastName']; ?> - Chair and <?php echo $deptmanagerDetails['ManagerFirstName'] . ' ' . $deptmanagerDetails['ManagerLastName']; ?> - Manager</h2>
-            <p>Welcome to the <?php echo $DeptDetails['DeptName']; ?> Department at UA University! Our department is dedicated to the study of political systems, public policy, and governmental structures, providing our students with a deep understanding of the complexities of political processes and their impact on societies worldwide.</p>
-             <ul>
+            <p>Welcome to the <?php echo $DeptDetails['DeptName']; ?> Department at UA University! Our department is committed to excellence in the field of computer information systems and equips students with the necessary skills to succeed in a rapidly evolving digital world.</p>
+            <p>Contact Information:</p>
+            <ul>
                 <li>Department Email: <a href="mailto:<?php echo $deptemailDetails['Email']; ?>"><?php echo $deptemailDetails['Email']; ?></a></li>
                 <li>Department Phone: <?php echo $deptphoneDetails['PhoneNum']; ?></li>
 				   <li>Department Office: <?php echo $deptroomDetails['RoomID']; ?></li>
             </ul>
             <p>Department Chair:</p>
             <ul>
-                 <li>Name: <?php echo $deptchairDetails['ChairFirstName'] . ' ' . $deptchairDetails['ChairLastName']; ?></li>
+               <li>Name: <?php echo $deptchairDetails['ChairFirstName'] . ' ' . $deptchairDetails['ChairLastName']; ?></li>
                 <li>Email: <a href="mailto:<?php echo $deptchairDetails['ChairEmail']; ?>"><?php echo $deptchairDetails['ChairEmail']; ?></a></li>
-                <li>Phone: (555) 345-6789</li>
+                <li>Phone: (555) 234-5678</li>
             </ul>
-            <p>Department Manager:</p>
+				<p>Department Manager:</p>
             <ul>
-                <li>Name: <?php echo $deptmanagerDetails['ManagerFirstName'] . ' ' . $deptmanagerDetails['ManagerLastName']; ?></li>
+               <li>Name: <?php echo $deptmanagerDetails['ManagerFirstName'] . ' ' . $deptmanagerDetails['ManagerLastName']; ?></li>
                 <li>Email: <a href="mailto:<?php echo $deptmanagerDetails['ManagerEmail']; ?>"><?php echo $deptmanagerDetails['ManagerEmail']; ?></a></li>
-                <li>Phone: (555) 710-8062</li>
+                <li>Phone: (555) 123-0849</li>
             </ul>
         </section>
+
 
             <section>
             <h2>Faculty in the <?php echo $DeptDetails['DeptName']; ?> Department</h2>

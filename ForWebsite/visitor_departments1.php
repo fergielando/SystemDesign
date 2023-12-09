@@ -2,7 +2,7 @@
 @include 'config1.php';
 
 // Retrieve department data from the database
-$query = "SELECT * FROM dept";
+$query = "SELECT * FROM dept WHERE DeptID <> 'NULL'";
 $result = mysqli_query($conn, $query);
 $departments = [];
 

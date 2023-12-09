@@ -8,6 +8,7 @@ $query = "SELECT
     coursesection.CRN,
     coursesection.CourseID,
     coursesection.AvailableSeats,
+    coursesection.SectionNum,
     timeslot.TimeSlotID,
     day.Weekday,
     course.CourseName,
@@ -18,6 +19,8 @@ $query = "SELECT
     periodd.EndTime,
     user.FirstName AS FacultyFirstName,
     user.LastName AS FacultyLastName,
+    coursesection.FacultyID,
+    dept.DeptName,
 	semester.SemesterName
 FROM coursesection
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
@@ -30,7 +33,8 @@ JOIN facultyhistory ON coursesection.CRN = facultyhistory.CRN
 JOIN faculty ON facultyhistory.FacultyID = faculty.FacultyID
 JOIN user ON faculty.FacultyID = user.UID  -- Join using the foreign key constraint
 JOIN semester ON coursesection.SemesterID = semester.SemesterID  -- Join using the foreign key constraint
-WHERE coursesection.CRN > 0
+JOIN dept ON course.DeptID = dept.DeptID
+WHERE coursesection.CRN <> 0
 ORDER BY coursesection.CRN ASC";
 
 
@@ -43,8 +47,23 @@ while ($row = mysqli_fetch_assoc($result)) {
     $courses[] = $row;
 }
 
+//Get Course Prerequisites for each Course
+foreach ($courses as &$course) {
+    $courseID = $course['CourseID'];
+    $prerequisitesQuery = "SELECT PRCourseID FROM courseprerequisite WHERE CourseID = '$courseID'";
+    $prerequisitesResult = mysqli_query($conn, $prerequisitesQuery);
+
+    $prerequisites = [];
+    while ($row = mysqli_fetch_assoc($prerequisitesResult)) {
+        $prerequisites[] = $row['PRCourseID'];
+    }
+
+    $course['Prerequisites'] = $prerequisites;
+}
+unset($course); // Unset the reference after the loop
+
 // Fetch distinct days for the filter
-$query = "SELECT DISTINCT day.Weekday FROM day"; // Adjust the table and column names as needed
+$query = "SELECT DISTINCT day.Weekday FROM day WHERE DayID <> 0"; // Adjust the table and column names as needed
 $result = mysqli_query($conn, $query);
 
 $days = [];
@@ -53,7 +72,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 }
 
 // Fetch distinct building names for the filter
-$query = "SELECT DISTINCT building.BuildingName FROM building"; // Adjust the table and column names as needed
+$query = "SELECT DISTINCT building.BuildingName FROM building WHERE BuildingID <> 0 AND BuildingID <>4"; // Adjust the table and column names as needed
 $result = mysqli_query($conn, $query);
 
 $buildingNames = [];
@@ -63,16 +82,16 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 
 // Fetch distinct department IDs for the filter
-$query = "SELECT DISTINCT course.deptID FROM course";
+$query = "SELECT DISTINCT dept.DeptName FROM dept WHERE DeptID <> 'NULL'";
 $result = mysqli_query($conn, $query);
 
 $departmentIDs = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $departmentIDs[] = $row['deptID'];
+    $departmentIDs[] = $row['DeptName'];
 }
 
 // Fetch distinct room IDs for the filter
-$query = "SELECT DISTINCT room.RoomID FROM room"; // Adjust the table and column names as needed
+$query = "SELECT DISTINCT room.RoomID FROM room WHERE RoomID <> 0"; // Adjust the table and column names as needed
 $result = mysqli_query($conn, $query);
 
 $roomIDs = [];
@@ -80,7 +99,7 @@ while ($row = mysqli_fetch_assoc($result)) {
    $roomIDs[] = $row['RoomID'];
 }
 
-$query = "SELECT DISTINCT CONCAT(periodd.StartTime, ' to ', periodd.EndTime) AS Time FROM periodd"; // Adjust the table and column names as needed
+$query = "SELECT DISTINCT CONCAT(periodd.StartTime, ' to ', periodd.EndTime) AS Time FROM periodd WHERE PeriodID <> 0"; // Adjust the table and column names as needed
 $result = mysqli_query($conn, $query);
 
 $times = [];
@@ -89,13 +108,32 @@ while ($row = mysqli_fetch_assoc($result)) {
 }
 
 // Fetch distinct semester names for the filter
-$query = "SELECT DISTINCT semester.SemesterName FROM semester"; // Adjust the table and column names as needed
+$query = "SELECT DISTINCT semester.SemesterName FROM semester WHERE SemesterID <> 0"; // Adjust the table and column names as needed
 $result = mysqli_query($conn, $query);
 
 $semesterNames = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $semesterNames[] = $row['SemesterName'];
 }
+
+// Fetch distinct Section Numbers for the filter
+$query = "SELECT DISTINCT coursesection.SectionNum FROM coursesection WHERE SectionNum <> 0"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$sectionnums = [];
+while ($row = mysqli_fetch_assoc($result)) {
+   $sectionnums[] = $row['SectionNum'];
+}
+
+// Fetch distinct Available Seats for the filter
+$query = "SELECT DISTINCT coursesection.AvailableSeats FROM coursesection"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$availbleseats = [];
+while ($row = mysqli_fetch_assoc($result)) {
+   $availbleseats[] = $row['AvailableSeats'];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -280,59 +318,76 @@ while ($row = mysqli_fetch_assoc($result)) {
 
    <div class="welcome-statement">
       Welcome to U.A. University! We are delighted to extend a warm and enthusiastic welcome to all members of the U.A. University community. U.A. University is thrilled to have you as part of our academic family. Our dedicated faculty and staff are here to support and guide you every step of the way. We believe in your potential and are excited to see what you will achieve during your time at U.A. University.
+      <br>
+      <br>
+      This page includes the Master Schedule for all course sections.
    </div>
 
    <!-- Search container for search input and button -->
    <div class="search-container">
-      <input type="text" id="searchInput" placeholder="Search...">
-      <button onclick="searchTable()">Search</button>
+       General Search: 
+      <input type="text" id="searchInput" placeholder="General Search..." onkeyup="searchAndFilterTable()">
       <button onclick="resetTable()">Reset</button>
    </div>
-
-   <!-- Filter container for Department -->
+   
+   <div class="search-container">
+       CRN:
+      <input type="text" id="crnSearch" placeholder="Search by CRN..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+	  
+       Course ID:
+      <input type="text" id="courseidSearch" placeholder="Search by Course ID..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+      
+      Course Name:
+      <input type="text" id="coursenameSearch" placeholder="Search by Course Name..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+   </div>
+   
+   <!-- Filter container for Section Number -->
    <div class="filter-container">
+   <label for="sectionFilter">Section Number:</label>
+   <select id="sectionFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($sectionnums as $SectionNum): ?>
+         <option value="<?php echo $SectionNum; ?>"><?php echo $SectionNum; ?></option>
+      <?php endforeach; ?>
+   </select>
+   
    <label for="deptFilter">Department:</label>
-   <select id="deptFilter" onchange="filterTable('deptFilter', 'Department ID')">
+   <select id="deptFilter" onchange="searchAndFilterTable()">
       <option value="">All</option>
       <?php foreach ($departmentIDs as $deptID): ?>
          <option value="<?php echo $deptID; ?>"><?php echo $deptID; ?></option>
       <?php endforeach; ?>
    </select>
-</div>
-
-<div class="filter-container">
-   <label for="buildingFilter">Building:</label>
-   <select id="buildingFilter" onchange="filterTable('buildingFilter', 'Building')">
-      <option value="">All</option>
-      <?php foreach ($buildingNames as $buildingName): ?>
-         <option value="<?php echo $buildingName; ?>"><?php echo $buildingName; ?></option>
-      <?php endforeach; ?>
-   </select>
-</div>
-
-<div class="filter-container">
-   <label for="dayFilter">Day:</label>
-   <select id="dayFilter" onchange="filterTable('dayFilter', 'Day')">
+   
+    <label for="dayFilter">Day:</label>
+   <select id="dayFilter" onchange="searchAndFilterTable()">
       <option value="">All</option>
       <?php foreach ($days as $day): ?>
          <option value="<?php echo $day; ?>"><?php echo $day; ?></option>
       <?php endforeach; ?>
    </select>
-</div>
+   
+    <label for="buildingFilter">Building:</label>
+   <select id="buildingFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($buildingNames as $buildingName): ?>
+         <option value="<?php echo $buildingName; ?>"><?php echo $buildingName; ?></option>
+      <?php endforeach; ?>
+   </select>
 
-<div class="filter-container">
-   <label for="roomFilter">Room ID:</label>
-   <select id="roomFilter" onchange="filterTable('roomFilter', 'Room ID')">
+   <label for="roomFilter">Room:</label>
+   <select id="roomFilter" onchange="searchAndFilterTable()">
       <option value="">All</option>
       <?php foreach ($roomIDs as $roomID): ?>
          <option value="<?php echo $roomID; ?>"><?php echo $roomID; ?></option>
       <?php endforeach; ?>
    </select>
-</div>
-
-<div class="filter-container">
-   <label for="timeFilter">Time:</label>
-   <select id="timeFilter" onchange="filterTable('timeFilter', 'Time')">
+   
+    <label for="timeFilter">Time:</label>
+   <select id="timeFilter" onchange="searchAndFilterTable()">
       <option value="">All</option>
       <?php foreach ($times as $time): ?>
          <option value="<?php echo $time; ?>"><?php echo $time; ?></option>
@@ -340,12 +395,30 @@ while ($row = mysqli_fetch_assoc($result)) {
    </select>
 </div>
 
+   <div class="search-container">
+       Professor Name:
+      <input type="text" id="professorSearch" placeholder="Search by Professor..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+      
+       Professor ID:
+      <input type="text" id="professoridSearch" placeholder="Search by Professor ID..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+   </div>
+
 <div class="filter-container">
    <label for="semesterFilter">Semester:</label>
-   <select id="semesterFilter" onchange="filterTable('semesterFilter', 'Semester')">
+   <select id="semesterFilter" onchange="searchAndFilterTable()">
       <option value="">All</option>
       <?php foreach ($semesterNames as $semester): ?>
          <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
+      <?php endforeach; ?>
+   </select>
+   
+   <label for="seatsFilter">Available Seats:</label>
+   <select id="seatsFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($availbleseats as $seats): ?>
+         <option value="<?php echo $seats; ?>"><?php echo $seats; ?></option>
       <?php endforeach; ?>
    </select>
 </div>
@@ -359,14 +432,19 @@ while ($row = mysqli_fetch_assoc($result)) {
    <thead>
     <tr>
         <th>CRN</th>
+		 <th>Course ID</th>
         <th>Course Name</th>
-        <th>Department ID</th>
+        <th>Section Num</th>
+		 <th>Prerequisites</th>
+        <th>Department</th>
         <th>Day</th>
         <th>Building</th>
-        <th>Room ID</th>
+        <th>Room</th>
         <th>Time</th>
         <th>Professor Name</th>  <!-- Add faculty name header -->
-		 <th>Semester</th>
+        <th>Professor ID</th>  <!-- Add faculty name header -->
+		<th>Semester</th>
+		<th>Available Seats</th>
     </tr>
 </thead>
 
@@ -374,88 +452,139 @@ while ($row = mysqli_fetch_assoc($result)) {
     <?php foreach ($courses as $course): ?>
         <tr>
             <td><?php echo $course['CRN']; ?></td>
+			  <td><?php echo $course['CourseID']; ?></td>
             <td><?php echo $course['CourseName']; ?></td>
-            <td><?php echo $course['deptID']; ?></td>
+            <td><?php echo $course['SectionNum']; ?></td>
+			  <td>
+                <?php if (!empty($course['Prerequisites'])): ?>
+                    <ul>
+                        <?php foreach ($course['Prerequisites'] as $prerequisite): ?>
+                            <li><?php echo $prerequisite; ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    None
+                <?php endif; ?>
+            </td>
+            <td><?php echo $course['DeptName']; ?></td>
             <td><?php echo $course['Weekday']; ?></td>
             <td><?php echo $course['BuildingName']; ?></td>
             <td><?php echo $course['RoomID']; ?></td>
             <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
             <td><?php echo $course['FacultyFirstName'] . " " . $course['FacultyLastName']; ?></td>  <!-- Display faculty name -->
-				<td><?php echo $course['SemesterName']; ?></td>
+            <td><?php echo $course['FacultyID']; ?></td>
+			<td><?php echo $course['SemesterName']; ?></td>
+			<td><?php echo $course['AvailableSeats']; ?></td>
         </tr>
     <?php endforeach; ?>
 </tbody>
 
    </table>
 
-   <script>
-      function searchTable() {
-         var input, filter, table, tr, td, i, txtValue;
-         input = document.getElementById("searchInput");
-         filter = input.value.toUpperCase();
-         table = document.querySelector("table");
-         tr = table.getElementsByTagName("tr");
+<script>
+      function searchAndFilterTable() {
+        var searchText = document.getElementById('searchInput').value.toUpperCase();
+        var crnText = document.getElementById('crnSearch').value.toUpperCase();
+		var courseidText = document.getElementById('courseidSearch').value.toUpperCase();
+        var coursenameText = document.getElementById('coursenameSearch').value.toUpperCase();
+        var professorText = document.getElementById('professorSearch').value.toUpperCase();
+        var professoridText = document.getElementById('professoridSearch').value.toUpperCase();
+        var filters = {
+            'Section Num': document.getElementById('sectionFilter').value.toUpperCase(),
+            'Department': document.getElementById('deptFilter').value.toUpperCase(),
+            'Building': document.getElementById('buildingFilter').value.toUpperCase(),
+            'Day': document.getElementById('dayFilter').value.toUpperCase(),
+            'Room': document.getElementById('roomFilter').value.toUpperCase(),
+            'Time': document.getElementById('timeFilter').value.toUpperCase(),
+            'Semester': document.getElementById('semesterFilter').value.toUpperCase(),
+			'Available Seats': document.getElementById('seatsFilter').value.toUpperCase()
+            // Add other filters here
+        };
 
-         for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td");
-            for (var j = 0; j < td.length; j++) {
-               if (td[j]) {
-                  txtValue = td[j].textContent || td[j].innerText;
-                  if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                     tr[i].style.display = "";
-                     break;
-                  } else {
-                     tr[i].style.display = "none";
-                  }
-               }
+        var table = document.querySelector('table');
+        var rows = table.getElementsByTagName('tr');
+
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var showRow = true;
+
+    for (var filter in filters) {
+            var columnIndex = getColumnIndex(filter);
+            if (columnIndex > -1) {
+                var cell = row.getElementsByTagName('td')[columnIndex];
+                if (cell) {
+                    var cellValue = cell.textContent || cell.innerText;
+
+                    if (filters[filter] !== 'ALL') {
+                        var filterValue = filters[filter];
+
+                        // Handle '0' as a special case for Available Seats
+                        if (filter === 'Available Seats' && filterValue === '0') {
+                            if (cellValue !== '0') {
+                                showRow = false;
+                                break;
+                            }
+                        } else {
+                            if (cellValue.toUpperCase().indexOf(filterValue) === -1) {
+                                showRow = false;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-         }
-      }
+        }
 
-      function filterTable(filterId, columnName) {
-         var input, filter, table, tr, td, i, txtValue;
-         input = document.getElementById(filterId);
-         filter = input.value.toUpperCase();
-         table = document.querySelector("table");
-         tr = table.getElementsByTagName("tr");
-
-         for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[getColumnIndex(columnName)];
-            if (td) {
-               txtValue = td.textContent || td.innerText;
-               if (filter === "" || txtValue.toUpperCase().indexOf(filter) > -1) {
-                  tr[i].style.display = "";
-               } else {
-                  tr[i].style.display = "none";
-               }
+            var crnCell = row.getElementsByTagName('td')[0]; // Assuming CRN is in the 1st column
+            if (crnCell) {
+                var crnValue = crnCell.textContent || crnCell.innerText;
+                if (crnValue.toUpperCase().indexOf(crnText) === -1 && crnText !== '') {
+                    showRow = false;
+                }
             }
-         }
-      }
+			
+            var courseidCell = row.getElementsByTagName('td')[1]; // Assuming Course ID is in the 1st column
+            if (courseidCell) {
+                var courseidValue = courseidCell.textContent || courseidCell.innerText;
+                if (courseidValue.toUpperCase().indexOf(courseidText) === -1 && courseidText !== '') {
+                    showRow = false;
+                }
+            }
+            
+            var coursenameCell = row.getElementsByTagName('td')[2]; // Assuming Course Name is in the 1st column
+            if (coursenameCell) {
+                var coursenameValue = coursenameCell.textContent || coursenameCell.innerText;
+                if (coursenameValue.toUpperCase().indexOf(coursenameText) === -1 && coursenameText !== '') {
+                    showRow = false;
+                }
+            }
 
+            var professorCell = row.getElementsByTagName('td')[10]; // Assuming Professor Name is in the 9th column
+            if (professorCell) {
+                var professorValue = professorCell.textContent || professorCell.innerText;
+                if (professorValue.toUpperCase().indexOf(professorText) === -1 && professorText !== '') {
+                    showRow = false;
+                }
+            }
+            
+            var professoridCell = row.getElementsByTagName('td')[11]; // Assuming Professor ID is in the 10th column
+            if (professoridCell) {
+                var professoridValue = professoridCell.textContent || professoridCell.innerText;
+                if (professoridValue.toUpperCase().indexOf(professoridText) === -1 && professoridText !== '') {
+                    showRow = false;
+                }
+            }
+            
+            var rowData = row.textContent || row.innerText;
+            if (rowData.toUpperCase().indexOf(searchText) > -1 && showRow) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    }
 
-
-      function filterTable(filterId, columnName) {
-   var input, filter, table, tr, td, i, txtValue;
-   input = document.getElementById(filterId);
-   filter = input.value.toUpperCase();
-   table = document.querySelector("table");
-   tr = table.getElementsByTagName("tr");
-
-   for (i = 0; i < tr.length; i++) {
-      td = tr[i].getElementsByTagName("td")[getColumnIndex(columnName)];
-      if (td) {
-         txtValue = td.textContent || td.innerText;
-         if (filter === "" || txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-         } else {
-            tr[i].style.display = "none";
-         }
-      }
-   }
-}
-
-
-      function getColumnIndex(columnName) {
+    function getColumnIndex(columnName) {
          var table = document.querySelector("table");
          var header = table.querySelector("thead");
          var thArray = Array.from(header.querySelectorAll("th"));
@@ -467,10 +596,30 @@ while ($row = mysqli_fetch_assoc($result)) {
          return -1;
       }
 
-      function resetTable() {
-   // Refresh the page
-   window.location.reload();
-}
+    function resetTable() {
+        var table = document.querySelector('table');
+        var rows = table.getElementsByTagName('tr');
+
+        for (var i = 0; i < rows.length; i++) {
+            rows[i].style.display = '';
+        }
+
+        document.getElementById('searchInput').value = '';
+		document.getElementById('crnSearch').value = '';
+		document.getElementById('coursenameSearch').value = '';
+		document.getElementById('sectionFilter').value = '';
+        // Reset all filter dropdowns to default
+        document.getElementById('deptFilter').value = '';
+        document.getElementById('buildingFilter').value = '';
+        document.getElementById('dayFilter').value = '';
+        document.getElementById('roomFilter').value = '';
+        document.getElementById('timeFilter').value = '';
+		document.getElementById('professorSearch').value = '';
+		document.getElementById('professoridSearch').value = '';
+        document.getElementById('semesterFilter').value = '';
+		document.getElementById('seatsFilter').value = '';
+        // Add other filter reset lines here if needed
+    }
 
    </script>
 </body>

@@ -34,7 +34,7 @@ JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
 JOIN user ON coursesection.FacultyID = user.UID
 LEFT JOIN studenthistory ON enrollment.StudentID = studenthistory.StudentID AND coursesection.SemesterID = studenthistory.SemesterID
-WHERE enrollment.StudentID = '$uid'AND studenthistory.SemesterID = '20232'";
+WHERE enrollment.StudentID = '$uid'AND coursesection.SemesterID = '20232'";
 
 
 $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
@@ -56,10 +56,10 @@ $studentInfo = mysqli_fetch_assoc($studentInfoResult);
 $studentYear = $studentInfo['StudentYear'];
 
 // Fetch the time slots and days of the week from your database
-$timeSlotsQuery = "SELECT DISTINCT StartTime, EndTime FROM periodd ORDER BY StartTime";
+$timeSlotsQuery = "SELECT DISTINCT StartTime, EndTime FROM periodd WHERE PeriodID <> 0 ORDER BY StartTime";
 $timeSlotsResult = mysqli_query($conn, $timeSlotsQuery);
 
-$daysOfWeekQuery = "SELECT DISTINCT Weekday FROM day ORDER BY FIELD(Weekday, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')";
+$daysOfWeekQuery = "SELECT DISTINCT Weekday FROM day WHERE DayID <> 0 ORDER BY FIELD(Weekday, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')";
 $daysOfWeekResult = mysqli_query($conn, $daysOfWeekQuery);
 
 $timeSlots = [];
