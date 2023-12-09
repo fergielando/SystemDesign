@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 @include 'config1.php';
 
 // Retrieve minor data from the database
-$query = "SELECT * FROM minor";
+$query = "SELECT * FROM minor WHERE MinorID <> 0";
 $result = mysqli_query($conn, $query);
 $minors = [];
 
