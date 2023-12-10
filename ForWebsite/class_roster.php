@@ -8,6 +8,10 @@ if (!isset($_SESSION['UID'])) {
     exit;
 }
 
+if (!isset($_SESSION['faculty_name'])) {
+   header('location:login_form1.php');
+}
+
 // Check if CRN is provided
 if (!isset($_GET['CRN'])) {
     echo "No course selected.";
