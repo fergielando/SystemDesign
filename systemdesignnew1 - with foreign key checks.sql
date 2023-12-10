@@ -7,7 +7,6 @@
 -- Server version: 10.6.16-MariaDB-cll-lve
 -- PHP Version: 7.2.34
 
-SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -75569,7 +75568,6 @@ ALTER TABLE `undergradstudentft`
 --
 ALTER TABLE `undergradstudentpt`
   ADD CONSTRAINT `undergradstudentpt_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `undergradstudent` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE;
-SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
