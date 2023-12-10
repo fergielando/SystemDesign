@@ -290,7 +290,7 @@ th:last-child {
    </div>
    
 <?php
-$semesterName = ''; // Variable to hold the semester name
+$semesterName = 'Fall 2023'; // Variable to hold the semester name
 
 // Check if a semester filter is applied
 if (isset($_POST['submit'])) {
