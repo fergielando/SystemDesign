@@ -2,7 +2,7 @@
 @include 'config1.php';
 
 // Retrieve major data from the database
-$query = "SELECT * FROM major";
+$query = "SELECT * FROM major WHERE MajorID <> 0";
 $result = mysqli_query($conn, $query);
 $majors = [];
 
