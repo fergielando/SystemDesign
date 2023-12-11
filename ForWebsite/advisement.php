@@ -52,9 +52,16 @@ if (isset($_POST['assignFaculty'])) {
     $advisorCountResult = mysqli_query($conn, $advisorCountQuery);
     $advisorCountData = mysqli_fetch_assoc($advisorCountResult);
     $advisorCount = $advisorCountData['advisorCount'];
+	
+	$facultyStudentCountQuery = "SELECT COUNT(*) AS facultyStudentCount FROM advisor WHERE FacultyID = $selectedFacultyUID";
+    $facultyStudentCountResult = mysqli_query($conn, $facultyStudentCountQuery);
+    $facultyStudentCountData = mysqli_fetch_assoc($facultyStudentCountResult);
+    $facultyStudentCount = $facultyStudentCountData['facultyStudentCount'];
 
     if ($advisorCount >= 2) {
         $assignError = "The selected student already has 2 or more advisors.";
+    } elseif ($facultyStudentCount >= 10) {
+        $assignError = "The selected faculty already advises 10 students.";
     } else {
         // Perform the faculty-to-student assignment in your database
         // Make sure to handle this securely and with appropriate validation
@@ -80,7 +87,7 @@ $queryAssignStudent = "SELECT user.UID AS StudentID, user.FirstName, user.LastNa
                         FROM advisor
                         GROUP BY StudentID
                     ) AS advisorCounts ON user.UID = advisorCounts.StudentID
-                    WHERE advisorCounts.advisorCount IS NULL OR advisorCounts.advisorCount < 2";
+                    WHERE (advisorCounts.advisorCount IS NULL OR advisorCounts.advisorCount < 2) AND StudentID > 50000";
 
 $assignStudentResult = mysqli_query($conn, $queryAssignStudent);
 
@@ -207,13 +214,15 @@ if (isset($_POST['unassignFaculty'])) {
 </head>
 <body>
     <h1>Faculty Advisement Page</h1>
-    
+    <div style="text-align: right; margin-right: 20px;">
+        <a href="javascript:history.go(-1)">Back</a>
+    </div>
     <form method="post">
         <label for="facultyDropdown">Select Faculty:</label>
         <select id="facultyDropdown" name="facultyDropdown">
             <option value="">Select Faculty</option>
             <?php foreach ($facultyList as $faculty): ?>
-                <option value="<?php echo $faculty['FacultyID']; ?>"><?php echo $faculty['FirstName'] . ' ' . $faculty['LastName']; ?></option>
+                <option value="<?php echo $faculty['FacultyID']; ?>"> <?php echo $faculty['FacultyID']; ?> - <?php echo $faculty['FirstName'] . ' ' . $faculty['LastName']; ?></option>
             <?php endforeach; ?>
         </select>
         <button type="submit">Show Advised Students</button>
@@ -244,14 +253,14 @@ if (isset($_POST['unassignFaculty'])) {
         <select id="unassignFacultyID" name="unassignFacultyID">
             <option value="">Select Faculty</option>
             <?php foreach ($facultyList as $faculty): ?>
-                <option value="<?php echo $faculty['FacultyID']; ?>"><?php echo $faculty['FirstName'] . ' ' . $faculty['LastName']; ?></option>
+                <option value="<?php echo $faculty['FacultyID']; ?>"><?php echo $faculty['FacultyID']; ?> - <?php echo $faculty['FirstName'] . ' ' . $faculty['LastName']; ?></option>
             <?php endforeach; ?>
         </select>
         <label for="unassignStudentID">Select Student:</label>
         <select id="unassignStudentID" name="unassignStudentID">
             <option value="">Select Student</option>
             <?php foreach ($studentList as $student): ?>
-                <option value="<?php echo $student['StudentID']; ?>"><?php echo $student['FirstName'] . ' ' . $student['LastName']; ?></option>
+                <option value="<?php echo $student['StudentID']; ?>"><?php echo $student['StudentID']; ?> - <?php echo $student['FirstName'] . ' ' . $student['LastName']; ?></option>
             <?php endforeach; ?>
         </select>
         <button type="submit" name="unassignFaculty">Unassign</button>
@@ -270,14 +279,14 @@ if (isset($_POST['unassignFaculty'])) {
             <select id="facultyID" name="facultyID">
                 <option value="">Select Faculty</option>
                 <?php foreach ($facultyList as $faculty): ?>
-                    <option value="<?php echo $faculty['FacultyID']; ?>"><?php echo $faculty['FirstName'] . ' ' . $faculty['LastName']; ?></option>
+                    <option value="<?php echo $faculty['FacultyID']; ?>"> <?php echo $faculty['FacultyID']; ?> - <?php echo $faculty['FirstName'] . ' ' . $faculty['LastName']; ?></option>
                 <?php endforeach; ?>
             </select>
             <label for="studentID">Select Student:</label>
             <select id="studentID" name="studentID">
                 <option value="">Select Student</option>
                 <?php foreach ($assignStudentList as $student): ?>
-                    <option value="<?php echo $student['StudentID']; ?>"><?php echo $student['FirstName'] . ' ' . $student['LastName']; ?></option>
+                    <option value="<?php echo $student['StudentID']; ?>"> <?php echo $student['StudentID']; ?> - <?php echo $student['FirstName'] . ' ' . $student['LastName']; ?></option>
                 <?php endforeach; ?>
             </select>
             <button type="submit" name="assignFaculty">Assign</button>
