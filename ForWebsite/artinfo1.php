@@ -62,20 +62,23 @@ WHERE DeptID = 'ART'";
 $deptmanagerResult = mysqli_query($conn, $deptmanagerQuery);
 $deptmanagerDetails = mysqli_fetch_assoc($deptmanagerResult);
 
-// Fetching faculty in the art department
 $facultyQuery = "SELECT 
-f.FacultyID, 
-f.FacultyType, 
-u.FirstName AS FacultyFirstName, 
-u.LastName AS FacultyLastName, 
-f.Position AS Position, 
-f.Specialty AS Specialty, 
-lt.Email AS FacultyEmail
+    f.FacultyID, 
+    f.FacultyType, 
+    u.FirstName AS FacultyFirstName, 
+    u.LastName AS FacultyLastName, 
+    f.Position AS Position, 
+    f.Specialty AS Specialty, 
+    lt.Email AS FacultyEmail,
+    COALESCE(fft.OfficeID, fpt.OfficeID) AS OfficeID
 FROM faculty f
-                JOIN facultydept fd ON f.FacultyID = fd.FacultyID
-                JOIN user u ON f.FacultyID = u.UID
-				JOIN logintable lt ON u.UID = lt.UID
-                WHERE fd.DeptID = 'ART'";
+JOIN facultydept fd ON f.FacultyID = fd.FacultyID
+JOIN user u ON f.FacultyID = u.UID
+JOIN logintable lt ON u.UID = lt.UID
+LEFT JOIN facultyft fft ON f.FacultyID = fft.FacultyID
+LEFT JOIN facultypt fpt ON f.FacultyID = fpt.FacultyID
+WHERE fd.DeptID = 'ART'";
+
 $facultyResult = mysqli_query($conn, $facultyQuery);
 $facultyList = [];
 while ($faculty = mysqli_fetch_assoc($facultyResult)) {
@@ -169,25 +172,28 @@ while ($minor = mysqli_fetch_assoc($artMinorsResult)) {
         <section>
         <h2>Faculty in the <?php echo $artDeptDetails['DeptName']; ?> Department</h2>
         <table>
-            <tr>
-				   <th>Faculty ID</th>
-                <th>Faculty Name</th>
-                <th>Position</th>
-                <th>Specialty</th>
-				  <th>Faculty Type</th>
-				   <th>Email</th> <!-- Added Email column -->
-            </tr>
-            <?php foreach ($facultyList as $faculty): ?>
-            <tr>
-				  <td><?php echo $faculty['FacultyID']; ?></td>
-                <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
-                <td><?php echo $faculty['Position']; ?></td>
-                <td><?php echo $faculty['Specialty']; ?></td>
-				  <td><?php echo $faculty['FacultyType']; ?></td>
-				  <td><?php echo $faculty['FacultyEmail']; ?></td> <!-- Displaying Faculty Email -->
-            </tr>
-            <?php endforeach; ?>
-        </table>
+    <tr>
+        <th>Faculty ID</th>
+        <th>Faculty Name</th>
+        <th>Position</th>
+        <th>Specialty</th>
+        <th>Faculty Type</th>
+        <th>Email</th>
+        <th>OfficeID</th> <!-- Added OfficeID column -->
+    </tr>
+    <?php foreach ($facultyList as $faculty): ?>
+    <tr>
+        <td><?php echo $faculty['FacultyID']; ?></td>
+        <td><?php echo $faculty['FacultyFirstName'] . ' ' . $faculty['FacultyLastName']; ?></td>
+        <td><?php echo $faculty['Position']; ?></td>
+        <td><?php echo $faculty['Specialty']; ?></td>
+        <td><?php echo $faculty['FacultyType']; ?></td>
+        <td><?php echo $faculty['FacultyEmail']; ?></td>
+        <td><?php echo $faculty['OfficeID']; ?></td> <!-- Displaying OfficeID -->
+    </tr>
+    <?php endforeach; ?>
+</table>
+
     </section>
 	
         <section>
