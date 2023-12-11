@@ -32,7 +32,9 @@ $scheduleQuery = "SELECT
 cs.CRN, 
 cs.CourseID, 
 cs.AvailableSeats, 
+GROUP_CONCAT(DISTINCT d.Weekday ORDER BY d.Weekday SEPARATOR '/') AS Weekdays, 
 cs.SemesterID,  -- Added SemesterID
+s.SemesterName,
 ts.TimeSlotID, 
 d.Weekday, 
 c.CourseName, 
@@ -54,10 +56,12 @@ JOIN
 room r ON cs.RoomID = r.RoomID
 JOIN 
 building b ON r.BuildingID = b.BuildingID
+LEFT JOIN
+semester s ON cs.SemesterID = s.SemesterID
 WHERE 
 cs.FacultyID = '$UID'
-
-";
+GROUP BY cs.TimeSlotID, cs.SemesterID, s.SemesterName, cs.CRN, cs.CourseID, cs.AvailableSeats, ts.TimeSlotID, c.CourseName, r.RoomNum, b.BuildingName, p.StartTime, p.EndTime
+ORDER BY ts.TimeSlotID";
 
 
 
@@ -65,6 +69,11 @@ $scheduleResult = mysqli_query($conn, $scheduleQuery);
 
 $courses = [];
 while ($row = mysqli_fetch_assoc($scheduleResult)) {
+    $row['Semester'] = $row['SemesterName']; // Update the Semester field with SemesterName
+    unset($row['SemesterID']); // Remove the unnecessary SemesterID field
+    unset($row['SemesterName']); // Remove the unnecessary SemesterName field
+    $row['Weekday'] = $row['Weekdays']; // Update the Weekday field with concatenated weekdays
+    unset($row['Weekdays']); // Remove the unnecessary Weekdays field
     $courses[] = $row;
 }
 
@@ -264,7 +273,6 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
       <a href="student_majors1.php" class="btn">Majors</a>
       <a href="student_minor1.php" class="btn">Minors</a>
       <a href="facdepartment.php" class="btn">Departments</a>
-	  <a href="faculty_course_catalog1.php" class="btn">Course Catalog</a>
       <a href="faculty_page1.php" class="btn">Master Schedule</a>
    </div>
 </header>
@@ -273,7 +281,7 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
   
 
    // Retrieve unique SemesterIDs for filtering
-   $uniqueSemesters = array_unique(array_column($courses, 'SemesterID'));
+   $uniqueSemesters = array_unique(array_column($courses, 'Semester'));
    ?>
 
    <!-- Semester filter -->
@@ -303,7 +311,7 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
        <!-- Container for course tables -->
        <div class="table-container">
            <?php foreach ($courses as $course): ?>
-               <div class="course-table" data-semester-id="<?php echo htmlspecialchars($course['SemesterID']); ?>">
+               <div class="course-table" data-semester-name="<?php echo htmlspecialchars($course['Semester']); ?>">
                    <table>
                        <tr><th>CRN</th><td><?php echo htmlspecialchars($course['CRN']); ?></td></tr>
                        <tr><th>Course ID</th><td><?php echo htmlspecialchars($course['CourseID']); ?></td></tr> <!-- Added line for CourseID -->
@@ -312,9 +320,9 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
                        <tr><th>Building</th><td><?php echo htmlspecialchars($course['BuildingName']); ?></td></tr>
                        <tr><th>Room</th><td><?php echo htmlspecialchars($course['RoomNum']); ?></td></tr>
                        <tr><th>Time</th><td><?php echo htmlspecialchars($course['StartTime']) . " - " . htmlspecialchars($course['EndTime']); ?></td></tr>
-                       <tr><th>Semester ID</th><td><?php echo htmlspecialchars($course['SemesterID']); ?></td></tr>
+                       <tr><th>Semester ID</th><td><?php echo htmlspecialchars($course['Semester']); ?></td></tr>
                        <tr>
-                           <td colspan="2"><a href="class_roster.php?CRN=<?php echo htmlspecialchars($course['CRN']); ?>&semesterID=<?php echo htmlspecialchars($course['SemesterID']); ?>">Class Roster</a></td>
+                           <td colspan="2"><a href="class_roster.php?CRN=<?php echo htmlspecialchars($course['CRN']); ?>&semesterID=<?php echo htmlspecialchars($course['Semester']); ?>">Class Roster</a></td>
                        </tr>
                    </table>
                </div>
@@ -332,8 +340,8 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
                const selectedSemester = semesterSelect.value;
 
                courseTables.forEach(function (table) {
-                   const semesterID = table.getAttribute('data-semester-id');
-                   if (semesterID === selectedSemester || selectedSemester === 'all') {
+                   const semesterName = table.getAttribute('data-semester-name');
+                   if (semesterName === selectedSemester || selectedSemester === 'all') {
                        table.style.display = 'block';
                    } else {
                        table.style.display = 'none';
