@@ -20,7 +20,7 @@ SET time_zone = "+00:00";
 --
 -- Database: `systemdesign`
 --
-CREATE DATABASE IF NOT EXISTS `u353026399_systemdesign` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS `systemdesign` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `systemdesign`;
 
 -- --------------------------------------------------------
@@ -75346,14 +75346,6 @@ ALTER TABLE `advisor`
   ADD CONSTRAINT `advisor_ibfk_2` FOREIGN KEY (`FacultyID`) REFERENCES `faculty` (`FacultyID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `attendance`
---
-ALTER TABLE `attendance`
-  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `attendance_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Constraints for table `classroom`
 --
 ALTER TABLE `classroom`
@@ -75569,6 +75561,14 @@ ALTER TABLE `undergradstudentft`
 ALTER TABLE `undergradstudentpt`
   ADD CONSTRAINT `undergradstudentpt_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `undergradstudent` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
+
+--
+-- Constraints for table `attendance`
+--
+ALTER TABLE `attendance`
+  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `student` (`StudentID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`CRN`) REFERENCES `coursesection` (`CRN`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `attendance_ibfk_3` FOREIGN KEY (`CourseID`) REFERENCES `course` (`CourseID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
