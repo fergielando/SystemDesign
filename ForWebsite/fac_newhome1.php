@@ -319,8 +319,15 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
                        <tr><th>Day</th><td><?php echo htmlspecialchars($course['Weekday']); ?></td></tr>
                        <tr><th>Building</th><td><?php echo htmlspecialchars($course['BuildingName']); ?></td></tr>
                        <tr><th>Room</th><td><?php echo htmlspecialchars($course['RoomNum']); ?></td></tr>
-                       <tr><th>Time</th><td><?php echo htmlspecialchars($course['StartTime']) . " - " . htmlspecialchars($course['EndTime']); ?></td></tr>
-                       <tr><th>Semester ID</th><td><?php echo htmlspecialchars($course['Semester']); ?></td></tr>
+                       <tr><th>Time</th><td>
+                            <?php 
+                                // Convert military time to AM/PM format
+                                $startTime = date("g:i A", strtotime($course['StartTime']));
+                                $endTime = date("g:i A", strtotime($course['EndTime']));
+                                echo htmlspecialchars($startTime) . " - " . htmlspecialchars($endTime);
+                            ?>
+                        </td></tr>
+                       <tr><th>Semester Name</th><td><?php echo htmlspecialchars($course['Semester']); ?></td></tr>
                        <tr>
                            <td colspan="2"><a href="class_roster.php?CRN=<?php echo htmlspecialchars($course['CRN']); ?>&semesterID=<?php echo htmlspecialchars($course['Semester']); ?>">Class Roster</a></td>
                        </tr>
