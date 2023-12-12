@@ -180,6 +180,7 @@ while ($row = mysqli_fetch_assoc($students_result)) {
         <option value="Academic">Academic</option>
         <option value="Financial">Financial</option>
         <option value="Disciplinary">Disciplinary</option>
+		<option value="Health">Health</option>
     </select>
     <input type="submit" name="create_hold" value="Create Hold">
 </form>

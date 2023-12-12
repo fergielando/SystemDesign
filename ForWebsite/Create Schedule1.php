@@ -86,18 +86,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
             }
 
            // Check for student hold
-$checkHoldQuery = "SELECT * FROM Hold WHERE StudentID = '$uid'";
+$checkHoldQuery = "SELECT * FROM hold WHERE StudentID = '$uid'";
 $checkHoldResult = mysqli_query($conn, $checkHoldQuery);
 
 if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
     // The student has a hold
     $holdInfo = mysqli_fetch_assoc($checkHoldResult);
     
-    // Display a larger, red error message with a 6-second delay
+    // Display a larger, red error message with a 8-second delay
     echo "<div style='font-size: 24px; color: red;'>You have a hold on your account of type: " . $holdInfo['HoldType'] . " since " . $holdInfo['DateOfHold'] . "</div>";
     
-    // Redirect back to the previous page after 6 seconds
-    echo "<script>setTimeout(function() { window.history.back(); }, 6000);</script>";
+    // Redirect back to the previous page after 8 seconds
+    echo "<script>setTimeout(function() { window.history.back(); }, 8000);</script>";
     exit;
 }
 
@@ -603,7 +603,7 @@ function applyFilters() {
         <option value="">All</option>
         <?php
         // Fetch and display unique semester values from your database
-        $semesterQuery = "SELECT DISTINCT SemesterID FROM coursesection";
+        $semesterQuery = "SELECT DISTINCT SemesterID FROM coursesection WHERE SemesterID <> 0";
         $semesterResult = mysqli_query($conn, $semesterQuery);
         while ($semester = mysqli_fetch_assoc($semesterResult)) {
             echo "<option value='{$semester['SemesterID']}'>{$semester['SemesterID']}</option>";
