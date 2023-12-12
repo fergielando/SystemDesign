@@ -234,14 +234,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['assignGrade'])) {
          <a href="admin_page1.php" class="btn">Back</a>
       </div>
    </header>
-    
+
+<div style="text-align: center; margin-top: 20px;">
+    <?php
+    // Get current date and time in desired formats
+    $currentDate = date('Y-m-d');
+    $currentTime = date('h:i A');
+    echo "<p>Current Date: $currentDate</p>";
+    echo "<p>Current Time: $currentTime</p>";
+
+    // Fetch and display class period details
+    $periodQuery = "SELECT periodd.StartTime, periodd.EndTime
+                    FROM coursesection
+                    JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
+                    JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
+                    WHERE coursesection.CRN = '$CRN'";
+    $periodResult = mysqli_query($conn, $periodQuery);
+
+    if ($period = mysqli_fetch_assoc($periodResult)) {
+        $startTime = date('h:i A', strtotime($period['StartTime']));
+        $endTime = date('h:i A', strtotime($period['EndTime']));
+        echo "<p>This class meets from $startTime to $endTime</p>";
+    } else {
+        echo "<p>Class period details not found.</p>";
+    }
+    ?>
+</div>
+
 	<div style="text-align: center; margin-top: 20px;">
     <?php
         // Get current date and time in desired formats
         $currentDate = date('Y-m-d');
         $currentTime = date('h:i A');
-        echo "<p>Current Date: $currentDate</p>";
-        echo "<p>Current Time: $currentTime</p>";
 		
 		// Map DayIDs to day names
         $daysMap = [
