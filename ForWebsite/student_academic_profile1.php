@@ -502,6 +502,7 @@ while ($course = mysqli_fetch_assoc($courseHistoryResult)) {
       <h1>Academic Profile</h1>
       <div class="button-container">
       <a href="Create Schedule1.php" class="back-button">Create Schedule</a>
+	   <a href="student_unofficialtranscript1.php" class="back-button">Unofficial Transcript</a>
       <a href="DegreeAudit1.php" class="back-button">Degree Audit</a>
       <a href="user_page1.php" class="back-button">Back</a>
    </div>

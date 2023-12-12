@@ -13,7 +13,9 @@ if (isset($_GET['UID'])) {
     $uid = mysqli_real_escape_string($conn, $_GET['UID']);
 
     // Fetch Student Data
-    $query = "SELECT * FROM user WHERE UID = '$uid'";
+    $query = "SELECT user.*,logintable.* FROM user 
+	JOIN logintable ON user.UID = logintable.UID
+	WHERE user.UID = '$uid'";
     $result = mysqli_query($conn, $query);
     if (mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
@@ -22,8 +24,10 @@ if (isset($_GET['UID'])) {
    }
 
    // Re-fetch user data
-$query = "SELECT * FROM user WHERE UID = '$uid'";
-$result = mysqli_query($conn, $query);
+$query = "SELECT user.*,logintable.* FROM user 
+	JOIN logintable ON user.UID = logintable.UID
+	WHERE user.UID = '$uid'";
+    $result = mysqli_query($conn, $query);
 if (mysqli_num_rows($result) > 0) {
     $user = mysqli_fetch_assoc($result);
 }
@@ -200,6 +204,20 @@ $advisorQuery = "SELECT u.FirstName, u.LastName, l.Email
                  WHERE a.StudentID = '$uid'";
 $advisorResult = mysqli_query($conn, $advisorQuery);
 
+// Fetch course history including grades
+$courseHistoryQuery = "SELECT coursesection.CRN, coursesection.CourseID, course.CourseName, semester.SemesterName, studenthistory.Grade
+FROM studenthistory
+JOIN coursesection ON studenthistory.CRN = coursesection.CRN
+JOIN course ON coursesection.CourseID = course.CourseID
+JOIN semester ON coursesection.SemesterID = semester.SemesterID
+WHERE studenthistory.StudentID = '$uid'";
+$courseHistoryResult = mysqli_query($conn, $courseHistoryQuery);
+$courseHistory = [];
+
+while ($course = mysqli_fetch_assoc($courseHistoryResult)) {
+    $courseHistory[] = $course;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -356,6 +374,7 @@ table tr:nth-child(odd) {
 <div class="header">
    <h1>Academic Profile</h1>
    <div class="button-container">
+		<a href="facunofficialtranscript.php?UID=<?php echo $uid; ?>" class="btn">Unofficial Transcript</a>
        <a href="Facdegreeaudit.php?UID=<?php echo $uid; ?>" class="btn">Degree Audit</a>
        <a href="fac_newhome1.php" class="btn">Back</a>
        </div>
@@ -364,8 +383,15 @@ table tr:nth-child(odd) {
 <div class="academic-profile-container">
    <h2>User Information</h2>
    <img src="profpic.jpg" alt="User Image" width="200">
-   <p><strong>User ID:</strong> <?php echo $user['UID']; ?></p>
-   <p><strong>Name:</strong> <?php echo $user['FirstName'] . ' ' . $user['LastName']; ?></p>
+      <p><strong>User ID:</strong> <?php echo $user['UID']; ?></p>
+      <p><strong>Name:</strong> <?php echo $user['FirstName'] . ' ' . $user['LastName']; ?></p>
+	  <p><strong>Email:</strong> <?php echo $user['Email']?></p>
+	  <p><strong>Gender:</strong> <?php echo $user['Gender']; ?></p>
+	  <p><strong>Date of Birth:</strong> <?php echo $user['DOB']; ?></p>
+	  <p><strong>Street:</strong> <?php echo $user['Street']; ?></p>
+	  <p><strong>City:</strong> <?php echo $user['City']; ?></p>
+	  <p><strong>State:</strong> <?php echo $user['State']; ?></p>
+	  <p><strong>Zip Code:</strong> <?php echo $user['ZipCode']; ?></p>
 </div>
 
 
@@ -375,19 +401,21 @@ table tr:nth-child(odd) {
       <tr>
          <th>CRN</th>
          <th>Course Name</th>
+         <th>Days</th>
          <th>Start Time</th>
          <th>End Time</th>
          <th>Faculty</th>
          <th>Section</th>
          <th>Room</th>
          <th>Building</th>
-         <th>Day</th>
+		 <th>Semester</th>
       </tr>
    </thead>
    <tbody>
       <?php
       $enrolledCoursesQuery = "SELECT 
       coursesection.CRN, 
+	  GROUP_CONCAT(DISTINCT day.Weekday ORDER BY day.Weekday SEPARATOR '/') AS Weekdays,
       coursesection.CourseID, 
       coursesection.SectionNum, 
       timeslot.TimeSlotID, 
@@ -397,6 +425,7 @@ table tr:nth-child(odd) {
       building.BuildingName, 
       periodd.StartTime, 
       periodd.EndTime,
+	  semester.SemesterName,
       CONCAT(user.FirstName, ' ', user.LastName) AS FacultyName
   FROM studenthistory
   JOIN coursesection ON studenthistory.CRN = coursesection.CRN
@@ -407,7 +436,10 @@ table tr:nth-child(odd) {
   JOIN room ON coursesection.RoomID = room.RoomID
   JOIN building ON room.BuildingID = building.BuildingID
   JOIN user ON coursesection.FacultyID = user.UID
-  WHERE studenthistory.StudentID = '$uid'";
+  JOIN semester ON coursesection.SemesterID = semester.SemesterID
+  WHERE studenthistory.StudentID = '$uid'
+  GROUP BY coursesection.CRN
+ORDER BY coursesection.CRN ASC";
   
 $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
       
@@ -417,18 +449,53 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
          echo "<tr>";
          echo "<td>{$enrolledCourse['CRN']}</td>";
          echo "<td>{$enrolledCourse['CourseName']}</td>";
-         echo "<td>{$enrolledCourse['StartTime']}</td>";
-         echo "<td>{$enrolledCourse['EndTime']}</td>";
+         echo "<td>";
+        
+        // Adjusted this part to properly display weekdays
+        $weekdays = explode('/', $enrolledCourse['Weekdays']);
+        echo implode('/', array_unique($weekdays));
+        
+        echo "</td>";
+         // Format StartTime to AM/PM
+        echo "<td>" . date("h:i A", strtotime($enrolledCourse['StartTime'])) . "</td>";
+        // Format EndTime to AM/PM
+        echo "<td>" . date("h:i A", strtotime($enrolledCourse['EndTime'])) . "</td>";
          echo "<td>{$enrolledCourse['FacultyName']}</td>";
          echo "<td>{$enrolledCourse['SectionNum']}</td>";
          echo "<td>{$enrolledCourse['RoomNum']}</td>";
          echo "<td>{$enrolledCourse['BuildingName']}</td>";
-         echo "<td>{$enrolledCourse['Weekday']}</td>";
+         echo "<td>{$enrolledCourse['SemesterName']}</td>";
          echo "</tr>";
       }
       ?>
    </tbody>
 </table>
+
+	  <div class="grades-container">
+    <h2>Current Grades</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>CRN</th>
+                <th>Course ID</th>
+                <th>Course Name</th>
+                <th>Grade</th>
+				   <th>Semester</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($courseHistory as $course) : ?>
+                <tr>
+                    <td><?php echo $course['CRN']; ?></td>
+                    <td><?php echo $course['CourseID']; ?></td>
+                    <td><?php echo $course['CourseName']; ?></td>
+                    <td><?php echo $course['Grade']; ?></td>
+					   <td><?php echo $course['SemesterName']; ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
 
 <!-- Student Holds section -->
 <div class="student-holds-container">
