@@ -113,12 +113,16 @@ while ($row = mysqli_fetch_assoc($result)) {
    $roomIDs[] = $row['RoomID'];
 }
 
-$query = "SELECT DISTINCT CONCAT(periodd.StartTime, ' to ', periodd.EndTime) AS Time FROM periodd WHERE PeriodID <> 0"; // Adjust the table and column names as needed
+$query = "SELECT DISTINCT CONCAT(periodd.StartTime, ' to ', periodd.EndTime) AS Time FROM periodd WHERE PeriodID <> 0";
 $result = mysqli_query($conn, $query);
 
 $times = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $times[] = $row['Time'];
+    $timeRange = explode(' to ', $row['Time']);
+    $formattedStart = date("g:i A", strtotime($timeRange[0]));
+    $formattedEnd = date("g:i A", strtotime($timeRange[1]));
+    $formattedTime = $formattedStart . ' to ' . $formattedEnd;
+    $times[] = $formattedTime;
 }
 
 // Fetch distinct semester names for the filter
@@ -455,7 +459,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             <td><?php echo $course['CourseName']; ?></td>
             <td><?php echo $course['SectionNum']; ?></td>
             <td><?php echo $course['DeptName']; ?></td>
-                        <td>
+             <td>
 					<?php 
 						$weekdays = explode('/', $course['Weekdays']);
 						echo implode('/', array_unique($weekdays)); // Displaying concatenated weekdays
@@ -463,7 +467,13 @@ while ($row = mysqli_fetch_assoc($result)) {
 				</td>
             <td><?php echo $course['BuildingName']; ?></td>
             <td><?php echo $course['RoomID']; ?></td>
-            <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
+            <td>
+					<?php
+					$startTime = date("g:i A", strtotime($course['StartTime']));
+					$endTime = date("g:i A", strtotime($course['EndTime']));
+					echo $startTime . " to " . $endTime;
+					?>
+				</td>
             <td><?php echo $course['FacultyFirstName'] . " " . $course['FacultyLastName']; ?></td>  <!-- Display faculty name -->
             <td><?php echo $course['FacultyID']; ?></td>
 			<td><?php echo $course['SemesterName']; ?></td>
