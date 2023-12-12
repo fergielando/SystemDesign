@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_name'])) {
 // Fetch available courses with additional details, ordered by CRN (Include this part only)
 $query = "SELECT
     coursesection.CRN,
+	GROUP_CONCAT(DISTINCT day.Weekday ORDER BY day.Weekday SEPARATOR '/') AS Weekdays,
     coursesection.CourseID,
     coursesection.AvailableSeats,
     coursesection.SectionNum,
@@ -39,6 +40,7 @@ JOIN user ON faculty.FacultyID = user.UID  -- Join using the foreign key constra
 JOIN semester ON coursesection.SemesterID = semester.SemesterID  -- Join using the foreign key constraint
 JOIN dept ON course.DeptID = dept.DeptID
 WHERE coursesection.CRN <> 0
+GROUP BY coursesection.CRN
 ORDER BY coursesection.CRN ASC";
 
 
@@ -439,7 +441,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <?php endif; ?>
             </td>
             <td><?php echo $course['DeptName']; ?></td>
-            <td><?php echo $course['Weekday']; ?></td>
+                        <td>
+					<?php 
+						$weekdays = explode('/', $course['Weekdays']);
+						echo implode('/', array_unique($weekdays)); // Displaying concatenated weekdays
+					?>
+				</td>
             <td><?php echo $course['BuildingName']; ?></td>
             <td><?php echo $course['RoomID']; ?></td>
             <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
