@@ -1,19 +1,20 @@
 <?php
 // Start the session
+session_start();
+
 // Include your database configuration file
 @include 'config1.php';
 
-session_start();
-
-// Check if a UID is stored in the session and redirect if not found
-if (!isset($_SESSION['UID'])) {
-    echo "User not authenticated. Redirecting to login page.";
-    // Redirect to login page or another appropriate page
-    header("Location: login_form1.php");
+// Check if a UID is passed in the URL
+if (!isset($_GET['UID'])) {
+    echo "No student selected. Redirecting to previous page.";
+    header("refresh:3;url=javascript:history.back()");
     exit;
 }
 
-$uid = $_SESSION['UID'];
+// Use the UID from the URL parameter
+$uid = mysqli_real_escape_string($conn, $_GET['UID']);
+
 
 // Retrieve the student's information from the database
 $queryUserInfo = "SELECT FirstName, LastName, UID FROM user WHERE UID = '$uid'";
@@ -46,12 +47,13 @@ while ($rowMinor = mysqli_fetch_assoc($resultMinors)) {
 
 // Fetch course history including grades
 $courseHistoryQuery = "SELECT coursesection.CRN, coursesection.CourseID, course.CourseName, studenthistory.Grade
-FROM studenthistory
-JOIN coursesection ON studenthistory.CRN = coursesection.CRN
-JOIN course ON coursesection.CourseID = course.CourseID
-WHERE studenthistory.StudentID = '$uid'";
+                       FROM studenthistory
+                       JOIN coursesection ON studenthistory.CRN = coursesection.CRN
+                       JOIN course ON coursesection.CourseID = course.CourseID
+                       WHERE studenthistory.StudentID = '$uid'";
 $courseHistoryResult = mysqli_query($conn, $courseHistoryQuery);
 $courseHistory = [];
+
 
 while ($course = mysqli_fetch_assoc($courseHistoryResult)) {
     $courseHistory[] = $course;
@@ -80,8 +82,8 @@ function fetchPrerequisitesWithGradeCheck($conn, $prerequisiteQuery, $courseHist
         ){
             $row['AchievedGrade'] = $course['Grade'];
             break;
-        } 
-		elseif(
+        }
+        elseif (
             isset($row['PRminorID']) &&
             $course['CourseID'] == $row['PRminorID'] &&
             (
@@ -100,7 +102,7 @@ function fetchPrerequisitesWithGradeCheck($conn, $prerequisiteQuery, $courseHist
         }
     }
     $prerequisites[] = $row;
-}
+   }
 
    return $prerequisites;
 }
@@ -134,7 +136,6 @@ foreach ($minors as $minor) {
    $prerequisites = fetchPrerequisitesWithGradeCheck($conn, $prerequisitesQuery, $courseHistory);
    $allMinorPrerequisites[$minor['MinorName']] = $prerequisites;
 }
-
 ?>
 
 

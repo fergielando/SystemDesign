@@ -492,7 +492,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             </td>
             <td><?php echo $course['DeptName']; ?></td>
 			  <td><?php echo $course['DeptID']; ?></td>
-                        <td>
+             <td>
 					<?php 
 						$weekdays = explode('/', $course['Weekdays']);
 						echo implode('/', array_unique($weekdays)); // Displaying concatenated weekdays

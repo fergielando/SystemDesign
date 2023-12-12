@@ -8,7 +8,9 @@ if (isset($_SESSION['UID'])) {
     $uid = $_SESSION['UID'];
 
     // Retrieve the user's information from the database
-    $query = "SELECT * FROM user WHERE UID = '$uid'";
+    $query = "SELECT user.*,logintable.* FROM user 
+	JOIN logintable ON user.UID = logintable.UID
+	WHERE user.UID = '$uid'";
     $result = mysqli_query($conn, $query);
 
     if (mysqli_num_rows($result) > 0) {
@@ -299,6 +301,21 @@ $advisorQuery = "SELECT u.FirstName, u.LastName, l.Email
                  WHERE a.StudentID = '$uid'";
 $advisorResult = mysqli_query($conn, $advisorQuery);
 
+
+// Fetch course history including grades
+$courseHistoryQuery = "SELECT coursesection.CRN, coursesection.CourseID, course.CourseName, semester.SemesterName, studenthistory.Grade
+FROM studenthistory
+JOIN coursesection ON studenthistory.CRN = coursesection.CRN
+JOIN course ON coursesection.CourseID = course.CourseID
+JOIN semester ON coursesection.SemesterID = semester.SemesterID
+WHERE studenthistory.StudentID = '$uid'";
+$courseHistoryResult = mysqli_query($conn, $courseHistoryQuery);
+$courseHistory = [];
+
+while ($course = mysqli_fetch_assoc($courseHistoryResult)) {
+    $courseHistory[] = $course;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -468,8 +485,8 @@ $advisorResult = mysqli_query($conn, $advisorQuery);
 
 .advisor-container {
     position: absolute;
-    bottom: 10px;
-    right: 90px;
+    top: 440px;
+    right: 70px;
     background-color: #fff;
     padding: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -496,7 +513,41 @@ $advisorResult = mysqli_query($conn, $advisorQuery);
       <img src="profpic.jpg" alt="User Image" width="200">
       <p><strong>User ID:</strong> <?php echo $user['UID']; ?></p>
       <p><strong>Name:</strong> <?php echo $user['FirstName'] . ' ' . $user['LastName']; ?></p>
+	  <p><strong>Email:</strong> <?php echo $user['Email']?></p>
+	  <p><strong>Gender:</strong> <?php echo $user['Gender']; ?></p>
+	  <p><strong>Date of Birth:</strong> <?php echo $user['DOB']; ?></p>
+	  <p><strong>Street:</strong> <?php echo $user['Street']; ?></p>
+	  <p><strong>City:</strong> <?php echo $user['City']; ?></p>
+	  <p><strong>State:</strong> <?php echo $user['State']; ?></p>
+	  <p><strong>Zip Code:</strong> <?php echo $user['ZipCode']; ?></p>
       </div>
+	  
+	  <div class="grades-container">
+    <h2>Current Grades</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>CRN</th>
+                <th>Course ID</th>
+                <th>Course Name</th>
+                <th>Grade</th>
+				   <th>Semester</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($courseHistory as $course) : ?>
+                <tr>
+                    <td><?php echo $course['CRN']; ?></td>
+                    <td><?php echo $course['CourseID']; ?></td>
+                    <td><?php echo $course['CourseName']; ?></td>
+                    <td><?php echo $course['Grade']; ?></td>
+					   <td><?php echo $course['SemesterName']; ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
       
 
       <div class="student-holds-container">
