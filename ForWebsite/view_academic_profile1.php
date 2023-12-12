@@ -508,14 +508,14 @@ table tr:nth-child(odd) {
       <tr>
          <th>CRN</th>
          <th>Course Name</th>
+         <th>Days</th>
          <th>Start Time</th>
          <th>End Time</th>
          <th>Faculty</th>
          <th>Section</th>
          <th>Room</th>
          <th>Building</th>
-         <th>Days</th>
-		  <th>Semester</th>
+		 <th>Semester</th>
       </tr>
    </thead>
    <tbody>
@@ -556,18 +556,21 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
          echo "<tr>";
          echo "<td>{$enrolledCourse['CRN']}</td>";
          echo "<td>{$enrolledCourse['CourseName']}</td>";
-         echo "<td>{$enrolledCourse['StartTime']}</td>";
-         echo "<td>{$enrolledCourse['EndTime']}</td>";
+         echo "<td>";
+        
+        // Adjusted this part to properly display weekdays
+        $weekdays = explode('/', $enrolledCourse['Weekdays']);
+        echo implode('/', array_unique($weekdays));
+        
+        echo "</td>";
+         // Format StartTime to AM/PM
+        echo "<td>" . date("h:i A", strtotime($enrolledCourse['StartTime'])) . "</td>";
+        // Format EndTime to AM/PM
+        echo "<td>" . date("h:i A", strtotime($enrolledCourse['EndTime'])) . "</td>";
          echo "<td>{$enrolledCourse['FacultyName']}</td>";
          echo "<td>{$enrolledCourse['SectionNum']}</td>";
          echo "<td>{$enrolledCourse['RoomNum']}</td>";
          echo "<td>{$enrolledCourse['BuildingName']}</td>";
-         echo "<td>
-    <?php 
-    $weekdays = explode('/', $enrolledCourse['Weekdays']);
-    echo implode('/', array_unique($weekdays));
-    ?>
-</td>";
 		 echo "<td>{$enrolledCourse['SemesterName']}</td>";
          echo "</tr>";
       }

@@ -64,14 +64,44 @@ function fetchPrerequisitesWithGradeCheck($conn, $prerequisiteQuery, $courseHist
    $prerequisites = [];
 
    while ($row = mysqli_fetch_assoc($result)) {
-       $row['AchievedGrade'] = false; // Default value
-       foreach ($courseHistory as $course) {
-           if (isset($row['PRmajorID']) && $course['CourseID'] == $row['PRmajorID'] && $course['Grade'] >= 'C') {
-               $row['AchievedGrade'] = true;
-               break;
-           }
-       }
-       $prerequisites[] = $row;
+    $row['AchievedGrade'] = false; // Default value
+    foreach ($courseHistory as $course) {
+        if (
+            isset($row['PRmajorID']) &&
+            $course['CourseID'] == $row['PRmajorID'] &&
+            (
+                $course['Grade'] == 'C' ||
+                $course['Grade'] == 'C+' ||
+                $course['Grade'] == 'B-' ||
+                $course['Grade'] == 'B' ||
+                $course['Grade'] == 'B+' ||
+                $course['Grade'] == 'A-' ||
+                $course['Grade'] == 'A' ||
+                $course['Grade'] == 'A+'
+            )
+        ){
+            $row['AchievedGrade'] = $course['Grade'];
+            break;
+        }
+        elseif (
+            isset($row['PRminorID']) &&
+            $course['CourseID'] == $row['PRminorID'] &&
+            (
+                $course['Grade'] == 'C' ||
+                $course['Grade'] == 'C+' ||
+                $course['Grade'] == 'B-' ||
+                $course['Grade'] == 'B' ||
+                $course['Grade'] == 'B+' ||
+                $course['Grade'] == 'A-' ||
+                $course['Grade'] == 'A' ||
+                $course['Grade'] == 'A+'
+            )
+        ){
+            $row['AchievedGrade'] = $course['Grade'];
+            break;
+        }
+    }
+    $prerequisites[] = $row;
    }
 
    return $prerequisites;
@@ -335,7 +365,7 @@ foreach ($minors as $minor) {
                         <td><?php echo htmlspecialchars($prerequisite['CourseName']); ?></td>
                         <td><?php echo htmlspecialchars($prerequisite['MinGrade']); ?></td>
                         <td><?php echo htmlspecialchars($prerequisite['DOLU']); ?></td>
-                        <td><?php echo !empty($prerequisite['AchievedGrade']) ? '✔' : ''; ?></td>
+                        <td><?php echo !empty($prerequisite['AchievedGrade']) ? $prerequisite['AchievedGrade'] : ''; ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -362,7 +392,7 @@ foreach ($minors as $minor) {
                         <td><?php echo htmlspecialchars($prerequisite['CourseName']); ?></td>
                         <td><?php echo htmlspecialchars($prerequisite['MinGrade']); ?></td>
                         <td><?php echo htmlspecialchars($prerequisite['DOLU']); ?></td>
-                        <td><?php echo !empty($prerequisite['AchievedGrade']) ? '✔' : ''; ?></td>
+                        <td><?php echo !empty($prerequisite['AchievedGrade']) ? $prerequisite['AchievedGrade'] : ''; ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

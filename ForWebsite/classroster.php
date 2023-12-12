@@ -142,6 +142,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['assignGrade'])) {
     assignGrade($conn, $_POST['StudentID'], $_POST['CRN'], $_POST['Grade']);
 }
 
+// Fetch SemesterID for the CRN
+$semesterIDQuery = "SELECT SemesterID FROM coursesection WHERE CRN = '$CRN'";
+$semesterIDResult = mysqli_query($conn, $semesterIDQuery);
+$semesterIDRow = mysqli_fetch_assoc($semesterIDResult);
+
+$semesterID = $semesterIDRow['SemesterID']; // Extract the SemesterID value
+
+
 ?>
 
 <!DOCTYPE html>
@@ -349,7 +357,7 @@ if ($facultyInfo) {
 					<?php endif; ?>
                 </td>
                 <td>
-                    <?php if ($isWithinClassHours): ?>
+                    <?php if ($isWithinClassHours && $semesterID == '20232'): ?>
                         <form action="record_attendance.php" method="post">
                             <input type="hidden" name="StudentID" value="<?php echo htmlspecialchars($student['StudentID']); ?>">
                             <input type="hidden" name="CRN" value="<?php echo htmlspecialchars($CRN); ?>">
