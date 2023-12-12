@@ -297,7 +297,14 @@ if ($facultyInfo) {
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($students as $student): ?>
+        <?php
+    // Iterate through the first 20 students
+    $counter = 0;
+    foreach ($students as $student):
+        if ($counter >= 20) {
+            break; // Stop looping after 20 students
+        }
+        ?>
             <tr>
                 <td><?php echo htmlspecialchars($student['StudentID']); ?></td>
                 <td><?php echo htmlspecialchars($student['FirstName']); ?></td>
@@ -359,7 +366,10 @@ if ($facultyInfo) {
                     <button onclick="showAttendance('<?php echo htmlspecialchars($student['StudentID']); ?>')">Show Attendance History</button>
                 </td>
             </tr>
-        <?php endforeach; ?>
+        <?php
+        $counter++;
+    endforeach;
+    ?>
     </tbody>
 </table>
 
