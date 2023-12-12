@@ -7,6 +7,39 @@ $result = mysqli_query($conn, $query);
 $departments = [];
 
 while ($row = mysqli_fetch_assoc($result)) {
+	
+	 $deptID = $row['DeptID'];
+
+    // Fetching Chair Details for each department
+    $deptchairQuery = "SELECT 
+        faculty.FacultyID, 
+        user.FirstName AS ChairFirstName, 
+        user.LastName AS ChairLastName
+        FROM dept 
+        JOIN faculty ON faculty.FacultyID = dept.ChairID
+        JOIN user ON faculty.FacultyID = user.UID
+        WHERE DeptID = '$deptID'";
+        
+    $deptchairResult = mysqli_query($conn, $deptchairQuery);
+    $deptchairDetails = mysqli_fetch_assoc($deptchairResult);
+
+    // Assign Chair details to the department
+    $row['ChairFullName'] = ($deptchairDetails) ? $deptchairDetails['ChairFirstName'] . ' ' . $deptchairDetails['ChairLastName'] : 'Unknown Chair';
+	
+	// Fetching Dept Manager Details
+	$deptmanagerQuery = "SELECT 
+	faculty.FacultyID, 
+	user.FirstName AS ManagerFirstName, 
+	user.LastName AS ManagerLastName
+	FROM dept 
+				JOIN faculty  ON faculty.FacultyID = dept.DeptManager
+                JOIN user  ON faculty.FacultyID = user.UID
+	WHERE DeptID = '$deptID'";
+	$deptmanagerResult = mysqli_query($conn, $deptmanagerQuery);
+	$deptmanagerDetails = mysqli_fetch_assoc($deptmanagerResult);
+	
+	$row['ManagerFullName'] = ($deptmanagerDetails) ? $deptmanagerDetails['ManagerFirstName'] . ' ' . $deptmanagerDetails['ManagerLastName'] : 'Unknown Chair';
+
     $departments[] = $row;
 }
 ?>
@@ -72,13 +105,13 @@ while ($row = mysqli_fetch_assoc($result)) {
         <h2>List of Departments</h2>
         <table>
             <tr>
-                <th>DeptID</th>
-                <th>DeptName</th>
-                <th>ChairId</th>
-                <th>DeptManager</th>/
+                <th>Dept ID</th>
+                <th>Dept Name</th>
+                <th>Chair Name</th>
+                <th>Dept Manager</th>
                 <th>Email</th>
-                <th>PhoneNum</th>
-                <th>RoomID</th>
+                <th>Phone Num</th>
+                <th>Room</th>
             </tr>
             <?php foreach ($departments as $department) : ?>
                 <tr>
@@ -140,8 +173,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                        }
                        ?>
                     </td>
-                    <td><?php echo $department['ChairID']; ?></td>
-                    <td><?php echo $department['DeptManager']; ?></td>
+                    <td><?php echo $department['ChairFullName']; ?></td>
+                    <td><?php echo $department['ManagerFullName']; ?></td>
                     <td><?php echo $department['Email']; ?></td>
                     <td><?php echo $department['PhoneNum']; ?></td>
                     <td><?php echo $department['RoomID']; ?></td>

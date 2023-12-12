@@ -39,6 +39,7 @@ if ($userRow = mysqli_fetch_assoc($userResult)) {
 // Fetch available courses with additional details, including prerequisites, ordered by CRN
 $query = "SELECT
     coursesection.CRN,
+	GROUP_CONCAT(DISTINCT day.Weekday ORDER BY day.Weekday SEPARATOR '/') AS Weekdays,
     MAX(coursesection.CourseID) AS CourseID,
     MAX(coursesection.AvailableSeats) AS AvailableSeats,
     MAX(timeslot.TimeSlotID) AS TimeSlotID,
@@ -725,7 +726,12 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
         <td><?php echo $course['CRN']; ?></td>
         <td><?php echo $course['CourseName']; ?></td>
         <td><?php echo $course['SectionNum']; ?></td>
-        <td><?php echo $course['Weekday']; ?></td>
+        <td>
+					<?php 
+						$weekdays = explode('/', $course['Weekdays']);
+						echo implode('/', array_unique($weekdays)); // Displaying concatenated weekdays
+					?>
+				</td>
         <td><?php echo $course['BuildingName']; ?></td>
         <td><?php echo $course['RoomNum']; ?></td>
         <td><?php echo $course['SemesterID']; ?></td>
@@ -737,7 +743,7 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
         <td>
         <?php
                      // Check if the course is in the Fall 2023 semester (semesterID 20232)
-                     if ($course['SemesterID'] === "20232") {
+                     if ($course['SemesterID'] === "20232" OR $course['SemesterID'] === "0") {
                         echo '<input type="checkbox" name="courses[]" value="' . $course['CRN'] . '" data-course-name="' . $course['CourseName'] . '" disabled>';
                      } else {
                         echo '<input type="checkbox" name="courses[]" value="' . $course['CRN'] . '" data-course-name="' . $course['CourseName'] . '" onchange="handleCourseSelection(this, \'' . $course['SemesterID'] . '\')">';
