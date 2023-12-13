@@ -514,7 +514,7 @@ function applyFilters() {
 
       // Function to handle course selection
       function handleCourseSelection(checkbox, semesterID) {
-         if (semesterID === "20232") { // Check if the semester is Fall 2023
+         if (semesterID === "20232" OR semesterID === '0') { // Check if the semester is Fall 2023
             var popup = document.getElementById("popup");
             popup.style.display = "block";
             checkbox.checked = false; // Uncheck the checkbox

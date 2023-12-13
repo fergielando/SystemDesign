@@ -2,6 +2,9 @@
 @include 'config1.php';
 session_start();
 
+if (!isset($_SESSION['admin_name'])) {
+   header('location:login_form1.php');
+}
 
 $uid = '';
 $user = [];
@@ -13,7 +16,8 @@ if (isset($_GET['UID'])) {
     $uid = mysqli_real_escape_string($conn, $_GET['UID']);
 
     // Retrieve the user's information from the database
-    $query = "SELECT user.*,logintable.* FROM user 
+    $query = "SELECT user.*,logintable.*
+	FROM user 
 	JOIN logintable ON user.UID = logintable.UID
 	WHERE user.UID = '$uid'";
     $result = mysqli_query($conn, $query);
@@ -24,13 +28,38 @@ if (isset($_GET['UID'])) {
    }
 
    // Re-fetch user data
-$query = "SELECT user.*,logintable.* FROM user 
+$query = "SELECT user.*,logintable.*
+	FROM user 
 	JOIN logintable ON user.UID = logintable.UID
 	WHERE user.UID = '$uid'";
 $result = mysqli_query($conn, $query);
 if (mysqli_num_rows($result) > 0) {
     $user = mysqli_fetch_assoc($result);
 }
+
+// Check if the user exists in the 'gradstudent' table
+$query = "SELECT * FROM gradstudent WHERE StudentID = '$uid'";
+$result = mysqli_query($conn, $query);
+
+if(mysqli_num_rows($result) > 0) {
+    // User exists in the 'gradstudent' table
+    $row = mysqli_fetch_assoc($result);
+    $studentType = $row['GradStudentType'];
+} else {
+    // User doesn't exist in the 'gradstudent' table, check 'undergradstudent' table
+    $query = "SELECT * FROM undergradstudent WHERE StudentID = '$uid'";
+    $result = mysqli_query($conn, $query);
+
+    if(mysqli_num_rows($result) > 0) {
+        // User exists in the 'undergradstudent' table
+        $row = mysqli_fetch_assoc($result);
+        $studentType = $row['UnderGradStudentType'];
+    } else {
+        // User doesn't exist in either table
+        $studentType = 'Unknown';
+    }
+}
+
 
 
 // Retrieve majors, minors, and enrolled courses
@@ -202,9 +231,6 @@ if (isset($_POST['assign_minor'])) {
             $assignMinorQuery = "INSERT INTO studentminor (StudentID, MinorID) VALUES ('$uid', '$selectedMinorID')";
             mysqli_query($conn, $assignMinorQuery);
             
-            // Optionally, refresh the page to reflect the changes
-            header("Location: view_academic_profile1.php");
-            exit;
         }
     }
 }
@@ -257,6 +283,7 @@ if (isset($_POST['drop_minor_submit'])) {
         // If the selected minor doesn't exist in the user's declared minors, show an error message or handle it as needed
         echo "Selected minor is not in your declared minors.";
     }
+	
 }
 
 
@@ -276,8 +303,6 @@ if (isset($_POST['update_user'])) {
     mysqli_query($conn, $updateQuery);
 
     // Refresh the page to reflect the changes
-    header("Location: view_academic_profile1.php?UID=someUserId");;
-    exit;
 }
 $advisorQuery = "SELECT u.FirstName, u.LastName, l.Email 
                  FROM advisor a 
@@ -298,6 +323,119 @@ $courseHistory = [];
 
 while ($course = mysqli_fetch_assoc($courseHistoryResult)) {
     $courseHistory[] = $course;
+}
+
+    // Logic to determine and update student type based on selection
+if (isset($_POST['change_student_type'])) {
+    $selectedStudentType = $_POST['student_type'];
+	
+	// Check if the user exists in undergradstudent or gradstudent table
+    $checkUndergradQuery = "SELECT * FROM undergradstudent WHERE StudentID = '$uid'";
+    $checkGradQuery = "SELECT * FROM gradstudent WHERE StudentID = '$uid'";
+    $resultUndergrad = mysqli_query($conn, $checkUndergradQuery);
+    $resultGrad = mysqli_query($conn, $checkGradQuery);
+	
+	//Check if the user exists in ft or pt tables
+	$checkUndergradftQuery = "SELECT * FROM undergradstudentft WHERE StudentID = '$uid'";
+	$checkUndergradptQuery = "SELECT * FROM undergradstudentpt WHERE StudentID = '$uid'";
+    $checkGradftQuery = "SELECT * FROM gradstudentft WHERE StudentID = '$uid'";
+	$checkGradptQuery = "SELECT * FROM gradstudentpt WHERE StudentID = '$uid'";
+    $resultUndergradft = mysqli_query($conn, $checkUndergradftQuery);
+	$resultUndergradpt = mysqli_query($conn, $checkUndergradptQuery);
+    $resultGradft = mysqli_query($conn, $checkGradftQuery);
+	$resultGradpt = mysqli_query($conn, $checkGradptQuery);
+    
+    // Logic to determine and update student type based on selection
+    if (mysqli_num_rows($resultUndergrad) > 0) {
+         $updateUndergradTypeQuery = "UPDATE undergradstudent SET UnderGradStudentType = 'Undergraduate $selectedStudentType' WHERE StudentID = '$uid'";
+        mysqli_query($conn, $updateUndergradTypeQuery);
+        echo "Student type changed to Undergraduate $selectedStudentType.";
+        if ($selectedStudentType === 'Full Time' AND mysqli_num_rows($resultUndergradpt) > 0) {
+			$updateUndergradQuery = "INSERT INTO undergradstudentft (StudentID, Standing, LowCredits, HighCredits, CreditEarned)
+				SELECT StudentID, Standing, '7','12', CreditEarned
+				FROM undergradstudentpt
+				WHERE StudentID = '$uid';";
+			mysqli_query($conn, $updateUndergradQuery);	
+			$deleteUndergradQuery = "DELETE FROM undergradstudentpt
+			WHERE StudentID = '$uid';";
+			mysqli_query($conn, $deleteUndergradQuery);	
+        } else if ($selectedStudentType === 'Part Time' AND mysqli_num_rows($resultUndergradft) > 0) {
+			$updateUndergradQuery = "INSERT INTO undergradstudentpt (StudentID, Standing, LowCredits, HighCredits, CreditEarned)
+				SELECT StudentID, Standing, '1','6', CreditEarned
+				FROM undergradstudentft
+				WHERE StudentID = '$uid';";
+			mysqli_query($conn, $updateUndergradQuery);	
+			$deleteUndergradQuery = "DELETE FROM undergradstudentft
+			WHERE StudentID = '$uid';";
+			mysqli_query($conn, $deleteUndergradQuery);	
+        } else {
+			echo "Warning: Student Type has stayed the same (selected same Student Type)";
+		}
+    } elseif (mysqli_num_rows($resultGrad) > 0) {
+		// Query to fetch GradStudentType based on StudentID from gradstudent table
+		$gradStudentTypeQuery = "SELECT GradStudentType FROM gradstudent WHERE StudentID = '$uid'";
+		$resultGradStudentType = mysqli_query($conn, $gradStudentTypeQuery);
+		if ($resultGradStudentType) {
+		$row = mysqli_fetch_assoc($resultGradStudentType);
+		$gradStudentType = $row['GradStudentType'];
+		}
+		if (strpos($gradStudentType, 'PHD') !== false) {
+	     $updateGradTypeQuery = "UPDATE gradstudent SET GradStudentType = 'PHD $selectedStudentType' WHERE StudentID = '$uid'";
+        mysqli_query($conn, $updateGradTypeQuery);
+        if ($selectedStudentType === 'Full Time' AND mysqli_num_rows($resultGradpt) > 0) {
+            $updateGradQuery = "INSERT INTO gradstudentft (StudentID, Standing, CreditEarned, QualifyExam, Thesis, LowCredits, HighCredits)
+				SELECT StudentID, Standing, CreditEarned,QualifyExam,Thesis, '7','12'
+				FROM gradstudentpt
+				WHERE StudentID = '$uid'";
+			mysqli_query($conn, $updateGradQuery);	
+			$deleteGradQuery = "DELETE FROM gradstudentpt
+			WHERE StudentID = '$uid'";
+			mysqli_query($conn, $deleteGradQuery);	
+        } else if ($selectedStudentType === 'Part Time' AND mysqli_num_rows($resultGradft) > 0) {
+            $updateGradQuery = "INSERT INTO gradstudentpt (StudentID, Standing, CreditEarned, QualifyExam, Thesis, LowCredits, HighCredits)
+				SELECT StudentID, Standing, CreditEarned,QualifyExam,Thesis, '1','6'
+				FROM gradstudentft
+				WHERE StudentID = '$uid'";
+			mysqli_query($conn, $updateGradQuery);	
+			$deleteGradQuery = "DELETE FROM gradstudentft
+			WHERE StudentID = '$uid'";
+			mysqli_query($conn, $deleteGradQuery);	
+        } else {
+			echo "Warning: Student Type has stayed the same (selected same Student Type)";
+		} 
+		}
+		if (strpos($gradStudentType, 'Masters') !== false) {
+	     $updateGradTypeQuery = "UPDATE gradstudent SET GradStudentType = 'Masters $selectedStudentType' WHERE StudentID = '$uid'";
+        mysqli_query($conn, $updateGradTypeQuery);
+        if ($selectedStudentType === 'Full Time' AND mysqli_num_rows($resultGradpt) > 0) {
+            $updateGradQuery = "INSERT INTO gradstudentft (StudentID, Standing, CreditEarned, QualifyExam, Thesis, LowCredits, HighCredits)
+				SELECT StudentID, Standing, CreditEarned,QualifyExam,Thesis, '7','12'
+				FROM gradstudentpt
+				WHERE StudentID = '$uid'";
+			mysqli_query($conn, $updateGradQuery);	
+			$deleteGradQuery = "DELETE FROM gradstudentpt
+			WHERE StudentID = '$uid'";
+			mysqli_query($conn, $deleteGradQuery);	
+        } else if ($selectedStudentType === 'Part Time' AND mysqli_num_rows($resultGradft) > 0) {
+            $updateGradQuery = "INSERT INTO gradstudentpt (StudentID, Standing, CreditEarned, QualifyExam, Thesis, LowCredits, HighCredits)
+				SELECT StudentID, Standing, CreditEarned,QualifyExam,Thesis, '1','6'
+				FROM gradstudentft
+				WHERE StudentID = '$uid'";
+			mysqli_query($conn, $updateGradQuery);	
+			$deleteGradQuery = "DELETE FROM gradstudentft
+			WHERE StudentID = '$uid'";
+			mysqli_query($conn, $deleteGradQuery);	
+        } else {
+			echo "Warning: Student Type has stayed the same (selected same Student Type)";
+		} 
+		}
+    } else {
+        echo "Student not found in records.";
+    }
+
+    // Redirect or display a message after the update
+    header("Location: student_academic_profile1.php");
+    exit;
 }
 
 ?>
@@ -467,13 +605,14 @@ table tr:nth-child(odd) {
       <img src="profpic.jpg" alt="User Image" width="200">
       <p><strong>User ID:</strong> <?php echo $user['UID']; ?></p>
       <p><strong>Name:</strong> <?php echo $user['FirstName'] . ' ' . $user['LastName']; ?></p>
-	  <p><strong>Email:</strong> <?php echo $user['Email']?></p>
-	  <p><strong>Gender:</strong> <?php echo $user['Gender']; ?></p>
-	  <p><strong>Date of Birth:</strong> <?php echo $user['DOB']; ?></p>
-	  <p><strong>Street:</strong> <?php echo $user['Street']; ?></p>
-	  <p><strong>City:</strong> <?php echo $user['City']; ?></p>
-	  <p><strong>State:</strong> <?php echo $user['State']; ?></p>
-	  <p><strong>Zip Code:</strong> <?php echo $user['ZipCode']; ?></p>
+	   <p><strong>Student Type:</strong> <?php echo $studentType?></p>
+	   <p><strong>Email:</strong> <?php echo $user['Email']?></p>
+	   <p><strong>Gender:</strong> <?php echo $user['Gender']; ?></p>
+	   <p><strong>Date of Birth:</strong> <?php echo $user['DOB']; ?></p>
+	   <p><strong>Street:</strong> <?php echo $user['Street']; ?></p>
+	   <p><strong>City:</strong> <?php echo $user['City']; ?></p>
+	   <p><strong>State:</strong> <?php echo $user['State']; ?></p>
+	   <p><strong>Zip Code:</strong> <?php echo $user['ZipCode']; ?></p>
       </div>
 
 	  <div class="grades-container">
@@ -684,7 +823,14 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
    <input type="submit" name="drop_minor_submit" value="Drop Minor" class="create-button">
 </form>
 
-
+		 <h2>Change Student Type</h2>
+		<form action="" method="post">
+		<select name="student_type">
+        <option value="Full Time">Full Time</option>
+        <option value="Part Time">Part Time</option>
+		</select>
+		<input type="submit" name="change_student_type" value="Change Type" class="create-button">
+		</form>
 
 
                <?php
@@ -718,7 +864,6 @@ if (isset($_POST['register_major_submit'])) {
             </tbody>
          </table>
       </div>
-   </div
 
 
 
