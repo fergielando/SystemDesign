@@ -318,6 +318,9 @@ while ($row = mysqli_fetch_assoc($result)) {
          <a href="statsoffice_statistics1.php" class="btn">Statistics</a>
       </div>
       <div class="button-container">
+         <a href="statsoffice_personalinfo.php" class="btn">Personal Information</a>
+      </div>
+      <div class="button-container">
          <a href="statsoffice_departments1.php" class="btn">Departments</a>
       </div>
       <div class="button-container">

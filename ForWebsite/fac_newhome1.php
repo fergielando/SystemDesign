@@ -270,6 +270,7 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
    <h1>Welcome to U.A. University</h1>
    <div class="button-container">
       <a href="logout1.php" class="btn">Logout</a>
+	  <a href="faculty_personalinfo.php" class="btn">Personal Information</a>
       <a href="student_majors1.php" class="btn">Majors</a>
       <a href="student_minor1.php" class="btn">Minors</a>
       <a href="facdepartment.php" class="btn">Departments</a>
@@ -367,7 +368,7 @@ while ($row = mysqli_fetch_assoc($advisingResult)) {
             <tr>
                 <th>Student ID</th>
                 <th>Name</th>
-                <th>Date of Advising</th>
+                <th>Date of Assignment</th>
             </tr>
             <?php foreach ($advisedStudents as $student): ?>
                 <tr>

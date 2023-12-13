@@ -286,9 +286,21 @@ if (isset($_GET['uid'])) {
       <td><a href="edit_user.php?UID=<?php echo $user['UID']; ?>">Edit</a></td>
    <td>
        <?php
-       if ($user['UserType'] !== 'faculty' && $user['UserType'] !== 'admin' && $user['UserType'] !== 'statsoffice') {
+       if ($user['UserType'] == 'student') {
            // Link for viewing the academic profile
            echo '<a href="view_academic_profile1.php?UID=' . $user['UID'] . '">View Academic Profile</a>';
+       }
+	   elseif ($user['UserType'] == 'faculty') {
+           // Link for viewing the academic profile
+           echo '<a href="adminfaculty_personalinfo.php?UID=' . $user['UID'] . '">View Faculty Information</a>';
+       }
+	   elseif ($user['UserType'] == 'statsoffice') {
+           // Link for viewing the academic profile
+           echo '<a href="adminstatsoffice_personalinfo.php?UID=' . $user['UID'] . '">View Stats Office Information</a>';
+       }
+	   elseif ($user['UserType'] == 'admin') {
+           // Link for viewing the academic profile
+           echo '<a href="admin_personalinfo.php?UID=' . $user['UID'] . '">View Admin Information</a>';
        }
        ?>
    </td>

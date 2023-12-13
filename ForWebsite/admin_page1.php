@@ -178,6 +178,7 @@ while ($row = mysqli_fetch_assoc($result)) {
       <div class="button-container">
          <a href="logout1.php" class="btn">Logout</a>
          <a href="Update_a_user1.php" class="btn">Update a user</a>
+		  <a href="admin_personalinfo.php" class="btn">Personal Information</a>
          <a href="course_catalog1.php" class="btn">Course Catalog</a>
          <a href="Departments_page1.php" class="btn">Departments</a>
          <a href="master_schedule1.php" class="btn">Master Schedule</a>
