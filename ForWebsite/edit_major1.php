@@ -6,7 +6,7 @@ if (isset($_GET['id'])) {
     $majorID = mysqli_real_escape_string($conn, $_GET['id']);
 
     // Retrieve the major information from the database based on the provided major ID
-    $query = "SELECT * FROM major WHERE MajorID = '$majorID'";
+    $query = "SELECT * FROM major WHERE MajorID ='$majorID'";
     $result = mysqli_query($conn, $query);
 
     if (mysqli_num_rows($result) > 0) {
@@ -31,7 +31,7 @@ if (isset($_POST['update'])) {
 
     if (mysqli_query($conn, $updateQuery)) {
         // Redirect back to the majors list page after the update is successful
-        header('location:majors1.php');
+        header('location:Majors1.php');
     } else {
         // Handle the case where the update fails
         echo "Update failed. Please try again.";

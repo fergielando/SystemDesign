@@ -5,7 +5,8 @@
 // Fetch faculty information from the 'advisor' table
 $query = "SELECT DISTINCT advisor.FacultyID, user.FirstName, user.LastName 
           FROM advisor
-          INNER JOIN user ON advisor.FacultyID = user.UID";
+          INNER JOIN user ON advisor.FacultyID = user.UID
+		  ORDER BY advisor.FacultyID";
 
 $result = mysqli_query($conn, $query);
 
@@ -27,7 +28,8 @@ if (isset($_POST['facultyDropdown'])) {
     $queryShowAdvised = "SELECT advisor.StudentID, user.FirstName, user.LastName
               FROM advisor
               INNER JOIN user ON advisor.StudentID = user.UID
-              WHERE advisor.FacultyID = $selectedFacultyUID";
+              WHERE advisor.FacultyID = $selectedFacultyUID
+			  ORDER BY advisor.StudentID";
 
     $resultShowAdvised = mysqli_query($conn, $queryShowAdvised);
 
