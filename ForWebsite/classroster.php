@@ -92,10 +92,11 @@ $isWithinSemesterDates = ($currentDate >= $semesterEndDate);
 // Fetch students, majors, and minors
 $rosterQuery = "SELECT student.StudentID, user.FirstName, user.LastName, enrollment.Grade,
                        GROUP_CONCAT(DISTINCT major.MajorName SEPARATOR ', ') AS Majors,
-                       GROUP_CONCAT(DISTINCT minor.MinorName SEPARATOR ', ') AS Minors
+                       GROUP_CONCAT(DISTINCT minor.MinorName SEPARATOR ', ') AS Minors, logintable.Email
                 FROM enrollment
                 INNER JOIN student ON enrollment.StudentID = student.StudentID
                 INNER JOIN user ON student.StudentID = user.UID
+				INNER JOIN logintable ON student.StudentID = logintable.UID
                 LEFT JOIN studentmajor ON student.StudentID = studentmajor.StudentID
                 LEFT JOIN major ON studentmajor.MajorID = major.MajorID
                 LEFT JOIN studentminor ON student.StudentID = studentminor.StudentID
@@ -320,6 +321,7 @@ if ($facultyInfo) {
             <th>Student ID</th>
             <th>First Name</th>
             <th>Last Name</th>
+			  <th>Email</th>
             <th>Major(s)</th>
             <th>Minor</th>
             <th>Grade</th>
@@ -341,6 +343,7 @@ if ($facultyInfo) {
                 <td><?php echo htmlspecialchars($student['StudentID']); ?></td>
                 <td><?php echo htmlspecialchars($student['FirstName']); ?></td>
                 <td><?php echo htmlspecialchars($student['LastName']); ?></td>
+				   <td><?php echo htmlspecialchars($student['Email']); ?></td>
                 <td><?php echo isset($student['Majors']) ? htmlspecialchars($student['Majors']) : ''; ?></td>
                 <td><?php echo isset($student['Minors']) ? htmlspecialchars($student['Minors']) : ''; ?></td>
                 <td><?php echo htmlspecialchars($student['Grade']); ?></td>
