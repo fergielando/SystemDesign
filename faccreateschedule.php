@@ -1,18 +1,40 @@
 <?php
-@include 'config1.php'; // Include your database configuration file
-
+// Start the session
 session_start();
 
-// Check for user's session UID
-if (!isset($_SESSION['UID'])) {
-    echo "Please log in to assign courses.";
+// Include your database configuration file
+@include 'config1.php';
+
+// Check if a UID is passed in the URL
+if (!isset($_GET['UID'])) {
+    echo "No student selected. Redirecting to previous page.";
+    header("refresh:3;url=javascript:history.back()");
     exit;
 }
 
-$uid = $_SESSION['UID'];
+
+// Use the UID from the URL parameter
+$uid = mysqli_real_escape_string($conn, $_GET['UID']);
 
 // Determine the student's course type based on their StudentID
 $courseType = ($uid >= 500801) ? 'Graduate' : 'Undergraduate';
+
+// Query to fetch student's name from the user table
+$userQuery = "SELECT FirstName, LastName FROM user WHERE UID = '$uid'";
+$userResult = mysqli_query($conn, $userQuery);
+
+// Initialize variables to store the name
+$firstName = '';
+$lastName = '';
+
+// Fetch the result
+if ($userRow = mysqli_fetch_assoc($userResult)) {
+    $firstName = $userRow['FirstName'];
+    $lastName = $userRow['LastName'];
+}
+
+
+
 
 // Fetch available courses with additional details, including prerequisites, ordered by CRN
 $query = "SELECT
@@ -46,9 +68,6 @@ WHERE course.CourseType = '$courseType'
 GROUP BY coursesection.CRN
 ORDER BY coursesection.CRN ASC";
 
-
-
-
 $result = mysqli_query($conn, $query);
 
 $courses = [];
@@ -71,10 +90,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
 
     foreach ($_POST['courses'] as $selectedCRN) {
         $selectedCRN = mysqli_real_escape_string($conn, $selectedCRN);
+
+
+
     
         // Retrieve course details for the selected course
         $courseDetailsQuery = "SELECT TimeSlotID FROM coursesection WHERE CRN = '$selectedCRN'";
         $courseDetailsResult = mysqli_query($conn, $courseDetailsQuery);
+
+
+
+        // Check for student hold
+$checkHoldQuery = "SELECT * FROM Hold WHERE StudentID = '$uid'";
+$checkHoldResult = mysqli_query($conn, $checkHoldQuery);
+
+if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
+    // The student has a hold
+    $holdInfo = mysqli_fetch_assoc($checkHoldResult);
+    
+    // Display a larger, red error message with a 6-second delay
+    echo "<div style='font-size: 24px; color: red;'>There is a hold on this account of type: " . $holdInfo['HoldType'] . " since " . $holdInfo['DateOfHold'] . "</div>";
+    
+    // Redirect back to the previous page after 6 seconds
+    echo "<script>setTimeout(function() { window.history.back(); }, 6000);</script>";
+    exit;
+}
+
+// If the student doesn't have a hold, proceed with class assignment logic
+// ...
         
         if ($courseDetailsRow = mysqli_fetch_assoc($courseDetailsResult)) {
             // Check if the course has already been dropped in the same semester
@@ -85,27 +128,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
                 echo "Course with CRN $selectedCRN has already been dropped in this semester.";
                 exit;
             }
-
-           // Check for student hold
-$checkHoldQuery = "SELECT * FROM Hold WHERE StudentID = '$uid'";
-$checkHoldResult = mysqli_query($conn, $checkHoldQuery);
-
-if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
-    // The student has a hold
-    $holdInfo = mysqli_fetch_assoc($checkHoldResult);
-    
-    // Display a larger, red error message with a 6-second delay
-    echo "<div style='font-size: 24px; color: red;'>You have a hold on your account of type: " . $holdInfo['HoldType'] . " since " . $holdInfo['DateOfHold'] . "</div>";
-    
-    // Redirect back to the previous page after 6 seconds
-    echo "<script>setTimeout(function() { window.history.back(); }, 6000);</script>";
-    exit;
-}
-
-// If the student doesn't have a hold, proceed with class assignment logic
-// ...
-
-
     
             // Retrieve prerequisite information for the selected course
             $prerequisiteQuery = "SELECT PRcourseID, MinGrade FROM courseprerequisite WHERE CourseID = (SELECT CourseID FROM coursesection WHERE CRN = '$selectedCRN')";
@@ -263,8 +285,15 @@ $currentSemester = "20232";
    <meta http-equiv="X-UA-Compatible" content="IE-edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <div class="header">
+
+   <div class="student-name">
+    <label>Student:</label>
+    <span><?php echo $firstName . ' ' . $lastName; ?></span>
+</div>
+
+
       <h1>Academic Profile</h1>
-      <button class="back-button" onclick="goBack()">Back</button>
+      <a href="Update_a_user1.php" class="btn">Back</a>
    </div>
 
 
@@ -296,6 +325,13 @@ $currentSemester = "20232";
    .header h1 {
       font-size: 36px;
    }
+
+   .student-name {
+         font-size: 24px; /* Increase font size */
+         font-weight: bold; /* Optional: makes the text bold */
+         margin-top: 10px; /* Optional: adds some space above the name */
+         /* Add other styling as needed */
+      }
 
    .header a {
       text-decoration: none;
@@ -654,17 +690,18 @@ function checkPrerequisite(prerequisiteCourseID, minGrade) {
             </thead>
             <tbody>
                <?php
+               // Fetch and display currently enrolled courses
              // Fetch and display currently enrolled courses
              $enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, course.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
-             FROM enrollment
-             JOIN coursesection ON enrollment.CRN = coursesection.CRN
+             FROM studenthistory
+             JOIN coursesection ON studenthistory.CRN = coursesection.CRN
              JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
              JOIN day ON timeslot.DayID = day.DayID
              JOIN course ON coursesection.CourseID = course.CourseID
              JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
              JOIN room ON coursesection.RoomID = room.RoomID
              JOIN building ON room.BuildingID = building.BuildingID
-             WHERE enrollment.StudentID = '$uid'";
+             WHERE studenthistory.StudentID = '$uid'";
 $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
 
 
