@@ -310,6 +310,7 @@ $semesterID = $semesterIDRow['SemesterID']; // Extract the SemesterID value
             <th>Assign Grade</th>
             <th>Attendance</th> <!-- New column for Attendance -->
 			  <th>Attendance History</th> <!-- New column header for Attendance History -->
+			  <th>View Academic Profile </th>
         </tr>
     </thead>
     <tbody>
@@ -381,6 +382,9 @@ $semesterID = $semesterIDRow['SemesterID']; // Extract the SemesterID value
                 </td>
 					<td>
                     <button onclick="showAttendance('<?php echo htmlspecialchars($student['StudentID']); ?>')">Show Attendance History</button>
+                </td>
+				   <td>
+                    <a href="facacademicprof.php?UID=<?php echo htmlspecialchars($student['StudentID']); ?>" target="_blank">View Profile</a>
                 </td>
             </tr>
         <?php

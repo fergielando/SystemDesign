@@ -310,6 +310,7 @@ $facultyInfo = mysqli_fetch_assoc($facultyInfoResult);
 // Display Faculty information
 if ($facultyInfo) {
     echo "<p>This class is taught by " . htmlspecialchars($facultyInfo['FacultyFirstName']) . " " . htmlspecialchars($facultyInfo['FacultyLastName']) . " (FacultyID: " . htmlspecialchars($facultyInfo['FacultyID']) . ")</p>";
+    echo "<p>Faculty Profile: <a href='adminfaculty_personalinfo.php?UID=" . htmlspecialchars($facultyInfo['FacultyID']) . "' target='_blank'>View Profile</a></p>";
 } else {
     echo "<p>Faculty information not available.</p>";
 }
@@ -328,6 +329,7 @@ if ($facultyInfo) {
             <th>Assign Grade</th>
             <th>Attendance</th> <!-- New column for Attendance -->
 			  <th>Attendance History</th> <!-- New column header for Attendance History -->
+			  <th>View Academic Profile </th>
         </tr>
     </thead>
     <tbody>
@@ -399,6 +401,9 @@ if ($facultyInfo) {
                 </td>
 					<td>
                     <button onclick="showAttendance('<?php echo htmlspecialchars($student['StudentID']); ?>')">Show Attendance History</button>
+                </td>
+				   <td>
+                    <a href="view_academic_profile1.php?UID=<?php echo htmlspecialchars($student['StudentID']); ?>" target="_blank">View Profile</a>
                 </td>
             </tr>
         <?php
