@@ -134,6 +134,22 @@ if ($resultPassedCourses) {
     echo "Failed to fetch passed courses data.";
 }
 
+$queryMastersDeptCount = "SELECT d.DeptName, COUNT(gs.StudentID) AS MastersCount
+                         FROM gradstudent gs
+                         INNER JOIN dept d ON gs.DeptID = d.DeptID
+                         WHERE (gs.GradStudentType = 'Masters Full Time' OR gs.GradStudentType = 'Masters Part Time')
+                         GROUP BY d.DeptName";
+
+$mastersDeptResult = mysqli_query($conn, $queryMastersDeptCount);
+
+$queryPhDDeptCount = "SELECT d.DeptName, COUNT(gs.StudentID) AS PhDCount
+                      FROM gradstudent gs
+                      INNER JOIN dept d ON gs.DeptID = d.DeptID
+                      WHERE (gs.GradStudentType = 'PHD Full Time' OR gs.GradStudentType = 'PHD Part Time')
+                      GROUP BY d.DeptName";
+
+$phDDeptResult = mysqli_query($conn, $queryPhDDeptCount);
+
 ?>
 
 <!DOCTYPE html>
@@ -318,105 +334,46 @@ if ($resultPassedCourses) {
 	<p>Number of Available Minors: <?php echo $minors_count; ?></p>
 	<p>Graduation Rate: <?php echo round($graduationRate, 2); ?>%</p>
    </div>
+   
+   <div>
+    <h2>Masters Students per Department</h2>
+    <table>
+        <tr>
+            <th>Department Name</th>
+            <th>Masters Count</th>
+        </tr>
+        <?php
+        while ($row = mysqli_fetch_assoc($mastersDeptResult)) {
+            echo "<tr>";
+            echo "<td>" . $row['DeptName'] . "</td>";
+            echo "<td>" . $row['MastersCount'] . "</td>";
+            echo "</tr>";
+        }
+        ?>
+    </table>
+</div>
+
+<div>
+    <h2>PhD Students per Department</h2>
+    <table>
+        <tr>
+            <th>Department Name</th>
+            <th>PhD Count</th>
+        </tr>
+        <?php
+        while ($row = mysqli_fetch_assoc($phDDeptResult)) {
+            echo "<tr>";
+            echo "<td>" . $row['DeptName'] . "</td>";
+            echo "<td>" . $row['PhDCount'] . "</td>";
+            echo "</tr>";
+        }
+        ?>
+    </table>
+</div>
+   
+   
 
    <script>
- document.addEventListener('DOMContentLoaded', function () {
-    var ctxUgGrad = document.getElementById('ugGradChart').getContext('2d');
-    var ctxFullPart = document.getElementById('fullPartChart').getContext('2d');
-    var ctxMajors = document.getElementById('majorChart').getContext('2d');
-    var ctxMinors = document.getElementById('minorChart').getContext('2d');
-    var ctxGradDept = document.getElementById('gradDeptChart').getContext('2d');
-	var undergradCount = <?php echo $undergrad_count; ?>;
-    var gradCount = <?php echo $grad_count; ?>;
-	var fulltime_count = <?php echo $fulltime_count; ?>;
-    var parttime_count = <?php echo $parttime_count; ?>;
-
-    // Prepare data
-    var dataUgGrad = {
-        labels: ['Undergraduate', 'Graduate'],
-        datasets: [{
-            label: 'Student Type',
-            data: [{{ undergrad_count }}, {{ grad_count }}],
-            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)']
-        }]
-    };
-
-    var dataFullPart = {
-        labels: ['Full-time', 'Part-time'],
-        datasets: [{
-            label: 'Enrollment Type',
-            data: [{{ fulltime_count }}, {{ parttime_count }}],
-            backgroundColor: ['rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)']
-        }]
-    };
-
-    var majorCounts = {{ major_counts|safe }};
-    var minorCounts = {{ minor_counts|safe }};
-    var gradDeptCounts = {{ grad_department_counts|safe }};
-
-    // Function to map data for bar charts
-    function mapChartData(data, labelKey, valueKey) {
-        return {
-            labels: data.map(item => item[labelKey]),
-            datasets: [{
-                label: 'Number of Students',
-                data: data.map(item => item[valueKey]),
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        };
-    }
-
-    // Chart for Majors
-    var ctxMajors = document.getElementById('majorChart').getContext('2d');
-    var majorChartData = mapChartData(majorCounts, 'major_name', 'student_count');
-    var majorChart = new Chart(ctxMajors, {
-        type: 'bar',
-        data: majorChartData,
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // Chart for Minors
-    var ctxMinors = document.getElementById('minorChart').getContext('2d');
-    var minorChartData = mapChartData(minorCounts, 'minor_name', 'student_count');
-    var minorChart = new Chart(ctxMinors, {
-        type: 'bar',
-        data: minorChartData,
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // Chart for Graduates by Department
-    var ctxGrads = document.getElementById('gradDeptChart').getContext('2d');
-    var gradDeptChartData = mapChartData(gradDeptCounts, 'department_name', 'grad_count');
-    var gradDeptChart = new Chart(ctxGrads, {
-        type: 'bar',
-        data: gradDeptChartData,
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-
-    // Create charts
-    new Chart(ctxUgGrad, { type: 'pie', data: dataUgGrad });
-    new Chart(ctxFullPart, { type: 'pie', data: dataFullPart });
    </script>
 </body>
 </html>
