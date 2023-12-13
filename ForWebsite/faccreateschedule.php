@@ -5,19 +5,31 @@ session_start();
 // Include your database configuration file
 @include 'config1.php';
 
+if (!isset($_SESSION['admin_name'])) {
+   header('location:login_form1.php');
+}
+
 // Check if a UID is passed in the URL
-if (!isset($_GET['UID'])) {
-    echo "No student selected. Redirecting to previous page.";
+if (!isset($_GET['UID']) || empty($_GET['UID'])) {
+    echo "No student selected. Redirecting to the previous page.";
     header("refresh:3;url=javascript:history.back()");
     exit;
 }
 
-
 // Use the UID from the URL parameter
 $uid = mysqli_real_escape_string($conn, $_GET['UID']);
 
-// Determine the student's course type based on their StudentID
-$courseType = ($uid >= 500801) ? 'Graduate' : 'Undergraduate';
+// Check if the student is a graduate or undergraduate
+$studentTypeQuery = "SELECT StudentID FROM gradstudent WHERE StudentID = '$uid'";
+$studentresult = mysqli_query($conn, $studentTypeQuery);
+
+if (mysqli_num_rows($studentresult) > 0) {
+    // Student is found in gradstudent table, therefore considered Graduate
+    $courseType = 'Graduate';
+} else {
+    // Student not found in gradstudent table, therefore considered Undergraduate
+    $courseType = 'Undergraduate';
+}
 
 // Query to fetch student's name from the user table
 $userQuery = "SELECT FirstName, LastName FROM user WHERE UID = '$uid'";
@@ -42,19 +54,23 @@ $query = "SELECT
 	GROUP_CONCAT(DISTINCT day.Weekday ORDER BY day.Weekday SEPARATOR '/') AS Weekdays,
     MAX(coursesection.CourseID) AS CourseID,
     MAX(coursesection.AvailableSeats) AS AvailableSeats,
+	MAX(coursesection.SectionNum) AS SectionNum,
     MAX(timeslot.TimeSlotID) AS TimeSlotID,
     MAX(day.Weekday) AS Weekday,
     MAX(course.CourseName) AS CourseName,
-    MAX(room.RoomNum) AS RoomNum,
+	MAX(course.DeptID) AS CourseDept,
+    MAX(coursesection.RoomID) AS RoomNum,
     MAX(building.BuildingName) AS BuildingName,
     MAX(periodd.StartTime) AS StartTime,
     MAX(periodd.EndTime) AS EndTime,
-    MAX(coursesection.SectionNum) AS SectionNum,
     MAX(coursesection.SemesterID) AS SemesterID,
+	MAX(semester.SemesterName) AS SemesterName,
     MAX(courseprerequisite.PRcourseID) AS PRcourseID,
     MAX(courseprerequisite.MinGrade) AS MinGrade,
     MAX(course.CourseType) AS CourseType,
     MAX(course.Credits) AS Credits,
+	MAX(user.FirstName) AS FacultyFirstName,
+	MAX(user.LastName) AS FacultyLastName,
     MAX(dept.DeptName) AS DeptName
 FROM coursesection
 JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
@@ -62,10 +78,14 @@ JOIN day ON timeslot.DayID = day.DayID
 JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
 JOIN room ON coursesection.RoomID = room.RoomID
 JOIN building ON room.BuildingID = building.BuildingID
+JOIN facultyhistory ON coursesection.CRN = facultyhistory.CRN
+JOIN faculty ON facultyhistory.FacultyID = faculty.FacultyID
 LEFT JOIN courseprerequisite ON coursesection.CourseID = courseprerequisite.CourseID
 JOIN course ON coursesection.CourseID = course.CourseID
 JOIN dept ON course.DeptID = dept.DeptID
-WHERE course.CourseType = '$courseType'
+JOIN user ON faculty.FacultyID = user.UID  -- Join using the foreign key constraint
+JOIN semester ON coursesection.SemesterID = semester.SemesterID  -- Join using the foreign key constraint
+WHERE course.CourseType = '$courseType' AND coursesection.SemesterID <> 0
 GROUP BY coursesection.CRN
 ORDER BY coursesection.CRN ASC";
 
@@ -76,8 +96,117 @@ while ($row = mysqli_fetch_assoc($result)) {
     $courses[] = $row;
 }
 
+//Get Course Prerequisites for each Course
+foreach ($courses as &$course) {
+    $courseID = $course['CourseID'];
+    $prerequisitesQuery = "SELECT PRCourseID FROM courseprerequisite WHERE CourseID = '$courseID'";
+    $prerequisitesResult = mysqli_query($conn, $prerequisitesQuery);
+
+    $prerequisites = [];
+    while ($row = mysqli_fetch_assoc($prerequisitesResult)) {
+        $prerequisites[] = $row['PRCourseID'];
+    }
+
+    $course['Prerequisites'] = $prerequisites;
+}
+unset($course); // Unset the reference after the loop
+
+// Fetch distinct semester Names for the filter
+$query = "SELECT DISTINCT SemesterName FROM semester WHERE semesterID <> 0"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$semesterNames = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $semesterNames[] = $row['SemesterName'];
+}
+
+// Fetch distinct semester IDs for the filter
+$query = "SELECT DISTINCT semesterID FROM coursesection WHERE semesterID <> 0"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$semesterIDs = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $semesterIDs[] = $row['semesterID'];
+}
+
+// Fetch distinct days for the filter
+$query = "SELECT DISTINCT day.Weekday FROM day WHERE DayID <> 0"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$days = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $days[] = $row['Weekday'];
+}
+
+// Fetch distinct building names for the filter
+$query = "SELECT DISTINCT building.BuildingName FROM building WHERE BuildingID <> 0 AND BuildingID <>4"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$buildingNames = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $buildingNames[] = $row['BuildingName'];
+}
+
+
+// Fetch distinct department IDs for the filter
+$query = "SELECT DISTINCT dept.DeptName FROM dept WHERE DeptID <> 'NULL'";
+$result = mysqli_query($conn, $query);
+
+$departmentIDs = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $departmentIDs[] = $row['DeptName'];
+}
+
+// Fetch distinct room IDs for the filter
+$query = "SELECT DISTINCT room.RoomID FROM room WHERE RoomID <> 0"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$roomIDs = [];
+while ($row = mysqli_fetch_assoc($result)) {
+   $roomIDs[] = $row['RoomID'];
+}
+
+$query = "SELECT DISTINCT CONCAT(periodd.StartTime, ' to ', periodd.EndTime) AS Time FROM periodd WHERE PeriodID <> 0";
+$result = mysqli_query($conn, $query);
+
+$times = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $timeRange = explode(' to ', $row['Time']);
+    $formattedStart = date("g:i A", strtotime($timeRange[0]));
+    $formattedEnd = date("g:i A", strtotime($timeRange[1]));
+    $formattedTime = $formattedStart . ' to ' . $formattedEnd;
+    $times[] = $formattedTime;
+}
+
+// Fetch distinct semester names for the filter
+$query = "SELECT DISTINCT semester.SemesterName FROM semester WHERE SemesterID <> 0"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$semesterNames = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $semesterNames[] = $row['SemesterName'];
+}
+
+// Fetch distinct Section Numbers for the filter
+$query = "SELECT DISTINCT coursesection.SectionNum FROM coursesection WHERE SectionNum <> 0"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$sectionnums = [];
+while ($row = mysqli_fetch_assoc($result)) {
+   $sectionnums[] = $row['SectionNum'];
+}
+
+// Fetch distinct Available Seats for the filter
+$query = "SELECT DISTINCT coursesection.AvailableSeats FROM coursesection"; // Adjust the table and column names as needed
+$result = mysqli_query($conn, $query);
+
+$availbleseats = [];
+while ($row = mysqli_fetch_assoc($result)) {
+   $availbleseats[] = $row['AvailableSeats'];
+}
+
 // Fetch TimeSlotIDs of courses the student is currently enrolled in
-$currentEnrollmentsQuery = "SELECT TimeSlotID FROM coursesection JOIN studenthistory ON coursesection.CRN = studenthistory.CRN WHERE studenthistory.StudentID = '$uid'";
+$currentEnrollmentsQuery = "SELECT TimeSlotID FROM coursesection JOIN enrollment ON coursesection.CRN = enrollment.CRN WHERE enrollment.StudentID = '$uid'";
 $currentEnrollmentsResult = mysqli_query($conn, $currentEnrollmentsQuery);
 $currentEnrollmentTimeSlots = [];
 while ($enrollmentRow = mysqli_fetch_assoc($currentEnrollmentsResult)) {
@@ -102,7 +231,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
 
 
         // Check for student hold
-$checkHoldQuery = "SELECT * FROM Hold WHERE StudentID = '$uid'";
+$checkHoldQuery = "SELECT * FROM hold WHERE StudentID = '$uid'";
 $checkHoldResult = mysqli_query($conn, $checkHoldQuery);
 
 if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
@@ -122,7 +251,7 @@ if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
         
         if ($courseDetailsRow = mysqli_fetch_assoc($courseDetailsResult)) {
             // Check if the course has already been dropped in the same semester
-            $checkDropQuery = "SELECT * FROM studenthistory WHERE StudentID = '$uid' AND CRN = '$selectedCRN' AND SemesterID = (SELECT SemesterID FROM coursesection WHERE CRN = '$selectedCRN') AND Grade = 'Dropped'";
+            $checkDropQuery = "SELECT * FROM studenthistory WHERE StudentID = '$uid' AND CRN = '$selectedCRN' AND SemesterID = '20232' AND Grade = 'Dro'";
             $checkDropResult = mysqli_query($conn, $checkDropQuery);
     
             if (mysqli_num_rows($checkDropResult) > 0) {
@@ -142,12 +271,12 @@ if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
                 $hasPrerequisite = false;
     
                 // Query to check if the student has the required grade in the prerequisite course
-                $prerequisiteCheckQuery = "SELECT * FROM studenthistory WHERE StudentID = '$uid' AND CourseID = '$prerequisiteCourseID' AND Grade IN ('A', 'B', 'C')";
+                $prerequisiteCheckQuery = "SELECT * FROM studenthistory WHERE StudentID = '$uid' AND CourseID = '$prerequisiteCourseID' AND Grade IN ('A+','A','A-', 'B+','B','B-', 'C+','C')";
                 $prerequisiteCheckResult = mysqli_query($conn, $prerequisiteCheckQuery);
     
                 if (!$hasPrerequisite) {
-                    // Retrieve the course name and CRN for the prerequisite course
-                    $prerequisiteCourseInfoQuery = "SELECT course.CourseName, coursesection.CRN FROM coursesection
+                    // Retrieve the course name and CourseID for the prerequisite course
+                    $prerequisiteCourseInfoQuery = "SELECT course.CourseName, coursesection.CourseID FROM coursesection
                     JOIN course ON coursesection.CourseID = course.CourseID
                     WHERE course.CourseID = '$prerequisiteCourseID'";
                     $prerequisiteCourseInfoResult = mysqli_query($conn, $prerequisiteCourseInfoQuery);
@@ -156,10 +285,10 @@ if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
                 
                     if ($prerequisiteCourseInfoRow = mysqli_fetch_assoc($prerequisiteCourseInfoResult)) {
                         $prerequisiteCourseName = $prerequisiteCourseInfoRow['CourseName'];
-                        $prerequisiteCRN = $prerequisiteCourseInfoRow['CRN'];
+                        $prerequisiteCRN = $prerequisiteCourseInfoRow['CourseID'];
                     }
                 
-                    echo "<div id='prerequisiteError' style='font-size: 18px; color: red;'>Enrollment failed: You must obtain a $minGrade or better in the prerequisite course ($prerequisiteCourseName - CRN: $prerequisiteCRN) to register for this class. Please review your course selection.</div>";
+                    echo "<div id='prerequisiteError' style='font-size: 18px; color: red;'>Enrollment failed: You must obtain a $minGrade or better in the prerequisite course ($prerequisiteCourseName - CourseID: $prerequisiteCRN) to register for this class. Please review your course selection.</div>";
                     echo "<script>setTimeout(function() { window.location.href = 'Create Schedule1.php'; }, 4500);</script>";
                     exit;
                 }
@@ -181,7 +310,6 @@ if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
     foreach ($selectedTimeSlots as $selectedTimeSlot) {
         if (in_array($selectedTimeSlot, $currentEnrollmentTimeSlots)) {
             echo "Enrollment failed: Conflict with previous or currently enrolled course.";
-            echo "<script>setTimeout(function() { window.location.href = 'Create Schedule1.php'; }, 3000);</script>";
             exit;
         }
     }
@@ -194,14 +322,26 @@ if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
                 $selectedCRN = mysqli_real_escape_string($conn, $selectedCRN);
                 $courseDetailsQuery = "SELECT CourseID, AvailableSeats, SemesterID FROM coursesection WHERE CRN = '$selectedCRN'";
                 $courseDetailsResult = mysqli_query($conn, $courseDetailsQuery);
+				
+				$checkHistoryQuery = "SELECT * FROM studenthistory WHERE StudentID = ? AND CRN = ?";
+				$stmt = mysqli_prepare($conn, $checkHistoryQuery);
+				mysqli_stmt_bind_param($stmt, "ss", $uid, $selectedCRN);
+				mysqli_stmt_execute($stmt);
+				$resultHistory = mysqli_stmt_get_result($stmt);
+				
                 if ($courseDetailsRow = mysqli_fetch_assoc($courseDetailsResult)) {
                     if ($courseDetailsRow['AvailableSeats'] > 0) {
-                        // Enrollment logic for studenthistory table
-                        $insertHistoryQuery = "INSERT INTO studenthistory (StudentID, CRN, CourseID, SemesterID, Grade) VALUES (?, ?, ?, ?, ?)";
-                        $grade = 'In Progress'; // Set the initial grade
-                        $stmt = mysqli_prepare($conn, $insertHistoryQuery);
-                        mysqli_stmt_bind_param($stmt, "sssss", $uid, $selectedCRN, $courseDetailsRow['CourseID'], $courseDetailsRow['SemesterID'], $grade);
-                        mysqli_stmt_execute($stmt);
+                         if(mysqli_num_rows($resultHistory) == 0) {
+						// If the entry doesn't exist, proceed with insertion
+						$insertHistoryQuery = "INSERT INTO studenthistory (StudentID, CRN, CourseID, SemesterID, Grade) VALUES (?, ?, ?, ?, ?)";
+						$grade = 'IP'; // Set the initial grade
+						$stmt = mysqli_prepare($conn, $insertHistoryQuery);
+						mysqli_stmt_bind_param($stmt, "sssss", $uid, $selectedCRN, $courseDetailsRow['CourseID'], $courseDetailsRow['SemesterID'], $grade);
+						mysqli_stmt_execute($stmt);
+							} else { 
+							$insertHistoryQuery = "UPDATE studenthistory SET Grade = 'IP' WHERE StudentID = '$uid' AND CRN = '$selectedCRN'";
+							$courseDetailsResult = mysqli_query($conn, $insertHistoryQuery);
+							}
 
                         // Enrollment logic for enrollment table
                         $currentDateTime = date("Y-m-d H:i:s"); // Get the current date and time
@@ -462,67 +602,6 @@ $currentSemester = "20232";
 
    <script>
 
-function applyFilters() {
-    var departmentFilter = document.getElementById("departmentFilter").value;
-    var dayFilter = document.getElementById("dayFilter").value;
-    var roomFilter = document.getElementById("roomFilter").value;
-    var semesterFilter = document.getElementById("semesterFilter").value;
-    var courseTypeFilter = document.getElementById("courseTypeFilter").value; // Add this line
-
-    var table = document.getElementById("courseTable");
-    var rows = table.getElementsByTagName("tr");
-
-    for (var i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
-        var row = rows[i];
-        var departmentCell = row.cells[8].textContent; // Column index 8 for the department
-        var dayCell = row.cells[3].textContent; // Column index 3 for the day
-        var roomCell = row.cells[5].textContent; // Column index 5 for the room
-        var semesterCell = row.cells[6].textContent; // Column index 6 for the semester
-        var courseTypeCell = row.cells[10].textContent; // Column index 10 for CourseType
-
-        // Check if the row matches the selected criteria
-        var departmentMatch = departmentFilter === "" || departmentCell === departmentFilter;
-        var dayMatch = dayFilter === "" || dayCell === dayFilter;
-        var roomMatch = roomFilter === "" || roomCell === roomFilter;
-        var semesterMatch = semesterFilter === "" || semesterCell === semesterFilter;
-        var courseTypeMatch = courseTypeFilter === "" || courseTypeCell === courseTypeFilter; // Add this line
-
-        // Hide or show the row based on the matches
-        if (departmentMatch && dayMatch && roomMatch && semesterMatch && courseTypeMatch) { // Update this line
-            row.style.display = "";
-        } else {
-            row.style.display = "none";
-        }
-    }
-}
-
-       function searchTable() {
-           var input, filter, table, tr, td, i, txtValue;
-           input = document.getElementById("searchInput");
-           filter = input.value.toUpperCase();
-           table = document.getElementById("courseTable");
-           tr = table.getElementsByTagName("tr");
-
-           for (i = 0; i < tr.length; i++) {
-               td = tr[i].getElementsByTagName("td");
-               var found = false;
-               for (var j = 0; j < td.length; j++) {
-                   if (td[j]) {
-                       txtValue = td[j].textContent || td[j].innerText;
-                       if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                           found = true;
-                           break;
-                       }
-                   }
-               }
-               if (found) {
-                   tr[i].style.display = "";
-               } else {
-                   tr[i].style.display = "none";
-               }
-           }
-       }
-
        function updateSelectedCourses() {
          var selectedCourses = document.querySelectorAll('input[name="courses[]"]:checked');
          var displayBox = document.getElementById("selectedCoursesBox");
@@ -572,84 +651,101 @@ function applyFilters() {
     <div class="course-assignment-container">
         <h1>Assign/Drop Courses</h1>
         <!-- ... Existing search input and course assignment form ... -->
-        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for courses...">
+        <div class="search-container">
+       General Search: 
+      <input type="text" id="searchInput" placeholder="General Search..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+   </div>
 
         <div class="filter-container">
-    <label for="departmentFilter">Department:</label>
-    <select id="departmentFilter">
-        <option value="">All</option>
-        <?php
-        // Fetch and display unique department names from your database
-        $departmentQuery = "SELECT DISTINCT DeptName FROM dept";
-        $departmentResult = mysqli_query($conn, $departmentQuery);
-        while ($department = mysqli_fetch_assoc($departmentResult)) {
-            echo "<option value='{$department['DeptName']}'>{$department['DeptName']}</option>";
-        }
-        ?>
+     CRN:
+      <input type="text" id="crnSearch" placeholder="Search by CRN..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+	  
+       Course ID:
+      <input type="text" id="courseidSearch" placeholder="Search by Course ID..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+      
+      Course Name:
+      <input type="text" id="coursenameSearch" placeholder="Search by Course Name..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
     </select>
 
+    <label for="sectionFilter">Section Number:</label>
+   <select id="sectionFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($sectionnums as $SectionNum): ?>
+         <option value="<?php echo $SectionNum; ?>"><?php echo $SectionNum; ?></option>
+      <?php endforeach; ?>
+   </select>
+
+
+
+    <label for="deptFilter">Department:</label>
+   <select id="deptFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($departmentIDs as $deptID): ?>
+         <option value="<?php echo $deptID; ?>"><?php echo $deptID; ?></option>
+      <?php endforeach; ?>
+   </select>
+</div>
+
+
+
+<div class="course-assignment-container">
     <label for="dayFilter">Day:</label>
-    <select id="dayFilter">
-        <option value="">All</option>
-        <?php
-        // Fetch and display unique weekday values from your database
-        $weekdayQuery = "SELECT DISTINCT Weekday FROM day";
-        $weekdayResult = mysqli_query($conn, $weekdayQuery);
-        while ($weekday = mysqli_fetch_assoc($weekdayResult)) {
-            echo "<option value='{$weekday['Weekday']}'>{$weekday['Weekday']}</option>";
-        }
-        ?>
-    </select>
+   <select id="dayFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($days as $day): ?>
+         <option value="<?php echo $day; ?>"><?php echo $day; ?></option>
+      <?php endforeach; ?>
+   </select>
 
 
+    <label for="buildingFilter">Building:</label>
+   <select id="buildingFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($buildingNames as $buildingName): ?>
+         <option value="<?php echo $buildingName; ?>"><?php echo $buildingName; ?></option>
+      <?php endforeach; ?>
+   </select>
 
-    <label for="courseTypeFilter">Course Type:</label>
-<select id="courseTypeFilter">
-    <option value="">All</option>
-    <?php
-    // Fetch and display unique course types from your database
-    $courseTypeQuery = "SELECT DISTINCT CourseType FROM course";
-    $courseTypeResult = mysqli_query($conn, $courseTypeQuery);
-    while ($courseType = mysqli_fetch_assoc($courseTypeResult)) {
-        echo "<option value='{$courseType['CourseType']}'>{$courseType['CourseType']}</option>";
-    }
-    ?>
-</select>
+       <label for="roomFilter">Room:</label>
+   <select id="roomFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($roomIDs as $roomID): ?>
+         <option value="<?php echo $roomID; ?>"><?php echo $roomID; ?></option>
+      <?php endforeach; ?>
+   </select>
+   
+   <label for="timeFilter">Time:</label>
+   <select id="timeFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($times as $time): ?>
+         <option value="<?php echo $time; ?>"><?php echo $time; ?></option>
+      <?php endforeach; ?>
+   </select>
+</div>
 
-
-
-
-
-    <label for="roomFilter">Room:</label>
-    <select id="roomFilter">
-        <option value="">All</option>
-        <?php
-        // Fetch and display unique room numbers from your database
-        $roomQuery = "SELECT DISTINCT RoomNum FROM room";
-        $roomResult = mysqli_query($conn, $roomQuery);
-        while ($room = mysqli_fetch_assoc($roomResult)) {
-            echo "<option value='{$room['RoomNum']}'>{$room['RoomNum']}</option>";
-        }
-        ?>
-    </select>
-
-  
-    </select>
-
-    <label for="semesterFilter">Semester:</label>
-    <select id="semesterFilter">
-        <option value="">All</option>
-        <?php
-        // Fetch and display unique semester values from your database
-        $semesterQuery = "SELECT DISTINCT SemesterID FROM coursesection";
-        $semesterResult = mysqli_query($conn, $semesterQuery);
-        while ($semester = mysqli_fetch_assoc($semesterResult)) {
-            echo "<option value='{$semester['SemesterID']}'>{$semester['SemesterID']}</option>";
-        }
-        ?>
-    </select>
-
-    <button onclick="applyFilters()">Apply Filters</button>
+<div class="course-assignment-container">
+Professor Name:
+      <input type="text" id="professorSearch" placeholder="Search by Professor..." onkeyup="searchAndFilterTable()">
+      <button onclick="resetTable()">Reset</button>
+	  
+	  <label for="semesterFilter">Semester:</label>
+   <select id="semesterFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($semesterNames as $semester): ?>
+         <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
+      <?php endforeach; ?>
+	  </select>
+	  <label for="seatsFilter">Available Seats:</label>
+   <select id="seatsFilter" onchange="searchAndFilterTable()">
+      <option value="">All</option>
+      <?php foreach ($availbleseats as $seats): ?>
+         <option value="<?php echo $seats; ?>"><?php echo $seats; ?></option>
+      <?php endforeach; ?>
+   </select>
 </div>
 
         <div class="top-right-container">
@@ -664,22 +760,39 @@ function applyFilters() {
                   <th>Room</th>
                   <th>Section</th>
                   <th>Time</th>
+				     <th>Semester</th>
+					 <th>Drop</th>
                </tr>
             </thead>
             <tbody>
                <?php
                // Fetch and display currently enrolled courses
              // Fetch and display currently enrolled courses
-             $enrolledCoursesQuery = "SELECT coursesection.CRN, coursesection.CourseID, coursesection.SectionNum, timeslot.TimeSlotID, day.Weekday, course.CourseName, room.RoomNum, building.BuildingName, periodd.StartTime, periodd.EndTime 
-             FROM studenthistory
-             JOIN coursesection ON studenthistory.CRN = coursesection.CRN
+             $enrolledCoursesQuery = "SELECT 
+			 coursesection.CRN, 
+			 GROUP_CONCAT(DISTINCT day.Weekday ORDER BY day.Weekday SEPARATOR '/') AS Weekdays,
+			 coursesection.CourseID, 
+			 coursesection.SectionNum, 
+			 timeslot.TimeSlotID, 
+			 day.Weekday, 
+			 course.CourseName, 
+			 room.RoomNum, 
+			 building.BuildingName, 
+			 periodd.StartTime, 
+			 periodd.EndTime, 
+			 semester.SemesterName
+             FROM enrollment
+             JOIN coursesection ON enrollment.CRN = coursesection.CRN
              JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
              JOIN day ON timeslot.DayID = day.DayID
              JOIN course ON coursesection.CourseID = course.CourseID
              JOIN periodd ON timeslot.PeriodID = periodd.PeriodID
              JOIN room ON coursesection.RoomID = room.RoomID
              JOIN building ON room.BuildingID = building.BuildingID
-             WHERE studenthistory.StudentID = '$uid'";
+			 JOIN semester ON coursesection.SemesterID = semester.SemesterID
+             WHERE enrollment.StudentID = '$uid' AND coursesection.SemesterID <> 0
+			 GROUP BY coursesection.CRN
+			ORDER BY coursesection.CRN ASC";
 $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
 
 
@@ -687,12 +800,22 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
                   echo "<tr>";
                   echo "<td>{$enrolledCourse['CRN']}</td>";
                   echo "<td>{$enrolledCourse['CourseName']}</td>";
-                  echo "<td>{$enrolledCourse['Weekday']}</td>";
+                  echo "<td>";
+
+					$weekdays = explode('/', $enrolledCourse['Weekdays']);
+				echo implode('/', array_unique($weekdays)); // Displaying concatenated weekdays
+
+				echo "</td>";
                   echo "<td>{$enrolledCourse['BuildingName']}</td>";
                   echo "<td>{$enrolledCourse['RoomNum']}</td>";
                   echo "<td>{$enrolledCourse['SectionNum']}</td>";
-                  echo "<td>{$enrolledCourse['StartTime']} to {$enrolledCourse['EndTime']}</td>";
-                  echo "<td><a href='?drop_course={$enrolledCourse['CRN']}'>Drop</a></td>"; // Add a "Drop" link
+                  echo "<td>";
+					$startTime = date("g:i A", strtotime($enrolledCourse['StartTime']));
+					$endTime = date("g:i A", strtotime($enrolledCourse['EndTime']));
+					echo $startTime . " to " . $endTime;
+					echo "</td>";
+				  echo "<td>{$enrolledCourse['SemesterName']}</td>";
+                  echo "<td><a href='?UID=$uid&drop_course={$enrolledCourse['CRN']}'>Drop</a></td>";
                   echo "</tr>";
                }
                ?>
@@ -705,17 +828,20 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
             <thead>
     <tr>
         <th>CRN</th>
+		 <th>Course ID</th>
         <th>Course Name</th>
-        <th>Section</th>
+        <th>Section Num</th>
+		 <th>Prerequisites</th>
+        <th>Department</th>
         <th>Day</th>
         <th>Building</th>
         <th>Room</th>
-        <th>SemesterID</th>
         <th>Time</th>
-        <th>Department</th> <!-- Add a "Department" column -->
-        <th>Credits</th>
-        <th>Course Type</th>
-        <th>Available Seats</th>
+        <th>Professor Name</th>  <!-- Add faculty name header -->
+		<th>Semester</th>
+		<th>Available Seats</th>
+		<th>Credits</th>
+		<th>Course Type</th>
         <th>Select</th>
     </tr>
 </thead>
@@ -724,8 +850,21 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
 <?php foreach ($courses as $course): ?>
     <tr>
         <td><?php echo $course['CRN']; ?></td>
+		<td><?php echo $course['CourseID']; ?></td>
         <td><?php echo $course['CourseName']; ?></td>
         <td><?php echo $course['SectionNum']; ?></td>
+			 <td>
+                <?php if (!empty($course['Prerequisites'])): ?>
+                    <ul>
+                        <?php foreach ($course['Prerequisites'] as $prerequisite): ?>
+                            <li><?php echo $prerequisite; ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    None
+                <?php endif; ?>
+            </td>
+			<td><?php echo $course['DeptName']; ?></td>
         <td>
 					<?php 
 						$weekdays = explode('/', $course['Weekdays']);
@@ -734,12 +873,18 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
 				</td>
         <td><?php echo $course['BuildingName']; ?></td>
         <td><?php echo $course['RoomNum']; ?></td>
-        <td><?php echo $course['SemesterID']; ?></td>
-        <td><?php echo $course['StartTime'] . " to " . $course['EndTime']; ?></td>
-        <td><?php echo $course['DeptName']; ?></td> <!-- Display the DeptName column -->
+            <td>
+					<?php
+					$startTime = date("g:i A", strtotime($course['StartTime']));
+					$endTime = date("g:i A", strtotime($course['EndTime']));
+					echo $startTime . " to " . $endTime;
+					?>
+				</td>
+		  <td><?php echo $course['FacultyFirstName'] . " " . $course['FacultyLastName']; ?></td> 
+        <td><?php echo $course['SemesterName']; ?></td>
+        <td><?php echo $course['AvailableSeats']; ?></td>
         <td><?php echo $course['Credits']; ?></td>
         <td><?php echo $course['CourseType']; ?></td>
-        <td><?php echo $course['AvailableSeats']; ?></td>
         <td>
         <?php
                      // Check if the course is in the Fall 2023 semester (semesterID 20232)
@@ -756,15 +901,139 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
             </table>
             <input type="submit" value="Assign Course">
         </form>
-    </div>
 
 
+<script>
+      function searchAndFilterTable() {
+        var searchText = document.getElementById('searchInput').value.toUpperCase();
+        var crnText = document.getElementById('crnSearch').value.toUpperCase();
+		var courseidText = document.getElementById('courseidSearch').value.toUpperCase();
+        var coursenameText = document.getElementById('coursenameSearch').value.toUpperCase();
+        var professorText = document.getElementById('professorSearch').value.toUpperCase();
+        var filters = {
+            'Section Num': document.getElementById('sectionFilter').value.toUpperCase(),
+            'Department': document.getElementById('deptFilter').value.toUpperCase(),
+            'Building': document.getElementById('buildingFilter').value.toUpperCase(),
+            'Day': document.getElementById('dayFilter').value.toUpperCase(),
+            'Room': document.getElementById('roomFilter').value.toUpperCase(),
+            'Time': document.getElementById('timeFilter').value.toUpperCase(),
+            'Semester': document.getElementById('semesterFilter').value.toUpperCase(),
+			'Available Seats': document.getElementById('seatsFilter').value.toUpperCase()
+            // Add other filters here
+        };
 
+        var table = document.getElementById('courseTable'); // Get the courseTable by ID
+        var rows = table.getElementsByTagName('tr');
 
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var showRow = true;
 
+    for (var filter in filters) {
+            var columnIndex = getColumnIndex(filter);
+            if (columnIndex > -1) {
+                var cell = row.getElementsByTagName('td')[columnIndex];
+                if (cell) {
+                    var cellValue = cell.textContent || cell.innerText;
 
+                    if (filters[filter] !== 'ALL') {
+                        var filterValue = filters[filter];
 
-    
+                        // Handle '0' as a special case for Available Seats
+                        if (filter === 'Available Seats' && filterValue === '0') {
+                            if (cellValue !== '0') {
+                                showRow = false;
+                                break;
+                            }
+                        } else {
+                            if (cellValue.toUpperCase().indexOf(filterValue) === -1) {
+                                showRow = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+            var crnCell = row.getElementsByTagName('td')[0]; // Assuming CRN is in the 1st column
+            if (crnCell) {
+                var crnValue = crnCell.textContent || crnCell.innerText;
+                if (crnValue.toUpperCase().indexOf(crnText) === -1 && crnText !== '') {
+                    showRow = false;
+                }
+            }
+			
+            var courseidCell = row.getElementsByTagName('td')[1]; // Assuming Course ID is in the 1st column
+            if (courseidCell) {
+                var courseidValue = courseidCell.textContent || courseidCell.innerText;
+                if (courseidValue.toUpperCase().indexOf(courseidText) === -1 && courseidText !== '') {
+                    showRow = false;
+                }
+            }
+            
+            var coursenameCell = row.getElementsByTagName('td')[2]; // Assuming Course Name is in the 1st column
+            if (coursenameCell) {
+                var coursenameValue = coursenameCell.textContent || coursenameCell.innerText;
+                if (coursenameValue.toUpperCase().indexOf(coursenameText) === -1 && coursenameText !== '') {
+                    showRow = false;
+                }
+            }
+
+            var professorCell = row.getElementsByTagName('td')[10]; // Assuming Professor Name is in the 9th column
+            if (professorCell) {
+                var professorValue = professorCell.textContent || professorCell.innerText;
+                if (professorValue.toUpperCase().indexOf(professorText) === -1 && professorText !== '') {
+                    showRow = false;
+                }
+            }
+            
+            var rowData = row.textContent || row.innerText;
+            if (rowData.toUpperCase().indexOf(searchText) > -1 && showRow) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    }
+
+    function getColumnIndex(columnName) {
+         var table = document.getElementById('courseTable'); // Get the courseTable by ID
+         var header = table.querySelector("thead");
+         var thArray = Array.from(header.querySelectorAll("th"));
+         for (var i = 0; i < thArray.length; i++) {
+            if (thArray[i].textContent.trim() === columnName) {
+               return i;
+            }
+         }
+         return -1;
+      }
+
+    function resetTable() {
+        var table = document.getElementById('courseTable'); // Get the courseTable by ID
+        var rows = table.getElementsByTagName('tr');
+
+        for (var i = 0; i < rows.length; i++) {
+            rows[i].style.display = '';
+        }
+
+        document.getElementById('searchInput').value = '';
+		document.getElementById('crnSearch').value = '';
+		document.getElementById('coursenameSearch').value = '';
+		document.getElementById('sectionFilter').value = '';
+        // Reset all filter dropdowns to default
+        document.getElementById('deptFilter').value = '';
+        document.getElementById('buildingFilter').value = '';
+        document.getElementById('dayFilter').value = '';
+        document.getElementById('roomFilter').value = '';
+        document.getElementById('timeFilter').value = '';
+		document.getElementById('professorSearch').value = '';
+        document.getElementById('semesterFilter').value = '';
+		document.getElementById('seatsFilter').value = '';
+        // Add other filter reset lines here if needed
+    }
+</script>
+
 </body>
 
 </html>
