@@ -47,7 +47,8 @@ if ($deptId != '') {
         $officeQuery = "SELECT r.RoomID, r.RoomNum, r.BuildingID 
                         FROM room r 
                         WHERE r.RoomType = 'Office' 
-                        AND r.RoomID NOT IN (SELECT RoomID FROM dept WHERE RoomID IS NOT NULL)";
+                         AND (r.RoomID = '" . mysqli_real_escape_string($conn, $row['RoomID']) . "'
+						OR r.RoomID NOT IN (SELECT RoomID FROM dept WHERE RoomID IS NOT NULL))";
         $officeResult = mysqli_query($conn, $officeQuery);
 
         while ($office = mysqli_fetch_assoc($officeResult)) {

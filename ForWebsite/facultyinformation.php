@@ -142,7 +142,25 @@ $facultyWithoutDepartment = getFacultyWithoutDepartment($conn);
         background-color: #ddd;
     }
 
+	.back-button {
+    background: #000;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
 
+/* Position the back button to the top right */
+.header {
+    position: relative;
+}
+
+.back-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
 
 
     </style>
@@ -159,7 +177,7 @@ $facultyWithoutDepartment = getFacultyWithoutDepartment($conn);
                 document.getElementById("departmentDetails").innerHTML = this.responseText;
             }
         };
-        xmlhttp.open("GET", "getDepartmentDetails.php?deptId=" + deptId, true);
+        xmlhttp.open("GET", "getdepartmentdetails.php?deptId=" + deptId, true);
         xmlhttp.send();
     }
     function loadFacultyByDepartment(deptId) {
@@ -206,7 +224,11 @@ $facultyWithoutDepartment = getFacultyWithoutDepartment($conn);
 </script>
 </head>
 <body>
-    
+    <div class="header">
+    <h1>Department Management</h1>
+    <a href="Departments_page1.php" class="back-button">Back</a>
+	</div>
+	
     <label for="departmentSelect">Choose a Department:</label>
     <select id="departmentSelect" onchange="loadDepartmentDetails(this.value); loadFacultyByDepartment(this.value);">
         <option value="">Select a Department</option>

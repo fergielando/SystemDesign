@@ -146,6 +146,26 @@ $facultyWithoutDepartment = getFacultyWithoutDepartment($conn);
     .faculty-table tr:hover {
         background-color: #ddd;
     }
+	
+	.back-button {
+    background: #000;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+/* Position the back button to the top right */
+.header {
+    position: relative;
+}
+
+.back-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
     </style>
     <title>Edit Department</title>
     <script type="text/javascript">
@@ -216,6 +236,10 @@ function loadFacultyByDepartment(deptId) {
 </script>
 </head>
 <body>
+	<div class="header">
+    <h1>Department Management</h1>
+    <a href="Departments_page1.php" class="back-button">Back</a>
+	</div>
     <h1>Edit Department Information</h1>
 
     <label for="departmentSelect">Choose a Department:</label>
