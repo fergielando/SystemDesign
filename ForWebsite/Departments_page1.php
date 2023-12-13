@@ -120,6 +120,8 @@ while ($row = mysqli_fetch_assoc($result)) {
    <div class="header">
       <h1>Department Management</h1>
       <a href="admin_page1.php" class="back-button">Back to Admin Page</a>
+	  <a href="editdepartment.php" class="back-button">Edit Departments</a>
+      <a href="facultyinformation.php" class="back-button">Edit Faculty</a>
    </div>
 
    <div class="department-container">
@@ -202,7 +204,6 @@ while ($row = mysqli_fetch_assoc($result)) {
                <td><?php echo $department['RoomID']; ?></td>
                <td>
                   <!-- Add Edit and Delete buttons with links or forms as needed -->
-                  <a href="edit_department.php?id=<?php echo $department['DeptID']; ?>">Edit</a>
                   <a href="delete_department.php?id=<?php echo $department['DeptID']; ?>">Delete</a>
                </td>
             </tr>
