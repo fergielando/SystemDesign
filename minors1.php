@@ -1,37 +1,37 @@
 <?php
 @include 'config1.php';
 
-// Retrieve major data from the database
-$query = "SELECT * FROM major";
+// Retrieve minor data from the database
+$query = "SELECT * FROM minor";
 $result = mysqli_query($conn, $query);
-$majors = [];
+$minors = [];
 
 // Initialize a counter for assigning new sequential IDs
 // $counter = 0;
 
 while ($row = mysqli_fetch_assoc($result)) {
-    //  $row['MajorID'] = $counter;
-    $majors[] = $row;
+    //  $row['minorID'] = $counter;
+    $minors[] = $row;
 
-    // Increment the counter for the next major
+    // Increment the counter for the next minor
     // $counter++;
 }
 
 
 
-// Retrieve major prerequisites from the database
-$prerequisiteQuery = "SELECT * FROM majorprerequisite";
+// Retrieve minor prerequisites from the database
+$prerequisiteQuery = "SELECT * FROM minorprerequisite";
 $prerequisiteResult = mysqli_query($conn, $prerequisiteQuery);
-$majorPrerequisites = [];
+$minorPrerequisites = [];
 
 while ($prerequisiteRow = mysqli_fetch_assoc($prerequisiteResult)) {
-    $majorPrerequisites[$prerequisiteRow['MajorID']][] = $prerequisiteRow;
+    $minorPrerequisites[$prerequisiteRow['MinorID']][] = $prerequisiteRow;
 }
 
-// Retrieve course names associated with PRmajorID
+// Retrieve course names associated with PRminorID
 $courseQuery = "SELECT c.CourseID, c.CourseName
                 FROM course c
-                JOIN majorprerequisite mp ON FIND_IN_SET(c.CourseID, mp.PRmajorID) > 0";
+                JOIN minorprerequisite mp ON FIND_IN_SET(c.CourseID, mp.PRminorID) > 0";
 $courseResult = mysqli_query($conn, $courseQuery);
 $courseNames = [];
 
@@ -46,7 +46,7 @@ while ($courseRow = mysqli_fetch_assoc($courseResult)) {
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE-edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Majors Page</title>
+   <title>minors Page</title>
 
    <link rel="stylesheet" href="css/fatman1.css">
 
@@ -117,8 +117,8 @@ while ($courseRow = mysqli_fetch_assoc($courseResult)) {
         // Add click event listeners to each button
         showButtons.forEach(function (button) {
             button.addEventListener("click", function () {
-                var majorID = this.getAttribute("data-majorid");
-                var prerequisitesRow = document.getElementById("prerequisites-" + majorID);
+                var minorID = this.getAttribute("data-minorid");
+                var prerequisitesRow = document.getElementById("prerequisites-" + minorID);
 
                 // Toggle the display of prerequisites section
                 if (prerequisitesRow.style.display === "none" || prerequisitesRow.style.display === "") {
@@ -138,57 +138,57 @@ while ($courseRow = mysqli_fetch_assoc($courseResult)) {
 
 
    <div class="header">
-      <h1>Majors</h1>
+      <h1>minors</h1>
       <a href="admin_page1.php" class="btn">Back</a>
 
    </div>
 
    <div class="major-container">
-    <h2>List of Majors</h2>
+    <h2>List of minors</h2>
     <table>
         <tr>
-            <th>Major ID</th>
-            <th>Major Name</th>
+            <th>minor ID</th>
+            <th>minor Name</th>
             <th>Dept ID</th>
-            <th>Edit Major</th>
+            <th>Edit minor</th>
             <th>Edit Prerequisites</th>
             <th>Show Prereqs</th>
         </tr>
-        <?php foreach ($majors as $major) : ?>
+        <?php foreach ($minors as $minor) : ?>
             <tr>
-                <td><?php echo $major['MajorID']; ?></td>
-                <td><?php echo $major['MajorName']; ?></td>
-                <td><?php echo $major['DeptID']; ?></td>
+                <td><?php echo $minor['MinorID']; ?></td>
+                <td><?php echo $minor['MinorName']; ?></td>
+                <td><?php echo $minor['DeptID']; ?></td>
                 <td>
-                    <a href="edit_major1.php?id=<?php echo $major['MajorID']; ?>">Edit Major</a>
+                    <a href="edit_minor1.php?id=<?php echo $minor['MinorID']; ?>">Edit minor</a>
                 </td>
                 <td>
-                    <button class="show-prerequisites-button" data-majorid="<?php echo $major['MajorID']; ?>">Show Prerequisites</button>
+                    <button class="show-prerequisites-button" data-minorid="<?php echo $minor['MinorID']; ?>">Show Prerequisites</button>
                 </td>
                 <td>
-                    <a href="edit_prerequisites.php?major_id=<?php echo $major['MajorID']; ?>">Edit Prerequisites</a>
+                    <a href="edit_minorpreq.php?minor_id=<?php echo $minor['MinorID']; ?>">Edit Prerequisites</a>
                 </td>
             </tr>
             <!-- Prerequisites Section (Initially Hidden) -->
-            <tr class="prerequisites-row" id="prerequisites-<?php echo $major['MajorID']; ?>" style="display: none;">
+            <tr class="prerequisites-row" id="prerequisites-<?php echo $minor['MinorID']; ?>" style="display: none;">
                 <td colspan="6">
                     <div class="prerequisites-content">
                         <table>
                             <tr>
-                                <th>PRmajorID</th>
+                                <th>PRminorID</th>
                                 <th>Course Name</th>
                                 <th>Min Grade</th>
                             </tr>
                             <?php
-                            if (isset($majorPrerequisites[$major['MajorID']])) {
-                                foreach ($majorPrerequisites[$major['MajorID']] as $prerequisite) {
-                                    $courseIDs = explode(',', $prerequisite['PRmajorID']);
+                            if (isset($minorPrerequisites[$minor['MinorID']])) {
+                                foreach ($minorPrerequisites[$minor['MinorID']] as $prerequisite) {
+                                    $courseIDs = explode(',', $prerequisite['PRminorID']);
                                     $minGrade = $prerequisite['MinGrade'];
 
                                     foreach ($courseIDs as $courseID) {
                                         if (isset($courseNames[$courseID])) {
                                             echo "<tr>";
-                                            echo "<td>" . $prerequisite['PRmajorID'] . "</td>";
+                                            echo "<td>" . $prerequisite['PRminorID'] . "</td>";
                                             echo "<td>" . $courseNames[$courseID] . "</td>";
                                             echo "<td>" . $minGrade . "</td>";
                                             echo "</tr>";
