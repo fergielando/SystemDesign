@@ -120,7 +120,7 @@ $facultyResult = mysqli_query($conn, $facultyQuery);
 $availableSlotsQuery = "
 SELECT 
     t.TimeSlotID, 
-    d.Weekday, 
+	GROUP_CONCAT(DISTINCT d.Weekday ORDER BY d.Weekday SEPARATOR '/') AS Weekdays,
     p.StartTime, 
     p.EndTime, 
     b.BuildingName, 
@@ -133,9 +133,10 @@ JOIN periodd p ON t.PeriodID = p.PeriodID
 JOIN room r ON 1 = 1
 JOIN building b ON r.BuildingID = b.BuildingID
 LEFT JOIN coursesection cs ON t.TimeSlotID = cs.TimeSlotID AND r.RoomID = cs.RoomID
-WHERE cs.CRN IS NULL
+WHERE cs.CRN IS NULL OR cs.CRN = '$CRN'
 AND r.RoomType <> 'office'
-ORDER BY d.Weekday, p.StartTime, r.RoomNum;";
+GROUP BY t.TimeSlotID, p.StartTime, p.EndTime, b.BuildingName, r.RoomNum, r.RoomID, r.RoomType
+ORDER BY Weekdays, p.StartTime, r.RoomNum;";
 
 $availableSlotsResult = mysqli_query($conn, $availableSlotsQuery);
 
@@ -382,8 +383,11 @@ select {
 <label for="timeslot">Select Timeslot:</label>
 <select id="timeslot_room" name="timeslot_room" required>
             <?php foreach ($availableSlots as $slot): ?>
-                <option value="<?php echo $slot['TimeSlotID'] . '_' . $slot['RoomID']; ?>">
-                    <?php echo $slot['Weekday'] . ', ' . $slot['StartTime'] . '-' . $slot['EndTime'] . ', ' . $slot['BuildingName'] . ' - Room ' . $slot['RoomNum'] . ' (' . $slot['RoomType'] . ')'; ?>
+					<?php
+            $selected = ($slot['TimeSlotID'] . '_' . $slot['RoomID'] === $row['TimeSlotID'] . '_' . $row['RoomID']) ? 'selected' : '';
+        ?>
+                <option value="<?php echo $slot['TimeSlotID'] . '_' . $slot['RoomID']; ?>" <?php echo $selected; ?>>
+                    <?php echo $slot['Weekdays'] . ', ' . $slot['StartTime'] . '-' . $slot['EndTime'] . ', ' . $slot['BuildingName'] . ' - Room ' . $slot['RoomNum'] . ' (' . $slot['RoomType'] . ')'; ?>
                 </option>
             <?php endforeach; ?>
         </select>
