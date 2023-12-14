@@ -1,21 +1,21 @@
 <?php
 @include 'config1.php';
 
-if (isset($_GET['major_id'])) {
-    $majorID = $_GET['major_id'];
+if (isset($_GET['minor_id'])) {
+    $minorID = $_GET['minor_id'];
 
-    // Retrieve major information
-    $majorQuery = "SELECT * FROM major WHERE MajorID = $majorID";
-    $majorResult = mysqli_query($conn, $majorQuery);
-    $major = mysqli_fetch_assoc($majorResult);
+    // Retrieve minor information
+    $minorQuery = "SELECT * FROM minor WHERE MinorID = $minorID";
+    $minorResult = mysqli_query($conn, $minorQuery);
+    $minor = mysqli_fetch_assoc($minorResult);
 
-    // Retrieve major prerequisites including MajorID and PRmajorID
-    $prerequisiteQuery = "SELECT MajorID, PRmajorID, MinGrade, DOLU FROM majorprerequisite WHERE MajorID = $majorID";
+    // Retrieve minor prerequisites including MinorID and PRminorID
+    $prerequisiteQuery = "SELECT MinorID, PRminorID, MinGrade, DOLU FROM minorprerequisite WHERE MinorID = $minorID";
     $prerequisiteResult = mysqli_query($conn, $prerequisiteQuery);
-    $majorPrerequisites = mysqli_fetch_all($prerequisiteResult, MYSQLI_ASSOC);
+    $minorPrerequisites = mysqli_fetch_all($prerequisiteResult, MYSQLI_ASSOC);
 } else {
-    // Handle the case where no major ID is provided in the URL
-    echo "No major selected for editing prerequisites.";
+    // Handle the case where no minor ID is provided in the URL
+    echo "No minor selected for editing prerequisites.";
     exit();
 }
 
@@ -23,61 +23,63 @@ if (isset($_GET['major_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_POST['add_prerequisite'])) {
-        $newPrerequisite = $_POST['new_prerequisite'];
-        $newPrMajorID = mysqli_real_escape_string($conn, $newPrerequisite['PRmajorID']);
-        
-        // Check if the PRmajorID already exists for the selected major
-        $checkQuery = "SELECT * FROM majorprerequisite WHERE MajorID = ? AND PRmajorID = ?";
-        $checkStmt = mysqli_prepare($conn, $checkQuery);
-        mysqli_stmt_bind_param($checkStmt, "is", $majorID, $newPrMajorID);
-        mysqli_stmt_execute($checkStmt);
-        mysqli_stmt_store_result($checkStmt);
-        
-        if (mysqli_stmt_num_rows($checkStmt) > 0) {
-            echo "PR Major ID already exists for this major.";
-        } else {
-            $minGrade = mysqli_real_escape_string($conn, $newPrerequisite['MinGrade']);
-            $dolu = mysqli_real_escape_string($conn, $newPrerequisite['DOLU']);
+    $newPrerequisite = $_POST['new_prerequisite'];
+    $newPrMinorID = $newPrerequisite['PRminorID'];
+    $minGrade = mysqli_real_escape_string($conn, $newPrerequisite['MinGrade']);
+    $dolu = mysqli_real_escape_string($conn, $newPrerequisite['DOLU']);
 
-            // Insert the new prerequisite
-            $insertQuery = "INSERT INTO majorprerequisite (MajorID, PRmajorID, MinGrade, DOLU) VALUES ('$majorID', 'BU6350', 'C', '2023-12-14')";
-$insertResult = mysqli_query($conn, $insertQuery);
+    // Check if the PRminorID already exists for the selected minor
+    $checkQuery = "SELECT * FROM minorprerequisite WHERE MinorID = ? AND PRminorID = ?";
+    $checkStmt = mysqli_prepare($conn, $checkQuery);
+    mysqli_stmt_bind_param($checkStmt, "is", $minorID, $newPrMinorID);
+    mysqli_stmt_execute($checkStmt);
+    mysqli_stmt_store_result($checkStmt);
 
-if ($insertResult) {
-    echo "Prerequisite added successfully.";
-} else {
-    echo "Error: " . mysqli_error($conn);
-}
-        }
-        mysqli_stmt_close($checkStmt);
+    if (mysqli_stmt_num_rows($checkStmt) > 0) {
+        echo "PR Minor ID already exists for this minor.";
     } else {
+        $insertQuery = "INSERT INTO minorprerequisite (MinorID, PRminorID, MinGrade, DOLU) VALUES (?, ?, ?, ?)";
+        $insertStmt = mysqli_prepare($conn, $insertQuery);
+        mysqli_stmt_bind_param($insertStmt, "isss", $minorID, $newPrMinorID, $minGrade, $dolu);
+        mysqli_stmt_execute($insertStmt);
+
+        if (mysqli_stmt_affected_rows($insertStmt) > 0) {
+            echo "Prerequisite added successfully.";
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
+
+        mysqli_stmt_close($insertStmt);
+    }
+    mysqli_stmt_close($checkStmt);
+} else {
     // Handle form submission to update or delete prerequisites
     $updatedPrerequisites = $_POST['prerequisites'];
 
     foreach ($updatedPrerequisites as $prerequisite) {
-        $prMajorID = mysqli_real_escape_string($conn, $prerequisite['PRmajorID']);
+        $prMinorID = mysqli_real_escape_string($conn, $prerequisite['PRminorID']);
         $minGrade = mysqli_real_escape_string($conn, $prerequisite['MinGrade']);
         $dolu = mysqli_real_escape_string($conn, $prerequisite['DOLU']);
         $action = $prerequisite['action'];
 
         if ($action === 'update') {
             // Update the existing record
-            $updateQuery = "UPDATE majorprerequisite SET MinGrade = ?, DOLU = ? WHERE MajorID = ? AND PRmajorID = ?";
+            $updateQuery = "UPDATE minorprerequisite SET MinGrade = ?, DOLU = ? WHERE MinorID = ? AND PRminorID = ?";
             $updateStmt = mysqli_prepare($conn, $updateQuery);
-            mysqli_stmt_bind_param($updateStmt, "ssis", $minGrade, $dolu, $majorID, $prMajorID);
+            mysqli_stmt_bind_param($updateStmt, "ssis", $minGrade, $dolu, $minorID, $prMinorID);
             mysqli_stmt_execute($updateStmt);
             mysqli_stmt_close($updateStmt);
         } elseif ($action === 'delete') {
             // Delete the existing record
-            $deleteQuery = "DELETE FROM majorprerequisite WHERE MajorID = ? AND PRmajorID = ?";
+            $deleteQuery = "DELETE FROM minorprerequisite WHERE MinorID = ? AND PRminorID = ?";
             $deleteStmt = mysqli_prepare($conn, $deleteQuery);
-            mysqli_stmt_bind_param($deleteStmt, "is", $majorID, $prMajorID);
+            mysqli_stmt_bind_param($deleteStmt, "is", $minorID, $prMinorID);
             mysqli_stmt_execute($deleteStmt);
             mysqli_stmt_close($deleteStmt);
         }
     }
-	    echo "Prerequisites updated successfully.";
-	}
+    echo "Prerequisites updated successfully.";
+}
 }
 ?>
 
@@ -88,22 +90,22 @@ if ($insertResult) {
 </head>
 <body>
     <div class="header">
-        <h1>Edit Major Prerequisites</h1>
-        <a href="majors1.php" class="back-button">Back to Majors</a>
+        <h1>Edit Minor Prerequisites</h1>
+        <a href="minors1.php" class="back-button">Back to Minors</a>
     </div>
 
     <div class="major-container">
-        <h2>Edit Prerequisites for <?php echo $major['MajorName']; ?></h2>
+        <h2>Edit Prerequisites for <?php echo $minor['MinorName']; ?></h2>
         <form method="POST">
-            <input type="hidden" name="major_id" value="<?php echo $majorID; ?>">
+            <input type="hidden" name="minor_id" value="<?php echo $minorID; ?>">
             <table>
                 <tr>
                     <th>Action</th>
-                    <th>PR Major ID</th>
+                    <th>PR Minor ID</th>
                     <th>Minimum Grade</th>
                     <th>DOLU</th>
                 </tr>
-                <?php foreach ($majorPrerequisites as $key => $prerequisite) : ?>
+                <?php foreach ($minorPrerequisites as $key => $prerequisite) : ?>
                     <tr>
                         <td>
                             <select name="prerequisites[<?php echo $key; ?>][action]">
@@ -112,7 +114,7 @@ if ($insertResult) {
                             </select>
                         </td>
                         <td>
-                            <input type="text" name="prerequisites[<?php echo $key; ?>][PRmajorID]" value="<?php echo $prerequisite['PRmajorID']; ?>">
+                            <input type="text" name="prerequisites[<?php echo $key; ?>][PRminorID]" value="<?php echo $prerequisite['PRminorID']; ?>">
                         </td>
                         <td>
                             <input type="text" name="prerequisites[<?php echo $key; ?>][MinGrade]" value="<?php echo $prerequisite['MinGrade']; ?>">
@@ -126,20 +128,20 @@ if ($insertResult) {
             <button type="submit">Save Changes</button>
         </form>
     </div>
-    
+	
     <div class="major-container">
     <h2>Add Prerequisites</h2>
     <form method="POST">
-        <input type="hidden" name="major_id" value="<?php echo $majorID; ?>">
+        <input type="hidden" name="minor_id" value="<?php echo $minorID; ?>">
         <table>
             <tr>
-                <th>PR Major ID</th>
+                <th>PR Minor ID</th>
                 <th>Minimum Grade</th>
                 <th>DOLU</th>
             </tr>
             <tr>
                 <td>
-                    <select name="new_prerequisite[PRmajorID]">
+                    <select name="new_prerequisite[PRminorID]">
                         <?php
                         $courseQuery = "SELECT CourseID, CourseName FROM course";
                         $courseResult = mysqli_query($conn, $courseQuery);

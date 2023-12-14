@@ -246,6 +246,60 @@ if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
     exit;
 }
 
+//Credits Check
+$query = "SELECT U.StudentID, U.UnderGradStudentType, SUM(C.Credits) AS TotalCredits
+FROM UnderGradStudent U
+JOIN enrollment E ON U.StudentID = E.StudentID
+JOIN coursesection CS ON E.CRN = CS.CRN
+JOIN course C ON CS.CourseID = C.CourseID
+WHERE CS.SemesterID = '20241' 
+GROUP BY U.StudentID, U.UnderGradStudentType";
+
+
+
+
+$result = mysqli_query($conn, $query);
+
+
+while ($row = mysqli_fetch_assoc($result)) {
+    $studentID = $row['StudentID'];
+    $studentType = $row['UnderGradStudentType'];
+    $totalCredits = $row['TotalCredits'];
+
+    $creditLimit = ($studentType === 'Undergrad Part Time') ? 6 : 12;
+
+    if ($totalCredits > $creditLimit) {
+        echo "Enrollment for Student ID $studentID failed: Exceeds credit limit. Maximum allowed credits: $creditLimit.";
+
+    }
+}
+$query = "SELECT G.StudentID, G.GradStudentType, SUM(C.Credits) AS TotalCredits
+FROM GradStudent G
+JOIN enrollment E ON G.StudentID = E.StudentID
+JOIN coursesection CS ON E.CRN = CS.CRN
+JOIN course C ON CS.CourseID = C.CourseID
+WHERE CS.SemesterID = '20241' 
+GROUP BY G.StudentID, G.GradStudentType";
+
+$result = mysqli_query($conn, $query);
+
+while ($row = mysqli_fetch_assoc($result)) {
+    $studentID = $row['StudentID'];
+    $studentType = $row['GradStudentType'];
+    $totalCredits = $row['TotalCredits'];
+
+    $creditLimits = [
+        'PHD Full Time' => 12,
+		'PHD Part Time' => 6,
+        'Masters Full Time' => 12,
+        'Masters Part Time' => 6,
+    ];
+
+    if (isset($creditLimits[$studentType]) && $totalCredits > $creditLimits[$studentType]) {
+        echo "Enrollment for Student ID $studentID failed: Exceeds credit limit. Maximum allowed credits for $studentType: " . $creditLimits[$studentType] . ".";
+    }
+}
+
 // If the student doesn't have a hold, proceed with class assignment logic
 // ...
         
@@ -780,7 +834,8 @@ Professor Name:
 			 building.BuildingName, 
 			 periodd.StartTime, 
 			 periodd.EndTime, 
-			 semester.SemesterName
+			 semester.SemesterName,
+			 coursesection.SemesterID
              FROM enrollment
              JOIN coursesection ON enrollment.CRN = coursesection.CRN
              JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
@@ -815,7 +870,11 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
 					echo $startTime . " to " . $endTime;
 					echo "</td>";
 				  echo "<td>{$enrolledCourse['SemesterName']}</td>";
+				   if ($enrolledCourse['SemesterID'] === "20241") {
                   echo "<td><a href='?UID=$uid&drop_course={$enrolledCourse['CRN']}'>Drop</a></td>";
+				  } else{
+				   echo "<td>Cannot Drop</td>";
+				  }
                   echo "</tr>";
                }
                ?>

@@ -1,70 +1,21 @@
 <?php
-@include 'config1.php'; 
+
+@include 'config1.php';
 
 session_start();
 
 
 if (!isset($_SESSION['UID'])) {
-    echo "Please log in to continue.";
+    echo "Please log in to assign courses.";
     exit;
 }
 
 
-if (isset($_POST['course_id'])) {
-    $course_id = $_POST['course_id'];
 
-    
-    $checkEnrollmentQuery = "SELECT * FROM coursesection WHERE CourseID = ? AND (SemesterID = 20241 OR SemesterID = 20232)";
-    $checkEnrollmentStmt = $conn->prepare($checkEnrollmentQuery);
-
-    if ($checkEnrollmentStmt) {
-        
-        $checkEnrollmentStmt->bind_param("s", $course_id);
-
-        
-        $checkEnrollmentStmt->execute();
-
-        
-        $enrollmentResult = $checkEnrollmentStmt->get_result();
-
-        if ($enrollmentResult->num_rows > 0) {
-            echo '<p style="color: red; font-size: 23px;">Cannot delete the course because students are currenlty enrolled in this course.</p>';
-} else {
-      
-            
-            if ($deleteStmt = $conn->prepare("DELETE FROM course WHERE CourseID = ?")) {
-                
-                $deleteStmt->bind_param("s", $course_id);
-
-                
-                $deleteStmt->execute();
-
-                
-                if ($deleteStmt->affected_rows > 0) {
-                    echo "Course successfully deleted.";
-                } else {
-                    echo "No course found with the given ID, or deletion failed.";
-                }
-
-                
-                $deleteStmt->close();
-            } else {
-                echo "Error preparing delete statement: " . $conn->error;
-            }
-        }
-
-        
-        $checkEnrollmentStmt->close();
-    } else {
-        echo "Error preparing check enrollment statement: " . $conn->error;
-    }
-} else {
-    echo "Course ID not provided.";
-}
-
-
+$uid = $_SESSION['UID'];
 ?>
-!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -163,12 +114,79 @@ if (isset($_POST['course_id'])) {
         tr:hover {
             background-color: #e9e9e9;
         }
-        </style>
+    </style>
+</head>
+<body>
+    <div class="left-section">
+        <h1>Create Course</h1>
+        <form action="processcreatecoursereal.php" method="POST">
+            <!-- Dropdown list for department ID -->
+            <label for="dept_id">Select Department:</label>
+<select id="dept_id" name="dept_id" required>
+    <option value="">Select a Department</option>
+    <?php
+    
+    $deptQuery = "SELECT DeptID, DeptName FROM dept";
+    $deptResult = mysqli_query($conn, $deptQuery);
+
+    if ($deptResult && mysqli_num_rows($deptResult) > 0) {
+        while ($deptRow = mysqli_fetch_assoc($deptResult)) {
+            $deptID = $deptRow['DeptID'];
+            $deptName = $deptRow['DeptName'];
+            echo "<option value='$deptID'>$deptID - $deptName</option>";
+        }
+    }
+    ?>
+</select><br>
+
+  
 
 
+  
+            
 
+            <!-- Input field for course ID -->
+            <label for="course_id">Course ID:</label>
+            <input type="text" id="course_id" name="course_id" required><br>
 
-<div class="right-section">
+            <!-- Input field for course name -->
+            <label for="course_name">Course Name:</label>
+            <input type="text" id="course_name" name="course_name" required><br>
+
+            <!-- Input field for course credits -->
+            <label for="credits">Credits:</label>
+            <input type="text" id="credits" name="credits" required><br>
+
+            <!-- Input field for course description -->
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea><br>
+
+            <label for="course_type">Course Type:</label>
+<select id="course_type" name="course_type" required>
+    <option value="Undergraduate">Undergraduate</option>
+    <option value="Graduate">Graduate</option>
+</select><br>
+<!-- Input fields for course prerequisites -->
+<label for="prerequisites">Prerequisite Course(s):</label>
+<div id="prerequisites-container">
+    <div class="prerequisite-input">
+        <input type="text" name="prerequisites[]" placeholder="Prerequisite Course ID">
+        <input type="text" name="min_grade[]" placeholder="Minimum Grade">
+        <button type="button" class="add-prerequisite">Add Prerequisite</button>
+    </div>
+</div>
+
+<div>
+    <label for="dolu">DOLU:</label>
+    <input type="text" name="dolu" id="dolu" value="<?php echo date('Y-m-d'); ?>" readonly>
+</div>
+
+            <!-- Submit button -->
+            <input type="submit" value="Create Course">
+        </form>
+    </div>
+
+    <div class="right-section">
     <h1>Courses in Selected Department</h1>
     <table>
         <thead>
@@ -185,7 +203,9 @@ if (isset($_POST['course_id'])) {
         </tbody>
     </table>
 </div>
-   <script>
+
+
+    <script>
         
         function updateCourseList() {
             var deptSelect = document.getElementById("dept_id");
@@ -262,3 +282,5 @@ document.addEventListener("DOMContentLoaded", function () {
 
  
     </script>
+</body>
+</html>

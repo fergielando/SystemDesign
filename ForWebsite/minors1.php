@@ -139,6 +139,7 @@ while ($courseRow = mysqli_fetch_assoc($courseResult)) {
 
    <div class="header">
       <h1>Minors</h1>
+	  <a href="createminor.php" class="btn">Create a Minor</a>
       <a href="admin_page1.php" class="btn">Back</a>
 
    </div>
@@ -150,11 +151,20 @@ while ($courseRow = mysqli_fetch_assoc($courseResult)) {
             <th>Minor ID</th>
             <th>Minor Name</th>
             <th>Dept ID</th>
-            <th>Edit Minor</th>
-            <th>Edit Prerequisites</th>
+            <th>Edit minor</th>
             <th>Show Prereqs</th>
+            <th>Edit Prerequisites</th>
+			  <th>Delete</th>
         </tr>
         <?php foreach ($minors as $minor) : ?>
+				<?php
+            // Check if any students are enrolled in the current minor
+            $enrollment_query = "SELECT * FROM studentminor WHERE MinorID = '{$minor['MinorID']}'";
+            $enrollment_result = mysqli_query($conn, $enrollment_query);
+
+            // Hide the delete button if students are enrolled
+            $disable_delete = mysqli_num_rows($enrollment_result) > 0;
+				?>
             <tr>
                 <td><?php echo $minor['MinorID']; ?></td>
                 <td><?php echo $minor['MinorName']; ?></td>
@@ -167,6 +177,13 @@ while ($courseRow = mysqli_fetch_assoc($courseResult)) {
                 </td>
                 <td>
                     <a href="edit_minorpreq.php?minor_id=<?php echo $minor['MinorID']; ?>">Edit Prerequisites</a>
+                </td>
+				<td>
+                    <?php if ($disable_delete) : ?>
+                        Cannot delete
+                    <?php else : ?>
+                        <a href="delete_minor.php?id=<?php echo $minor['MinorID']; ?>">Delete</a>
+                    <?php endif; ?>
                 </td>
             </tr>
             <!-- Prerequisites Section (Initially Hidden) -->
