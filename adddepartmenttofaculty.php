@@ -1,10 +1,11 @@
 <?php
-@include 'config1.php';
+@include 'config1.php'; 
 
 if (isset($_POST['facultyId'], $_POST['deptId'])) {
     $facultyId = mysqli_real_escape_string($conn, $_POST['facultyId']);
     $deptId = mysqli_real_escape_string($conn, $_POST['deptId']);
 
+    
     $roleQuery = "SELECT Position FROM faculty WHERE FacultyID = ?";
     $roleStmt = mysqli_prepare($conn, $roleQuery);
     mysqli_stmt_bind_param($roleStmt, 's', $facultyId);
@@ -16,6 +17,7 @@ if (isset($_POST['facultyId'], $_POST['deptId'])) {
     if ($facultyRole === 'Manager' || $facultyRole === 'Chair') {
         echo "Faculty members with the role of Manager or Chair cannot be added to another department.";
     } else {
+        
         mysqli_begin_transaction($conn);
 
         try {
@@ -29,28 +31,14 @@ if (isset($_POST['facultyId'], $_POST['deptId'])) {
             if ($typeRow) {
                 $facultyType = $typeRow['FacultyType'];
 
-               
-            $teachingQuery = "SELECT COUNT(*) AS TeachingCount FROM coursesection cs 
-            JOIN course c ON cs.CourseID = c.CourseID 
-            WHERE cs.FacultyID = ? AND c.DeptID = ?";
-$teachingStmt = mysqli_prepare($conn, $teachingQuery);
-mysqli_stmt_bind_param($teachingStmt, 'ss', $facultyId, $deptId);
-mysqli_stmt_execute($teachingStmt);
-$teachingResult = mysqli_stmt_get_result($teachingStmt);
-$teachingRow = mysqli_fetch_assoc($teachingResult);
+                $countQuery = "SELECT COUNT(*) AS DeptCount FROM facultydept WHERE FacultyID = ?";
+                $countStmt = mysqli_prepare($conn, $countQuery);
+                mysqli_stmt_bind_param($countStmt, 's', $facultyId);
+                mysqli_stmt_execute($countStmt);
+                $countResult = mysqli_stmt_get_result($countStmt);
+                $countRow = mysqli_fetch_assoc($countResult);
+                $deptCount = $countRow['DeptCount'];
 
-if ($teachingRow && $teachingRow['TeachingCount'] > 0) {
-echo "Cannot remove faculty from a department they are currently teaching in.";
-                } else {
-                    $countQuery = "SELECT COUNT(*) AS DeptCount FROM facultydept WHERE FacultyID = ?";
-                    $countStmt = mysqli_prepare($conn, $countQuery);
-                    mysqli_stmt_bind_param($countStmt, 's', $facultyId);
-                    mysqli_stmt_execute($countStmt);
-                    $countResult = mysqli_stmt_get_result($countStmt);
-                    $countRow = mysqli_fetch_assoc($countResult);
-                    $deptCount = $countRow['DeptCount'];
-
-                  
                 if ($facultyType === 'Full-time' && $deptCount < 2) {
                     if ($deptCount == 1) {
                         $updateQuery = "UPDATE facultydept SET PercentTime = 50 WHERE FacultyID = ?";
@@ -79,7 +67,6 @@ echo "Cannot remove faculty from a department they are currently teaching in.";
                 } else {
                     echo "Cannot add department due to faculty type and existing department assignments.";
                 }
-                }
             } else {
                 echo "Faculty member not found.";
             }
@@ -90,12 +77,8 @@ echo "Cannot remove faculty from a department they are currently teaching in.";
             echo "Error: " . $e->getMessage();
         }
 
-        mysqli_stmt_close($roleStmt);
         mysqli_stmt_close($typeStmt);
         mysqli_stmt_close($countStmt);
-        if (isset($teachingStmt)) {
-            mysqli_stmt_close($teachingStmt);
-        }
     }
 } else {
     echo "Faculty ID and Department ID are required.";
