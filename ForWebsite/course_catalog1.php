@@ -273,7 +273,8 @@ unset($course); // Unset the reference after the loop
             <th>Credits</th>
             <th>Description</th>
             <th>Course Type</th>
-        <th>Actions</th> <!-- New column for actions -->
+        <th>Update Course Info</th> <!-- New column for actions -->
+		 <th>Manage Course Prerequisites</th> <!-- New column for actions -->
     </tr>
 </thead>
 <tbody>
@@ -299,6 +300,10 @@ unset($course); // Unset the reference after the loop
             <td>
                 <!-- Update button -->
                 <a href="update_course.php?id=<?php echo $course['CourseID']; ?>" class="update-btn">Update</a>
+            </td>
+            <td>
+                <!-- Update button -->
+                <a href="update_prerequisites_page.php?id=<?php echo $course['CourseID']; ?>" class="update-btn">Update</a>
             </td>
         </tr>
     <?php endforeach; ?>
