@@ -145,7 +145,7 @@ if (isset($_GET['id'])) {
 </select><br>
 
                 <input type="hidden" name="prerequisite_ids_original[]" value="<?php echo $prerequisite['PRcourseID']; ?>">
-                <button type="button" onclick="removePrerequisite(this)">Delete</button>
+                <a href="delete_prerequisite.php?course_id=<?php echo $course_id; ?>&prerequisite_id=<?php echo $prerequisite['PRcourseID']; ?>">Delete</a>
             </div>
         <?php endforeach; ?>
 
@@ -179,11 +179,6 @@ if (isset($_GET['id'])) {
     </table>
 
     <script>
-        function removePrerequisite(button) {
-            
-            var div = button.parentElement;
-            div.remove();
-        }
     </script>
 </body>
 </html>
