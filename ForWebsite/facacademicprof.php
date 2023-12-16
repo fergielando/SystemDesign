@@ -427,8 +427,8 @@ table tr:nth-child(odd) {
       periodd.EndTime,
 	  semester.SemesterName,
       CONCAT(user.FirstName, ' ', user.LastName) AS FacultyName
-  FROM studenthistory
-  JOIN coursesection ON studenthistory.CRN = coursesection.CRN
+  FROM enrollment
+  JOIN coursesection ON enrollment.CRN = coursesection.CRN
   JOIN timeslot ON coursesection.TimeSlotID = timeslot.TimeSlotID
   JOIN day ON timeslot.DayID = day.DayID
   JOIN course ON coursesection.CourseID = course.CourseID
@@ -437,7 +437,7 @@ table tr:nth-child(odd) {
   JOIN building ON room.BuildingID = building.BuildingID
   JOIN user ON coursesection.FacultyID = user.UID
   JOIN semester ON coursesection.SemesterID = semester.SemesterID
-  WHERE studenthistory.StudentID = '$uid'
+  WHERE enrollment.StudentID = '$uid'
   GROUP BY coursesection.CRN
 ORDER BY coursesection.CRN ASC";
   

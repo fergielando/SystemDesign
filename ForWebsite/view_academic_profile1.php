@@ -296,14 +296,40 @@ if (isset($_POST['update_user'])) {
     $newPassword = mysqli_real_escape_string($conn, $_POST['new_password']);
 
     // Check if the new password is not empty before updating
-    $passwordUpdate = !empty($newPassword) ? ", Password = '$newPassword'" : "";
+    $passwordUpdate = !empty($newPassword) ? "Password = '" . md5($newPassword) . "'" : "";
 
     // Update user information in the database
-    $updateQuery = "UPDATE user SET Street = '$newStreet', City = '$newCity', State = '$newState'$passwordUpdate WHERE UID = '$uid'";
+    $updateQuery = "UPDATE user SET Street = '$newStreet', City = '$newCity', State = '$newState' WHERE UID = '$uid'";
     mysqli_query($conn, $updateQuery);
+	if(!empty($newPassword)){
+	$updatePasswordQuery = "UPDATE logintable SET $passwordUpdate WHERE UID = '$uid'";
+	mysqli_query($conn, $updatePasswordQuery);
+	}
 
-    // Refresh the page to reflect the changes
+     // Perform the query and handle errors
+    $updateResult = mysqli_query($conn, $updateQuery);
+
+    if ($updateResult) {
+        // Successfully updated user information
+        $updateMessage = "User information updated successfully!";
+    } else {
+        // Failed to update user information
+        $updateMessage = "Error updating user information. Please try again.";
+    }
+
+    // Display the message
+    echo '<p>' . $updateMessage . '</p>';
 }
+
+// Retrieve holds for the student
+$queryHolds = "SELECT HoldID, DateOfHold, HoldType FROM hold WHERE StudentID = '$uid'";
+$resultHolds = mysqli_query($conn, $queryHolds);
+$holds = [];
+
+while ($rowHold = mysqli_fetch_assoc($resultHolds)) {
+    $holds[] = $rowHold;
+}
+
 $advisorQuery = "SELECT u.FirstName, u.LastName, l.Email 
                  FROM advisor a 
                  JOIN user u ON a.FacultyID = u.UID 
@@ -432,10 +458,6 @@ if (isset($_POST['change_student_type'])) {
     } else {
         echo "Student not found in records.";
     }
-
-    // Redirect or display a message after the update
-    header("Location: student_academic_profile1.php");
-    exit;
 }
 
 ?>
@@ -595,6 +617,7 @@ table tr:nth-child(odd) {
    <h1>Academic Profile</h1>
    <div class="button-container">
    <a href="faccreateschedule.php?UID=<?php echo $uid; ?>" class="btn">Create Schedule</a>
+		<a href="admin_unofficialtranscript1.php?UID=<?php echo $uid; ?>" class="btn">Unofficial Transcript</a>
        <a href="facdegreeaudit.php?UID=<?php echo $uid; ?>" class="btn">Degree Audit</a>
        <a href="Update_a_user1.php" class="btn">Back</a>
        </div>
@@ -822,7 +845,19 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
    </select>
    <input type="submit" name="drop_minor_submit" value="Drop Minor" class="create-button">
 </form>
-
+         <h2>User Options</h2>
+         <form action="" method="post">
+            <label for="new_street">New Street:</label>
+            <input type="text" name="new_street" id="new_street" value="<?php echo $user['Street']; ?>"><br>
+            <label for="new_city">New City:</label>
+            <input type="text" name="new_city" id="new_city" value="<?php echo $user['City']; ?>"><br>
+            <label for="new_state">New State:</label>
+            <input type="text" name="new_state" id="new_state" value="<?php echo $user['State']; ?>"><br>
+            <label for="new_password">New Password:</label>
+            <input type="password" name="new_password" id="new_password"><br>
+            <input type="submit" name="update_user" value="Update User" class="create-button">
+         </form>
+		 
 		 <h2>Change Student Type</h2>
 		<form action="" method="post">
 		<select name="student_type">
@@ -831,6 +866,7 @@ $enrolledCoursesResult = mysqli_query($conn, $enrolledCoursesQuery);
 		</select>
 		<input type="submit" name="change_student_type" value="Change Type" class="create-button">
 		</form>
+		
 
 
                <?php

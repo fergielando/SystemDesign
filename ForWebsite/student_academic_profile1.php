@@ -301,11 +301,15 @@ if (isset($_POST['update_user'])) {
     $newPassword = mysqli_real_escape_string($conn, $_POST['new_password']);
 
     // Check if the new password is not empty before updating
-    $passwordUpdate = !empty($newPassword) ? ", Password = '$newPassword'" : "";
+    $passwordUpdate = !empty($newPassword) ? "Password = '" . md5($newPassword) . "'" : "";
 
     // Update user information in the database
-    $updateQuery = "UPDATE user SET Street = '$newStreet', City = '$newCity', State = '$newState'$passwordUpdate WHERE UID = '$uid'";
+    $updateQuery = "UPDATE user SET Street = '$newStreet', City = '$newCity', State = '$newState' WHERE UID = '$uid'";
     mysqli_query($conn, $updateQuery);
+	if(!empty($newPassword)){
+	$updatePasswordQuery = "UPDATE logintable SET $passwordUpdate WHERE UID = '$uid'";
+	mysqli_query($conn, $updatePasswordQuery);
+	}
 
      // Perform the query and handle errors
     $updateResult = mysqli_query($conn, $updateQuery);

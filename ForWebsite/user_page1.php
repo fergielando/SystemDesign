@@ -379,6 +379,7 @@ if (isset($_POST['submit'])) {
     <a href="student_minor1.php" class="btn">Minors</a>
     <a href="student_departments1.php" class="btn">Departments</a>
     <a href="studentmasterschedule.php" class="btn">Master Schedule</a>
+	<a href="academiccal.html" class="btn">Academic Calendar</a>
 </div>
 
 </body>

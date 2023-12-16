@@ -131,6 +131,15 @@ if (isset($_POST['update'])) {
         input[type="submit"]:hover {
             background-color: #2980b9;
         }
+		
+        .department-list-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
    </style>
 </head>
 <body>
@@ -148,6 +157,37 @@ if (isset($_POST['update'])) {
          <input type="submit" name="update" value="Update">
       </form>
    </div>
+   
+   <!-- Displaying Department IDs and Names in a table -->
+<div class="department-list-container">
+    <h2>Department List</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Department ID</th>
+                <th>Department Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            // Assuming $conn is your database connection
+            $deptQuery = "SELECT DeptID, DeptName FROM dept";
+            $deptResult = mysqli_query($conn, $deptQuery);
+
+            if (mysqli_num_rows($deptResult) > 0) {
+                while ($row = mysqli_fetch_assoc($deptResult)) {
+                    echo "<tr>";
+                    echo "<td>" . $row['DeptID'] . "</td>";
+                    echo "<td>" . $row['DeptID'] . " - " . $row['DeptName'] . "</td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='2'>No departments found</td></tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
 
    <!-- Add any other elements or styling as needed -->
 

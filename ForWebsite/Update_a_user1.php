@@ -215,7 +215,7 @@ if (isset($_GET['uid'])) {
 <body>
 
 <div class="header">
-   <h1>Department Management</h1>
+   <h1>User Management</h1>
    <div class="button-container">
       <a href="admin_page1.php" class="btn">Back to Admin Page</a>
       <a href="create_a_user1.php" class="btn">Create a User</a>

@@ -207,8 +207,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['courses']) && is_array
             $checkDropResult = mysqli_query($conn, $checkDropQuery);
     
             if (mysqli_num_rows($checkDropResult) > 0) {
-                echo "Course with CRN $selectedCRN has already been dropped in this semester.";
-                exit;
+                return "Course with CRN $selectedCRN has already been dropped in this semester.";
             }
 
            // Check for student hold
@@ -220,20 +219,17 @@ if ($checkHoldResult && mysqli_num_rows($checkHoldResult) > 0) {
     $holdInfo = mysqli_fetch_assoc($checkHoldResult);
     
     // Display a larger, red error message with a 8-second delay
-    echo "<div style='font-size: 24px; color: red;'>You have a hold on your account of type: " . $holdInfo['HoldType'] . " since " . $holdInfo['DateOfHold'] . "</div>";
-    
-    // Redirect back to the previous page after 8 seconds
-    echo "<script>setTimeout(function() { window.history.back(); }, 8000);</script>";
-    exit;
+    return "<div style='font-size: 24px; color: red;'>You have a hold on your account of type: " . $holdInfo['HoldType'] . " since " . $holdInfo['DateOfHold'] . "</div>";
 }
 
+if($courseType == 'Undergraduate'){
 //Credits Check
 $query = "SELECT U.StudentID, U.UnderGradStudentType, SUM(C.Credits) AS TotalCredits
-FROM UnderGradStudent U
+FROM undergradstudent U
 JOIN enrollment E ON U.StudentID = E.StudentID
 JOIN coursesection CS ON E.CRN = CS.CRN
 JOIN course C ON CS.CourseID = C.CourseID
-WHERE CS.SemesterID = '20241' 
+WHERE CS.SemesterID = '20241'
 GROUP BY U.StudentID, U.UnderGradStudentType";
 
 
@@ -250,16 +246,19 @@ while ($row = mysqli_fetch_assoc($result)) {
     $creditLimit = ($studentType === 'Undergrad Part Time') ? 6 : 12;
 
     if ($totalCredits > $creditLimit) {
-        echo "Enrollment for Student ID $studentID failed: Exceeds credit limit. Maximum allowed credits: $creditLimit.";
+		echo "Enrollment for Student ID $studentID failed: Exceeds credit limit. Maximum allowed credits: $creditLimit.";
+        return "Enrollment for Student ID $studentID failed: Exceeds credit limit. Maximum allowed credits: $creditLimit.";
 
     }
 }
+}
+elseif($courseType == 'Graduate'){
 $query = "SELECT G.StudentID, G.GradStudentType, SUM(C.Credits) AS TotalCredits
-FROM GradStudent G
+FROM gradstudent G
 JOIN enrollment E ON G.StudentID = E.StudentID
 JOIN coursesection CS ON E.CRN = CS.CRN
 JOIN course C ON CS.CourseID = C.CourseID
-WHERE CS.SemesterID = '20241' 
+WHERE CS.SemesterID = '20241'
 GROUP BY G.StudentID, G.GradStudentType";
 
 $result = mysqli_query($conn, $query);
@@ -277,8 +276,10 @@ while ($row = mysqli_fetch_assoc($result)) {
     ];
 
     if (isset($creditLimits[$studentType]) && $totalCredits > $creditLimits[$studentType]) {
-        echo "Enrollment for Student ID $studentID failed: Exceeds credit limit. Maximum allowed credits for $studentType: " . $creditLimits[$studentType] . ".";
+		echo "Enrollment for Student ID $studentID failed: Exceeds credit limit. Maximum allowed credits for $studentType: " . $creditLimits[$studentType] . ".";
+        return "Enrollment for Student ID $studentID failed: Exceeds credit limit. Maximum allowed credits for $studentType: " . $creditLimits[$studentType] . ".";
     }
+}
 }
 
 // If the student doesn't have a hold or credits restriction, proceed with class assignment logic
@@ -290,8 +291,8 @@ while ($row = mysqli_fetch_assoc($result)) {
             $checkDropResult = mysqli_query($conn, $checkDropQuery);
     
             if (mysqli_num_rows($checkDropResult) > 0) {
-                echo "Course with CRN $selectedCRN has already been dropped in this semester.";
-                exit;
+				echo "Course with CRN $selectedCRN has already been dropped in this semester.";
+                return "Course with CRN $selectedCRN has already been dropped in this semester.";
             }
     
             // Retrieve prerequisite information for the selected course
@@ -322,10 +323,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                         $prerequisiteCourseName = $prerequisiteCourseInfoRow['CourseName'];
                         $prerequisiteCRN = $prerequisiteCourseInfoRow['CourseID'];
                     }
-                
-                    echo "<div id='prerequisiteError' style='font-size: 18px; color: red;'>Enrollment failed: You must obtain a $minGrade or better in the prerequisite course ($prerequisiteCourseName - CourseID: $prerequisiteCRN) to register for this class. Please review your course selection.</div>";
-                    echo "<script>setTimeout(function() { window.location.href = 'Create Schedule1.php'; }, 4500);</script>";
-                    exit;
+					echo "<div id='prerequisiteError' style='font-size: 18px; color: red;'>Enrollment failed: You must obtain a $minGrade or better in the prerequisite course ($prerequisiteCourseName - CourseID: $prerequisiteCRN) to register for this class. Please review your course selection.</div>";
+                    return "<div id='prerequisiteError' style='font-size: 18px; color: red;'>Enrollment failed: You must obtain a $minGrade or better in the prerequisite course ($prerequisiteCourseName - CourseID: $prerequisiteCRN) to register for this class. Please review your course selection.</div>";
                 }
                 
                 
@@ -333,8 +332,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     
             if (in_array($courseDetailsRow['TimeSlotID'], $selectedTimeSlots)) {
                 $timeSlotConflict = true;
-                echo "Enrollment failed: Time slot conflict detected.";
-                break;
+				echo "Enrollment failed: Time slot conflict detected.";
+                return "Enrollment failed: Time slot conflict detected.";
             }
             $selectedTimeSlots[] = $courseDetailsRow['TimeSlotID'];
         }
@@ -344,8 +343,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     // Check for conflicts with current enrollments
     foreach ($selectedTimeSlots as $selectedTimeSlot) {
         if (in_array($selectedTimeSlot, $currentEnrollmentTimeSlots)) {
-            echo "Enrollment failed: Conflict with previous or currently enrolled course.";
-            exit;
+			echo "Enrollment failed: Conflict with previous or currently enrolled course.";
+            return "Enrollment failed: Conflict with previous or currently enrolled course.";
         }
     }
 
@@ -391,9 +390,9 @@ while ($row = mysqli_fetch_assoc($result)) {
                         mysqli_stmt_bind_param($stmt, "s", $selectedCRN);
                         mysqli_stmt_execute($stmt);
                     } else {
-                        echo "Enrollment failed: No available seats in course CRN $selectedCRN.";
                         mysqli_rollback($conn);
-                        exit;
+						echo "Enrollment failed: No available seats in course CRN $selectedCRN.";
+                        return "Enrollment failed: No available seats in course CRN $selectedCRN.";
                     }
                 }
             }
@@ -427,7 +426,8 @@ WHERE enrollment.StudentID = '$uid' AND enrollment.CRN = '$dropCRN'";
         $checkDropResult = mysqli_query($conn, $checkDropQuery);
 
         if (mysqli_num_rows($checkDropResult) > 0) {
-            echo "Course with CRN $dropCRN has already been dropped in this semester.";
+			echo "Course with CRN $dropCRN has already been dropped in this semester.";
+            return "Course with CRN $dropCRN has already been dropped in this semester.";
         } else {
             // Update the grade to "Dropped" in studenthistory
             $updateHistoryQuery = "UPDATE studenthistory SET Grade = 'Dro' WHERE StudentID = '$uid' AND CRN = '$dropCRN' AND SemesterID = '$semesterID'";
@@ -444,7 +444,7 @@ WHERE enrollment.StudentID = '$uid' AND enrollment.CRN = '$dropCRN'";
             echo "Course with CRN $dropCRN has been dropped successfully.";
         }
     } else {
-        echo "Course with CRN $dropCRN is not currently enrolled.";
+        return "Course with CRN $dropCRN is not currently enrolled.";
     }
 }
 

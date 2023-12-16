@@ -86,7 +86,7 @@ $fourDaysAfterEnd = strtotime('+4 days', $semesterEndDate);
 
 $currentDate = time();
 
-$isWithinSemesterDates = ($currentDate >= $semesterEndDate);
+$isWithinSemesterDates = ($currentDate >= $semesterStartDate);
 
 
 // Fetch students, majors, and minors
