@@ -332,6 +332,8 @@ while ($row = mysqli_fetch_assoc($result)) {
          <a href="admin_page1.php" class="btn">Back</a>
          <a href="createcoursesection.php" class="btn">Create Course Section</a>
          <a href="deletecoursesection.html" class="btn">Delete Course Section</a>
+		  <a href="create_semester.php" class="btn">Create Semester</a>
+		  <a href="edit_semester.php" class="btn">Edit Semester</a>
 
 
       </div>
@@ -492,7 +494,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             </td>
             <td><?php echo $course['DeptName']; ?></td>
 			  <td><?php echo $course['DeptID']; ?></td>
-             <td>
+                        <td>
 					<?php 
 						$weekdays = explode('/', $course['Weekdays']);
 						echo implode('/', array_unique($weekdays)); // Displaying concatenated weekdays
